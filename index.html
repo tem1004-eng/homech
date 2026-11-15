@@ -104,13 +104,22 @@ table.times th,table.times td{padding:13px 16px;text-align:left;border-bottom:1p
 table.times th{background:var(--accent-soft);font-weight:600}
 .note{font-size:.85rem;color:var(--muted);margin-top:10px}
 
-.board{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:8px}
+/* 게시판: 왼쪽 목록 + 오른쪽 새 글 쓰기 */
+.board{margin-bottom:8px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,400px);gap:24px;align-items:start}
+.split-title{font-weight:700;font-size:1.05rem;color:var(--accent);margin:0 0 12px;padding-bottom:8px;border-bottom:2px solid var(--accent-soft)}
+.split-left{min-width:0}
+.split-right{position:sticky;top:100px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:0 8px 22px rgba(60,40,10,.06)}
+.split-right form.post{grid-template-columns:1fr;margin-bottom:0}
+.split .music-row{grid-template-columns:1fr}
+.split .yt-frame{margin-top:6px}
+
 form.post{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
 form.post .full{grid-column:1/-1}
 form.post input,form.post textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff}
 form.post textarea{min-height:110px;resize:vertical}
 form.post label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:4px}
-.status{font-size:.9rem;color:var(--muted);min-height:1.4em}
+.status{font-size:.9rem;color:var(--muted);min-height:1.4em;margin-bottom:6px}
 .items{display:grid;gap:12px}
 .item{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fff;transition:box-shadow .2s ease}
 .item:hover{box-shadow:0 8px 20px rgba(60,40,10,.08)}
@@ -146,6 +155,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   .brand{justify-content:center}
   nav{flex:1 1 100%;order:3}
   nav ul{justify-content:center}
+  .split{grid-template-columns:1fr}
+  .split-right{position:static;order:-1}
 }
 @media(max-width:640px){
   nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
@@ -292,7 +303,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   <div class="wrap">
     <div class="page-head">
       <h2>오늘의 예배</h2>
-      <p class="lead">유튜브 예배 영상 링크를 올려 주세요. 링크를 올리면 영상이 바로 보입니다.</p>
+      <p class="lead">왼쪽에서 올라온 예배 영상을 보고, 오른쪽에서 새 영상 링크를 올려 주세요.</p>
     </div>
     <div class="board" data-board="service"></div>
   </div>
@@ -302,7 +313,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   <div class="wrap">
     <div class="page-head">
       <h2>주보</h2>
-      <p class="lead">주보 이미지(여러 장 가능) 또는 PDF를 올리면 아래에서 바로 볼 수 있습니다.</p>
+      <p class="lead">왼쪽에서 주보를 바로 볼 수 있고, 오른쪽에서 주보 이미지(여러 장 가능) 또는 PDF를 올릴 수 있습니다.</p>
     </div>
     <div class="board" data-board="bulletin"></div>
   </div>
@@ -312,7 +323,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   <div class="wrap">
     <div class="page-head">
       <h2>사진 게시판</h2>
-      <p class="lead">교회 행사와 일상의 사진을 여러 장 함께 올리고 바로 볼 수 있습니다.</p>
+      <p class="lead">왼쪽에서 올라온 사진을 보고, 오른쪽에서 여러 장을 한꺼번에 올릴 수 있습니다.</p>
     </div>
     <div class="board" data-board="photo"></div>
   </div>
@@ -322,7 +333,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   <div class="wrap">
     <div class="page-head">
       <h2>음악 게시판</h2>
-      <p class="lead">찬양과 음악 링크를 함께 나눠 주세요. 유튜브 링크를 올리면 오른쪽에서 바로 들을 수 있습니다.</p>
+      <p class="lead">왼쪽에서 올라온 음악을 바로 들을 수 있고, 오른쪽에서 유튜브 링크를 올릴 수 있습니다.</p>
     </div>
     <div class="board" data-board="music"></div>
   </div>
@@ -332,7 +343,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   <div class="wrap">
     <div class="page-head">
       <h2>좋은 글 게시판</h2>
-      <p class="lead">마음에 남는 글과 묵상을 나눠 주세요. 이미지를 함께 올릴 수 있고, 제목을 쓰지 않으면 내용의 첫 줄이 제목이 됩니다.</p>
+      <p class="lead">왼쪽에서 좋은 글을 읽고, 오른쪽에서 글과 이미지를 올릴 수 있습니다. 제목을 쓰지 않으면 내용의 첫 줄이 제목이 됩니다.</p>
     </div>
     <div class="board" data-board="articles"></div>
   </div>
@@ -342,7 +353,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   <div class="wrap">
     <div class="page-head">
       <h2>파일 공유 게시판</h2>
-      <p class="lead">문서와 파일을 첨부해 함께 공유할 수 있습니다.</p>
+      <p class="lead">왼쪽에서 올라온 파일을 내려받고, 오른쪽에서 문서와 파일을 첨부해 함께 공유할 수 있습니다.</p>
     </div>
     <div class="board" data-board="files"></div>
   </div>
@@ -466,21 +477,32 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   };
   const errText = msg => ERR[msg] || '처리에 실패했습니다. 잠시 후 다시 시도해 주세요.';
 
+  /* 게시판 화면: 왼쪽 = 올라온 글, 오른쪽 = 새로 올리기 */
   function mountBoard(el){
     const id = el.dataset.board, cfg = BOARDS[id];
     const bodyLabel = id === 'articles' ? '내용 (첫 줄이 제목으로 쓰입니다)' : LABELS.body;
+    const listTitle = {service:'올라온 예배 영상', bulletin:'올라온 주보', photo:'올라온 사진', music:'올라온 음악', articles:'올라온 좋은 글', files:'올라온 파일'}[id] || '올라온 글';
+    const writeTitle = {service:'예배 영상 올리기', bulletin:'주보 올리기', photo:'사진 올리기', music:'음악 올리기', articles:'좋은 글 쓰기', files:'파일 올리기'}[id] || '새 글 쓰기';
     el.innerHTML = `
-      <div class="status" data-role="status"></div>
-      <form class="post" data-role="form">
-        <div class="full"><label>${cfg.titleLabel}</label><input name="title" ${id === 'articles' ? '' : 'required'} maxlength="120"></div>
-        <div class="full"><label>작성자 이름 (선택)</label><input name="author" maxlength="40"></div>
-        ${cfg.fields.includes('link') ? `<div class="full"><label>${LABELS.link}</label><input name="link" type="url" placeholder="https://..."></div>` : ''}
-        ${cfg.fields.includes('body') ? `<div class="full"><label>${bodyLabel}</label><textarea name="body" maxlength="5000"></textarea></div>` : ''}
-        ${cfg.fields.includes('file') ? `<div class="full"><label>${cfg.multiple ? LABELS.fileMulti : LABELS.file}</label><input name="file" type="file" ${cfg.multiple ? 'multiple' : ''} ${cfg.accept ? `accept="${cfg.accept}"` : ''}></div>` : ''}
-        <div class="full"><label>비밀번호 (나중에 수정·삭제할 때 필요, 4자 이상)</label><input name="pw" type="password" required minlength="4" maxlength="30"></div>
-        <div class="full"><button class="btn" type="submit">등록하기</button></div>
-      </form>
-      <div class="items" data-role="items"><div class="empty">불러오는 중…</div></div>`;
+      <div class="split">
+        <div class="split-left">
+          <div class="split-title">${listTitle}</div>
+          <div class="items" data-role="items"><div class="empty">불러오는 중…</div></div>
+        </div>
+        <div class="split-right">
+          <div class="split-title">${writeTitle}</div>
+          <div class="status" data-role="status"></div>
+          <form class="post" data-role="form">
+            <div class="full"><label>${cfg.titleLabel}</label><input name="title" ${id === 'articles' ? '' : 'required'} maxlength="120"></div>
+            <div class="full"><label>작성자 이름 (선택)</label><input name="author" maxlength="40"></div>
+            ${cfg.fields.includes('link') ? `<div class="full"><label>${LABELS.link}</label><input name="link" type="url" placeholder="https://..."></div>` : ''}
+            ${cfg.fields.includes('body') ? `<div class="full"><label>${bodyLabel}</label><textarea name="body" maxlength="5000"></textarea></div>` : ''}
+            ${cfg.fields.includes('file') ? `<div class="full"><label>${cfg.multiple ? LABELS.fileMulti : LABELS.file}</label><input name="file" type="file" ${cfg.multiple ? 'multiple' : ''} ${cfg.accept ? `accept="${cfg.accept}"` : ''}></div>` : ''}
+            <div class="full"><label>비밀번호 (나중에 수정·삭제할 때 필요, 4자 이상)</label><input name="pw" type="password" required minlength="4" maxlength="30"></div>
+            <div class="full"><button class="btn" type="submit">등록하기</button></div>
+          </form>
+        </div>
+      </div>`;
   }
 
   function youtubeId(url){
@@ -507,7 +529,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 
   function renderList(el, rows){
     const id = el.dataset.board, items = el.querySelector('[data-role="items"]');
-    if(!rows.length){ items.innerHTML = '<div class="empty">아직 등록된 글이 없습니다.</div>'; return; }
+    if(!rows.length){ items.innerHTML = '<div class="empty">아직 등록된 글이 없습니다. 오른쪽에서 첫 글을 올려 보세요.</div>'; return; }
     if(id === 'service'){
       items.innerHTML = rows.map(r => {
         const yid = youtubeId(r.link);
