@@ -65,6 +65,10 @@ h3.sub{font-size:1.2rem;margin:36px 0 14px}
 .c-blue{--c:#3d6b8c}
 .c-rose{--c:#9a4f5e}
 .about-extra{margin-top:20px}
+.acct{display:inline-flex;align-items:center;flex-wrap:wrap;gap:8px}
+.copy-btn{padding:4px 12px;border:1px solid var(--c);background:#fff;color:var(--c);border-radius:999px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer;transition:background .15s ease,color .15s ease}
+.copy-btn:hover{background:var(--c);color:#fff}
+.copy-btn.done{background:var(--c);color:#fff}
 table.times{width:100%;border-collapse:collapse;background:var(--card);border-radius:14px;overflow:hidden;border:1px solid var(--line)}
 table.times th,table.times td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line);font-size:.97rem}
 table.times th{background:var(--accent-soft);font-weight:600}
@@ -208,7 +212,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       <div class="about-panel c-rose" style="max-width:420px">
         <div class="about-head"><span class="ico">💳</span>헌금 계좌</div>
         <ul>
-          <li><span class="k">은행</span><span>농협 351-0985-0331-13</span></li>
+          <li><span class="k">은행</span><span class="acct">농협 351-0985-0331-13 <button class="copy-btn" type="button" data-copy="351-0985-0331-13">복사</button></span></li>
           <li><span class="k">예금주</span><span>구미은혜로교회</span></li>
         </ul>
       </div>
@@ -338,6 +342,43 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     document.querySelectorAll('nav a').forEach(a => a.classList.toggle('current', a.getAttribute('href') === '#' + name));
     window.scrollTo(0, 0);
   }
+
+  /* ---------- 계좌번호 복사 ---------- */
+  function copyText(text){
+    if(navigator.clipboard && window.isSecureContext){
+      return navigator.clipboard.writeText(text);
+    }
+    // 보안 연결이 아닐 때를 위한 대체 방법
+    return new Promise((resolve, reject) => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try{
+        document.execCommand('copy') ? resolve() : reject(new Error('copy failed'));
+      }catch(e){
+        reject(e);
+      }finally{
+        document.body.removeChild(ta);
+      }
+    });
+  }
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.copy-btn[data-copy]');
+    if(!btn) return;
+    const original = btn.textContent;
+    copyText(btn.dataset.copy).then(() => {
+      btn.textContent = '복사됨';
+      btn.classList.add('done');
+      setTimeout(() => { btn.textContent = original; btn.classList.remove('done'); }, 1500);
+    }).catch(() => {
+      btn.textContent = '실패';
+      setTimeout(() => { btn.textContent = original; }, 1500);
+    });
+  });
 
   /* ---------- 게시판 설정 ---------- */
   const BOARDS = {
