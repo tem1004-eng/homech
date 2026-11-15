@@ -15,7 +15,7 @@
 
 const SHEET_NAME = 'posts';
 const HEADERS = ['id', 'board', 'title', 'author', 'link', 'body', 'createdAt', 'fileId', 'fileName', 'fileType', 'fileUrl'];
-const ALLOWED_BOARDS = ['bulletin', 'photo', 'music', 'articles', 'files'];
+const ALLOWED_BOARDS = ['service', 'bulletin', 'photo', 'music', 'articles', 'files'];
 const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10MB (base64 기준 약 13MB)
 
 function setup() {
