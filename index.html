@@ -60,20 +60,33 @@ nav a.nav-btn.current{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--c1),0 6px 16px r
 .view{display:none}
 .view.active{display:block}
 
-.hero{padding:120px 0 120px;color:#fff;background:linear-gradient(180deg,rgba(18,28,44,.35),rgba(18,28,44,.72)),url(images/church.png) center 40%/cover no-repeat}
-.hero h1{font-size:2.6rem;margin:0 0 14px;letter-spacing:-.03em;text-shadow:0 2px 18px rgba(0,0,0,.35)}
-.hero p{color:#f3ecdf;margin:0 0 30px;font-size:1.1rem;text-shadow:0 1px 10px rgba(0,0,0,.3)}
+/* 첫 화면: 인사말(맨 위) → 사진 슬라이드 + 유튜브 영상 */
+.hero{padding:90px 0 90px;color:#fff;background:linear-gradient(180deg,rgba(18,28,44,.40),rgba(18,28,44,.78)),url(images/church.png) center 40%/cover no-repeat}
+.hero-title{font-size:2.4rem;margin:0 0 36px;letter-spacing:-.03em;text-align:center;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:center}
+
+/* 왼쪽: 사진 슬라이드 */
+.slider{position:relative;border-radius:18px;overflow:hidden;aspect-ratio:4/3;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.25);box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.slide{position:absolute;inset:0;opacity:0;transition:opacity .8s ease;cursor:pointer;background:#000}
+.slide.on{opacity:1}
+.slide img{width:100%;height:100%;object-fit:cover;display:block}
+.slide-cap{position:absolute;left:0;right:0;bottom:0;padding:26px 16px 12px;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;font-size:.92rem;text-shadow:0 1px 6px rgba(0,0,0,.4)}
+.sl-btn{position:absolute;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;border:0;background:rgba(0,0,0,.35);color:#fff;font-size:.9rem;line-height:1;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center;transition:background .15s ease}
+.sl-btn:hover{background:rgba(0,0,0,.6)}
+.sl-btn.prev{left:8px}
+.sl-btn.next{right:8px}
+.slider .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;color:#f3ecdf;font-size:.95rem;background:rgba(0,0,0,.45)}
+
+/* 오른쪽: 유튜브 영상 박스 */
+.hero-video-box{padding:12px;border-radius:20px;background:linear-gradient(135deg,rgba(255,255,255,.38),rgba(255,255,255,.08));border:1px solid rgba(255,255,255,.3);box-shadow:0 20px 44px rgba(0,0,0,.35)}
+.hero-video{position:relative;padding-top:56.25%;border-radius:14px;overflow:hidden;background:#000;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.hero-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.hero-video .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;color:#f3ecdf;font-size:.95rem;background:rgba(0,0,0,.45)}
+.hero-cap{color:#f3ecdf;font-size:.88rem;margin-top:12px;text-align:center;text-shadow:0 1px 8px rgba(0,0,0,.35);min-height:1.4em}
+
 .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:999px;background:linear-gradient(135deg,#7a5c2e,#b08a4f);color:#fff;text-decoration:none;font-weight:600;border:0;cursor:pointer;font-size:.95rem;font-family:inherit;box-shadow:0 6px 18px rgba(122,92,46,.30);transition:transform .15s ease,box-shadow .15s ease}
 .btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(122,92,46,.38);color:#fff}
 .btn.sm{padding:8px 16px;font-size:.88rem;box-shadow:0 4px 12px rgba(122,92,46,.25)}
-.hero .btn{padding:14px 30px;font-size:1rem;box-shadow:0 10px 28px rgba(0,0,0,.30)}
-.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center}
-.hero-text{text-align:left}
-.hero-text p{margin-bottom:28px}
-.hero-video{position:relative;padding-top:56.25%;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 18px 40px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18)}
-.hero-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.hero-video .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;color:#f3ecdf;font-size:.95rem;background:rgba(0,0,0,.45)}
-.hero-cap{color:#f3ecdf;font-size:.88rem;margin-top:10px;text-shadow:0 1px 8px rgba(0,0,0,.35);min-height:1.4em}
 
 .page{padding:60px 0 80px;min-height:70vh}
 .page.alt{background:#f6f2ea}
@@ -213,7 +226,9 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   nav::-webkit-scrollbar{display:none}
   nav ul{width:max-content;justify-content:flex-start;padding-bottom:4px}
-  .hero-grid{grid-template-columns:1fr}.hero-text{text-align:center}.hero h1{font-size:1.85rem}.hero{padding:110px 0 100px}
+  .hero{padding:80px 0 70px}
+  .hero-title{font-size:1.8rem;margin-bottom:26px}
+  .hero-grid{grid-template-columns:1fr;gap:26px}
   form.post{grid-template-columns:1fr}.music-row{grid-template-columns:1fr}.about-grid{grid-template-columns:1fr}
   .tiles{grid-template-columns:1fr 1fr;gap:14px}.tile{min-height:140px;padding:20px 16px}.tile h3{font-size:1.05rem}.tile p{font-size:.85rem}
   .cal-cell{min-height:52px}.lab{font-size:.6rem}
@@ -252,15 +267,18 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 
 <section class="view" data-view="home">
   <div class="hero">
-    <div class="wrap hero-grid">
-      <div class="hero-text">
-        <h1>구미은혜로교회에 오신 것을 환영합니다</h1>
-        <p>하나님의 은혜 안에서 함께 예배하고, 나누고, 세워져 가는 공동체입니다.</p>
-        <a class="btn" href="#worship">예배 안내 보기</a>
-      </div>
-      <div>
-        <div class="hero-video" id="latest-video"><div class="ph">최신 예배 영상을 불러오는 중…</div></div>
-        <div class="hero-cap" id="latest-cap"></div>
+    <div class="wrap">
+      <h1 class="hero-title">구미은혜로교회에 오신 것을 환영합니다</h1>
+      <div class="hero-grid">
+        <div>
+          <div class="slider" id="photo-slider"><div class="ph">사진을 불러오는 중…</div></div>
+        </div>
+        <div>
+          <div class="hero-video-box">
+            <div class="hero-video" id="latest-video"><div class="ph">최신 예배 영상을 불러오는 중…</div></div>
+          </div>
+          <div class="hero-cap" id="latest-cap"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -911,6 +929,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         form.reset();
         status.textContent = jobs.length > 1 ? `${jobs.length}개 파일을 등록했습니다.` : '등록되었습니다.';
         loadBoard(el);
+        if(id === 'photo') loadSlider();
       }catch(err){
         console.error(err);
         status.textContent = errText(err.message);
@@ -1192,6 +1211,49 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     }
   }
 
+  /* ---------- 첫 화면 사진 슬라이드 (사진 게시판 이미지, 자동 넘김) ---------- */
+  let sliderTimer = null;
+  async function loadSlider(){
+    const box = document.getElementById('photo-slider');
+    if(!box) return;
+    if(!configured){ box.innerHTML = '<div class="ph">사진 연결 설정 전입니다.</div>'; return; }
+    try{
+      const res = await fetch(`${API_URL}?board=photo`);
+      const rows = await res.json();
+      const photos = (Array.isArray(rows) ? rows : []).filter(r => r.fileUrl && isImage(r.fileType));
+      if(sliderTimer){ clearInterval(sliderTimer); sliderTimer = null; }
+      if(!photos.length){ box.innerHTML = '<div class="ph">아직 올라온 사진이 없습니다.</div>'; return; }
+
+      box.innerHTML = photos.map((r, i) => `
+        <div class="slide${i === 0 ? ' on' : ''}" data-i="${i}" title="사진 게시판으로 이동">
+          <img src="${esc(shotUrl(r.fileUrl))}" alt="${esc(r.title)}" loading="lazy" onerror="this.onerror=null;this.src='${esc(r.fileUrl)}'">
+          <div class="slide-cap">${esc(r.title)}</div>
+        </div>`).join('') + `
+        <button class="sl-btn prev" type="button" aria-label="이전 사진">‹</button>
+        <button class="sl-btn next" type="button" aria-label="다음 사진">›</button>`;
+
+      const slides = [...box.querySelectorAll('.slide')];
+      let cur = 0;
+      const show = n => {
+        cur = (n + slides.length) % slides.length;
+        slides.forEach((s, i) => s.classList.toggle('on', i === cur));
+      };
+      const start = () => { stop(); if(slides.length > 1) sliderTimer = setInterval(() => show(cur + 1), 4500); };
+      const stop = () => { if(sliderTimer){ clearInterval(sliderTimer); sliderTimer = null; } };
+
+      box.querySelector('.prev').addEventListener('click', e => { e.stopPropagation(); show(cur - 1); start(); });
+      box.querySelector('.next').addEventListener('click', e => { e.stopPropagation(); show(cur + 1); start(); });
+      // 사진을 누르면 사진 게시판으로 이동합니다.
+      slides.forEach(s => s.addEventListener('click', () => { location.hash = '#photo'; }));
+      box.addEventListener('mouseenter', stop);
+      box.addEventListener('mouseleave', start);
+      start();
+    }catch(err){
+      console.error(err);
+      box.innerHTML = '<div class="ph">사진을 불러오지 못했습니다.</div>';
+    }
+  }
+
   /* ---------- 시작 ---------- */
   initCalState();
   boardEls.forEach(wireManage);
@@ -1200,6 +1262,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   wireCalForm();
   window.addEventListener('hashchange', route);
   loadLatestService();
+  loadSlider();
   route();
   refreshBoards();
   renderCalendar();
