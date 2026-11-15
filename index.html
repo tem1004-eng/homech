@@ -68,9 +68,6 @@ form.post label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:
 .item .m{font-size:.82rem;color:var(--muted);margin-top:2px}
 .item .b{white-space:pre-wrap;margin-top:8px;font-size:.95rem}
 .shot{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line);background:#fff}
-.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-top:6px}
-.thumbs a{display:block;border-radius:10px;overflow:hidden;border:1px solid var(--line);aspect-ratio:4/3;background:#eee}
-.thumbs img{width:100%;height:100%;object-fit:cover;display:block}
 .banner{padding:12px 16px;background:#fff7e6;border:1px solid #ecd9ad;border-radius:10px;color:#6b5320;font-size:.92rem;margin-bottom:16px}
 .empty{color:var(--muted);font-size:.95rem;padding:10px 0}
 .mbar{display:flex;gap:6px;margin-top:10px}
@@ -203,7 +200,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   <div class="wrap">
     <div class="page-head">
       <h2>사진 게시판</h2>
-      <p class="lead">교회 행사와 일상의 사진을 나눠 주세요.</p>
+      <p class="lead">교회 행사와 일상의 사진을 여러 장 함께 올리고 바로 볼 수 있습니다.</p>
     </div>
     <div class="board" data-board="photo"></div>
   </div>
@@ -285,7 +282,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   const BOARDS = {
     service:{fields:['title','link','body'], titleLabel:'예배 제목 (예: 2026.11.15 주일 오전예배)'},
     bulletin:{fields:['title','file'], accept:'image/*,application/pdf', multiple:true, titleLabel:'주보 제목 (예: 2026년 11월 15일 주보)'},
-    photo:{fields:['title','file'], accept:'image/*', titleLabel:'사진 제목'},
+    photo:{fields:['title','file'], accept:'image/*', multiple:true, titleLabel:'사진 제목'},
     music:{fields:['title','link','body'], titleLabel:'곡명'},
     articles:{fields:['title','body'], titleLabel:'글 제목'},
     files:{fields:['title','file'], accept:'*/*', titleLabel:'파일 제목'}
@@ -370,7 +367,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       }).join('');
       return;
     }
-    if(id === 'bulletin'){
+    if(id === 'bulletin' || id === 'photo'){
       items.innerHTML = rows.map(r => {
         let view = '';
         if(r.fileUrl && isImage(r.fileType)){
@@ -380,13 +377,6 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         }
         return `<div class="item"><div class="t">${esc(r.title)}</div><div class="m">${esc(r.author)} · ${fmt(r.createdAt)}</div><div class="b">${view}</div>${r.body ? `<div class="b">${esc(r.body)}</div>` : ''}</div>`;
       }).join('');
-      return;
-    }
-    if(id === 'photo'){
-      const thumbs = rows.filter(r => r.fileUrl).map(r =>
-        `<a href="${esc(r.fileUrl)}" target="_blank" rel="noopener" title="${esc(r.title)}"><img src="${esc(r.fileUrl)}" alt="${esc(r.title)}" loading="lazy"></a>`).join('');
-      items.innerHTML = `<div class="thumbs">${thumbs}</div>` +
-        rows.map(r => `<div class="item"><div class="t">${esc(r.title)}</div><div class="m">${esc(r.author)} · ${fmt(r.createdAt)}</div></div>`).join('');
       return;
     }
     items.innerHTML = rows.map(r => {
@@ -508,7 +498,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       const fd = new FormData(form);
       const base = { action:'create', board: id, password: (fd.get('pw') || '').toString() };
       ['title','author','link','body'].forEach(k => { const v = (fd.get(k) || '').toString().trim(); if(v) base[k] = v; });
-      // 선택한 파일마다 글을 하나씩 등록합니다 (주보는 여러 장 가능)
+      // 선택한 파일마다 글을 하나씩 등록합니다 (주보·사진은 여러 장 가능)
       const files = fd.getAll('file').filter(f => f && f.size);
       const jobs = files.length ? files : [null];
       try{
