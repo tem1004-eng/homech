@@ -410,7 +410,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   <div class="wrap">
     <div class="page-head">
       <h2>목회달력</h2>
-      <p class="lead">절기와 교회 행사를 날짜별로 확인하고, 날짜를 골라 일정과 사진을 올릴 수 있습니다.</p>
+      <p class="lead">절기와 교회 행사를 날짜별로 확인하고, 날짜와 시간을 골라 일정과 사진을 올릴 수 있습니다. 등록된 일정은 수정할 수 있습니다.</p>
     </div>
     <div class="cal-app" id="cal-app" data-board="calendar">
       <div class="split">
@@ -431,11 +431,12 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
           <div class="status" data-role="status"></div>
           <form class="post" data-role="form">
             <div class="full"><label>날짜</label><input name="date" type="date" required></div>
+            <div class="full"><label>시간 (선택)</label><input name="time" type="time"></div>
             <div class="full"><label>행사 이름</label><input name="title" maxlength="120" required></div>
             <div class="full"><label>작성자 이름 (선택)</label><input name="author" maxlength="40"></div>
-            <div class="full"><label>메모 (시간·장소 등)</label><textarea name="memo" maxlength="2000"></textarea></div>
+            <div class="full"><label>메모 (장소 등)</label><textarea name="memo" maxlength="2000"></textarea></div>
             <div class="full"><label>사진 (선택, 1장)</label><input name="file" type="file" accept="image/*"></div>
-            <div class="full"><label>비밀번호 (삭제할 때 필요, 4자 이상)</label><input name="pw" type="password" required minlength="4" maxlength="30"></div>
+            <div class="full"><label>비밀번호 (수정·삭제할 때 필요, 4자 이상)</label><input name="pw" type="password" required minlength="4" maxlength="30"></div>
             <div class="full"><button class="btn" type="submit">등록하기</button></div>
           </form>
         </div>
@@ -536,6 +537,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   const LABELS = {link:'음악 링크 (URL)', body:'내용 / 메모', file:'첨부 파일 (최대 10MB)', fileMulti:'첨부 파일 (여러 장 선택 가능, 각 10MB 이하)'};
   const WD = ['일','월','화','수','목','금','토'];
   const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+  const TIME_RE = /^⏰\s*(\d{2}:\d{2})\n?/;   // 목회달력 메모 맨 앞줄에 저장되는 시간
 
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmt = ts => ts ? new Date(Number(ts)).toLocaleString('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
@@ -695,10 +697,11 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       const panel = item && item.querySelector('[data-role="panel"]');
       if(!panel) return;
       const act = btn.dataset.act;
+      const isCal = el.dataset.board === 'calendar';
       if(act === 'cancel') panel.innerHTML = '';
-      else if(act === 'edit') openEdit(el, item, panel);
+      else if(act === 'edit') (isCal ? openCalEdit(item, panel) : openEdit(el, item, panel));
       else if(act === 'delete') openDelete(panel);
-      else if(act === 'save') saveEdit(el, item, panel);
+      else if(act === 'save') (isCal ? saveCalEdit(el, item, panel) : saveEdit(el, item, panel));
       else if(act === 'remove') removePost(el, item, panel);
     });
   }
@@ -717,6 +720,48 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         <div class="row"><button class="mini primary" type="button" data-act="save">저장</button><button class="mini" type="button" data-act="cancel">취소</button></div>
         <div class="perr" data-role="err"></div>
       </div>`;
+  }
+
+  /* 목회달력 일정 수정 칸 (날짜·시간·행사 이름·메모) */
+  function openCalEdit(item, panel){
+    const r = calRows.find(x => String(x.id) === item.dataset.id);
+    if(!r) return;
+    panel.innerHTML = `
+      <div class="pbox">
+        <label>날짜</label><input name="date" type="date" value="${esc(r.date)}">
+        <label>시간 (선택)</label><input name="time" type="time" value="${esc(r.time)}">
+        <label>행사 이름</label><input name="title" maxlength="120" value="${esc(r.title)}">
+        <label>메모 (장소 등)</label><textarea name="memo" maxlength="2000">${esc(r.memo)}</textarea>
+        ${pwField()}
+        <div class="row"><button class="mini primary" type="button" data-act="save">저장</button><button class="mini" type="button" data-act="cancel">취소</button></div>
+        <div class="perr" data-role="err"></div>
+      </div>`;
+  }
+
+  async function saveCalEdit(el, item, panel){
+    const err = panel.querySelector('[data-role="err"]');
+    const g = n => { const x = panel.querySelector(`[name="${n}"]`); return x ? x.value.trim() : ''; };
+    const date = g('date'), time = g('time'), title = g('title'), memo = g('memo'), pw = g('pw');
+    if(!DATE_RE.test(date)){ err.textContent = '날짜를 선택해 주세요.'; return; }
+    if(!title){ err.textContent = '행사 이름을 입력해 주세요.'; return; }
+    err.textContent = '저장 중…';
+    try{
+      const out = await postJSON({
+        action:'update', board:'calendar', id: item.dataset.id,
+        title: title,
+        link: date,
+        body: (time ? `⏰ ${time}\n` : '') + memo,
+        password: pw
+      });
+      if(!out.ok) throw new Error(out.error || 'failed');
+      // 날짜를 바꾸었다면 그 날짜로 이동해서 보여줍니다.
+      calState.y = Number(date.slice(0, 4));
+      calState.m = Number(date.slice(5, 7)) - 1;
+      calState.sel = date;
+      await loadCalendar();
+    }catch(e){
+      err.textContent = errText(e.message);
+    }
   }
 
   function openDelete(panel){
@@ -835,10 +880,10 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   }
 
   /* ---------- 목회 일정 데이터 (기본 일정 + 목회달력에서 추가한 일정) ---------- */
-  let calRows = [];   // 목회달력 게시판 글 (link = 날짜, body = 메모)
+  let calRows = [];   // 목회달력 게시판 글 (link = 날짜, body = [⏰ 시간 줄] + 메모)
 
   function userEvents(){
-    const seeds = SCHEDULE.map(([date, title, memo]) => ({date, title, memo, seed:true}));
+    const seeds = SCHEDULE.map(([date, title, memo]) => ({date, title, memo, time:'', seed:true}));
     return [...seeds, ...calRows];
   }
 
@@ -872,7 +917,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       [advent, '대림절 첫 주'],
       [new Date(y, 11, 25), '성탄절']
     ];
-    return list.map(([d, t]) => ({date: ymdFromDate(d), title: t, christian: true}));
+    return list.map(([d, t]) => ({date: ymdFromDate(d), title: t, time:'', christian: true}));
   }
 
   /* 예배 안내의 일정 목록: 오늘 기준 지난 행사 1개 + 앞으로의 행사 7개 */
@@ -882,7 +927,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     const q = Math.floor((tm - 1) / 3) + 1;
     document.getElementById('sched-title').textContent = `${ty}년 ${q}/4분기 일정`;
 
-    const all = userEvents().slice().sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
+    const all = userEvents().slice().sort((a, b) =>
+      a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || '') || a.title.localeCompare(b.title));
     let idx = all.findIndex(ev => ev.date >= today);
     if(idx < 0) idx = all.length;
     const start = Math.max(0, idx - 1);
@@ -893,10 +939,11 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       const isPast = ev.date < today, isToday = ev.date === today;
       const state = isPast ? 'past' : (isToday ? 'today' : '');
       const badge = isPast ? '지난 행사' : (isToday ? '오늘' : '');
+      const timeTxt = ev.time ? ` · ${ev.time}` : '';
       const photo = ev.fileUrl && isImage(ev.fileType)
         ? `<img class="ev-img" src="${esc(shotUrl(ev.fileUrl))}" alt="${esc(ev.title)}" loading="lazy">` : '';
       return `<div class="card ev-card ${state}">
-        <div class="ev-date">${m}월 ${d}일 (${WD[new Date(y, m - 1, d).getDay()]})${badge ? `<span class="badge">${badge}</span>` : ''}</div>
+        <div class="ev-date">${m}월 ${d}일 (${WD[new Date(y, m - 1, d).getDay()]})${timeTxt}${badge ? `<span class="badge">${badge}</span>` : ''}</div>
         <h3>${esc(ev.title)}</h3>
         ${ev.memo ? `<p>${esc(ev.memo)}</p>` : ''}
         ${photo}
@@ -930,7 +977,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       const key = ymdFromDate(new Date(y, m, d));
       const labels = [
         ...ch.filter(e => e.date === key).map(e => `<span class="lab ch">${esc(e.title)}</span>`),
-        ...ue.filter(e => e.date === key).map(e => `<span class="lab ev">${esc(e.title)}</span>`)
+        ...ue.filter(e => e.date === key).map(e => `<span class="lab ev">${e.time ? esc(e.time) + ' ' : ''}${esc(e.title)}</span>`)
       ].slice(0, 3).join('');
       const cls = ['cal-cell', key === today ? 'today' : '', key === calState.sel ? 'sel' : '', new Date(y, m, d).getDay() === 0 ? 'sun' : ''].join(' ').replace(/\s+/g, ' ');
       html += `<button type="button" class="${cls}" data-date="${key}"><span class="dn">${d}</span>${labels}</button>`;
@@ -946,7 +993,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     document.getElementById('cal-daytitle').textContent = `${y}년 ${m}월 ${d}일 (${WD[new Date(y, m - 1, d).getDay()]})`;
     const ch = christianEvents(y).filter(e => e.date === key);
     const seeds = SCHEDULE.filter(s => s[0] === key);
-    const mine = calRows.filter(r => r.date === key);
+    const mine = calRows.filter(r => r.date === key).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
 
     let html = ch.map(e => `<div class="item ch-item"><div class="t">${esc(e.title)}</div><div class="m">절기</div></div>`).join('');
     html += seeds.map(([, t, memo]) => `<div class="item"><div class="t">${esc(t)}</div>${memo ? `<div class="b">${esc(memo)}</div>` : ''}<div class="m">교회 기본 일정</div></div>`).join('');
@@ -954,11 +1001,11 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       const photo = r.fileUrl && isImage(r.fileType)
         ? `<div class="b"><a href="${esc(r.fileUrl)}" target="_blank" rel="noopener"><img class="shot" src="${esc(shotUrl(r.fileUrl))}" alt="${esc(r.title)}" loading="lazy"></a></div>` : '';
       return `<div class="item" data-id="${esc(r.id)}">
-        <div class="t">${esc(r.title)}</div>
+        <div class="t">${r.time ? `<span class="badge">${esc(r.time)}</span> ` : ''}${esc(r.title)}</div>
         <div class="m">${esc(r.author)} · ${fmt(r.createdAt)}</div>
         ${photo}
         ${r.memo ? `<div class="b">${esc(r.memo)}</div>` : ''}
-        <div class="mbar"><button class="mini" type="button" data-act="delete">삭제</button></div>
+        <div class="mbar"><button class="mini" type="button" data-act="edit">수정</button><button class="mini" type="button" data-act="delete">삭제</button></div>
         <div class="panel" data-role="panel"></div>
       </div>`;
     }).join('');
@@ -974,7 +1021,16 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         if(rows.error) throw new Error(rows.error);
         calRows = (Array.isArray(rows) ? rows : [])
           .filter(r => DATE_RE.test(String(r.link || '')))
-          .map(r => ({...r, date: String(r.link), memo: r.body || ''}));
+          .map(r => {
+            const body = String(r.body || '');
+            const tm = body.match(TIME_RE);
+            return {
+              ...r,
+              date: String(r.link),
+              time: tm ? tm[1] : '',
+              memo: tm ? body.slice(tm[0].length) : body
+            };
+          });
       }catch(err){
         console.error(err);
       }
@@ -1030,13 +1086,17 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       e.preventDefault();
       const fd = new FormData(form);
       const date = (fd.get('date') || '').toString();
+      const time = (fd.get('time') || '').toString();
       const title = (fd.get('title') || '').toString().trim();
+      const memo = (fd.get('memo') || '').toString().trim();
       if(!DATE_RE.test(date)){ status.textContent = '날짜를 선택해 주세요.'; return; }
       if(!title){ status.textContent = '행사 이름을 입력해 주세요.'; return; }
+      // 시간은 메모 맨 앞줄에 저장합니다 (예: ⏰ 15:00)
+      const body = (time ? `⏰ ${time}\n` : '') + memo;
       const payload = {
         action:'create', board:'calendar', title, link: date,
         author: (fd.get('author') || '').toString().trim(),
-        body: (fd.get('memo') || '').toString().trim(),
+        body: body,
         password: (fd.get('pw') || '').toString()
       };
       const file = fd.get('file');
