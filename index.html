@@ -72,6 +72,10 @@ form.post label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:
 .music-info .b{margin-top:6px}
 .yt-frame{position:relative;padding-top:56.25%;border-radius:10px;overflow:hidden;background:#000;border:1px solid var(--line)}
 .yt-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.art-title{font-size:1.15rem;margin-bottom:2px}
+.art-img-wrap{margin-top:12px}
+.art-img{display:block;width:100%;max-width:820px;height:auto;border-radius:10px;border:1px solid var(--line);background:#fff}
+.art-body{font-size:1.02rem;line-height:1.85}
 .banner{padding:12px 16px;background:#fff7e6;border:1px solid #ecd9ad;border-radius:10px;color:#6b5320;font-size:.92rem;margin-bottom:16px}
 .empty{color:var(--muted);font-size:.95rem;padding:10px 0}
 .mbar{display:flex;gap:6px;margin-top:10px}
@@ -224,7 +228,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   <div class="wrap">
     <div class="page-head">
       <h2>좋은 글 게시판</h2>
-      <p class="lead">마음에 남는 글과 묵상을 나눠 주세요.</p>
+      <p class="lead">마음에 남는 글과 묵상을 나눠 주세요. 이미지를 함께 올릴 수 있고, 제목을 쓰지 않으면 내용의 첫 줄이 제목이 됩니다.</p>
     </div>
     <div class="board" data-board="articles"></div>
   </div>
@@ -288,7 +292,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     bulletin:{fields:['title','file'], accept:'image/*,application/pdf', multiple:true, titleLabel:'주보 제목 (예: 2026년 11월 15일 주보)'},
     photo:{fields:['title','file'], accept:'image/*', multiple:true, titleLabel:'사진 제목'},
     music:{fields:['title','link','body'], titleLabel:'곡명'},
-    articles:{fields:['title','body'], titleLabel:'글 제목'},
+    articles:{fields:['title','body','file'], accept:'image/*', titleLabel:'글 제목 (비워두면 내용 첫 줄이 제목이 됩니다)'},
     files:{fields:['title','file'], accept:'*/*', titleLabel:'파일 제목'}
   };
   const LABELS = {link:'음악 링크 (URL)', body:'내용 / 메모', file:'첨부 파일 (최대 10MB)', fileMulti:'첨부 파일 (여러 장 선택 가능, 각 10MB 이하)'};
@@ -298,6 +302,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   const isImage = t => (t||'').startsWith('image/');
   const driveId = url => { const m = String(url||'').match(/[?&]id=([^&]+)/); return m ? m[1] : ''; };
   const shotUrl = url => { const id = driveId(url); return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w1600` : url; };
+  const firstLine = text => String(text || '').split('\n').map(s => s.trim()).find(Boolean) || '';
 
   /* ★ 일정 수정: 아래 목록만 고치면 됩니다. [날짜, 제목, 내용] 순서 (내용은 없으면 '' 로 두세요) */
   const SCHEDULE = [
@@ -322,13 +327,14 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 
   function mountBoard(el){
     const id = el.dataset.board, cfg = BOARDS[id];
+    const bodyLabel = id === 'articles' ? '내용 (첫 줄이 제목으로 쓰입니다)' : LABELS.body;
     el.innerHTML = `
       <div class="status" data-role="status"></div>
       <form class="post" data-role="form">
-        <div class="full"><label>${cfg.titleLabel}</label><input name="title" required maxlength="120"></div>
+        <div class="full"><label>${cfg.titleLabel}</label><input name="title" ${id === 'articles' ? '' : 'required'} maxlength="120"></div>
         <div class="full"><label>작성자 이름 (선택)</label><input name="author" maxlength="40"></div>
         ${cfg.fields.includes('link') ? `<div class="full"><label>${LABELS.link}</label><input name="link" type="url" placeholder="https://..."></div>` : ''}
-        ${cfg.fields.includes('body') ? `<div class="full"><label>${LABELS.body}</label><textarea name="body" maxlength="5000"></textarea></div>` : ''}
+        ${cfg.fields.includes('body') ? `<div class="full"><label>${bodyLabel}</label><textarea name="body" maxlength="5000"></textarea></div>` : ''}
         ${cfg.fields.includes('file') ? `<div class="full"><label>${cfg.multiple ? LABELS.fileMulti : LABELS.file}</label><input name="file" type="file" ${cfg.multiple ? 'multiple' : ''} ${cfg.accept ? `accept="${cfg.accept}"` : ''}></div>` : ''}
         <div class="full"><label>비밀번호 (나중에 수정·삭제할 때 필요, 4자 이상)</label><input name="pw" type="password" required minlength="4" maxlength="30"></div>
         <div class="full"><button class="btn" type="submit">등록하기</button></div>
@@ -379,6 +385,24 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
           : '';
         const linkTxt = r.link ? `<div class="b"><a href="${esc(r.link)}" target="_blank" rel="noopener">유튜브에서 열기 ↗</a></div>` : '';
         return `<div class="item"><div class="music-row"><div class="music-info"><div class="t">${esc(r.title)}</div><div class="m">${esc(r.author)} · ${fmt(r.createdAt)}</div>${r.body ? `<div class="b">${esc(r.body)}</div>` : ''}${linkTxt}</div>${player}</div></div>`;
+      }).join('');
+      return;
+    }
+    if(id === 'articles'){
+      items.innerHTML = rows.map(r => {
+        // 제목을 따로 쓰지 않은 글은 내용 첫 줄이 제목이므로, 본문에서는 그 줄을 한 번만 보여줍니다.
+        const lines = String(r.body || '').split('\n');
+        let text = String(r.body || '');
+        if(lines.length && lines[0].trim() === String(r.title || '').trim()){
+          text = lines.slice(1).join('\n').replace(/^\s*\n/, '');
+        }
+        let img = '';
+        if(r.fileUrl && isImage(r.fileType)){
+          img = `<div class="art-img-wrap"><a href="${esc(r.fileUrl)}" target="_blank" rel="noopener"><img class="art-img" src="${esc(shotUrl(r.fileUrl))}" alt="${esc(r.title)}" loading="lazy" onerror="this.onerror=null;this.src='${esc(r.fileUrl)}'"></a></div>`;
+        } else if(r.fileUrl){
+          img = `<div class="b">📎 <a href="${esc(r.fileUrl)}" target="_blank" rel="noopener">${esc(r.fileName || '첨부 파일 내려받기')}</a></div>`;
+        }
+        return `<div class="item"><div class="t art-title">${esc(r.title)}</div><div class="m">${esc(r.author)} · ${fmt(r.createdAt)}</div>${img}${text.trim() ? `<div class="b art-body">${esc(text.trim())}</div>` : ''}</div>`;
       }).join('');
       return;
     }
@@ -455,7 +479,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   async function saveEdit(el, item, panel){
     const err = panel.querySelector('[data-role="err"]');
     const g = n => { const x = panel.querySelector(`[name="${n}"]`); return x ? x.value.trim() : ''; };
-    const title = g('title');
+    let title = g('title');
+    if(!title && el.dataset.board === 'articles') title = firstLine(g('body')).slice(0, 120);
     if(!title){ err.textContent = '제목을 입력해 주세요.'; return; }
     err.textContent = '저장 중…';
     try{
@@ -513,6 +538,11 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       const fd = new FormData(form);
       const base = { action:'create', board: id, password: (fd.get('pw') || '').toString() };
       ['title','author','link','body'].forEach(k => { const v = (fd.get(k) || '').toString().trim(); if(v) base[k] = v; });
+      // 좋은 글: 제목을 비우면 내용 첫 줄(없으면 첨부 파일 이름)을 제목으로 씁니다.
+      if(id === 'articles' && !base.title){
+        const firstFile = fd.getAll('file').find(f => f && f.size);
+        base.title = (firstLine(base.body) || (firstFile ? firstFile.name.replace(/\.[^.]+$/, '') : '') || '제목 없음').slice(0, 120);
+      }
       // 선택한 파일마다 글을 하나씩 등록합니다 (주보·사진은 여러 장 가능)
       const files = fd.getAll('file').filter(f => f && f.size);
       const jobs = files.length ? files : [null];
