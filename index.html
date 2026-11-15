@@ -14,7 +14,7 @@ header.site{position:sticky;top:0;z-index:10;background:rgba(251,249,244,.96);ba
 .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
 .brand{max-width:1760px;display:flex;align-items:center;justify-content:space-between;gap:12px 16px;min-height:76px;padding:10px 20px;flex-wrap:wrap}
 
-/* 맨 왼쪽: 교회 이름 상자 + 목회달력 버튼 */
+/* 맨 왼쪽: 교회 이름 상자 + 목회달력 버튼 + 유투브 버튼 */
 .brand-left{display:flex;align-items:center;gap:10px;flex:0 0 auto;flex-wrap:wrap}
 
 /* 왼쪽 교회 이름 상자 (움직이는 그라데이션) */
@@ -30,6 +30,10 @@ header.site{position:sticky;top:0;z-index:10;background:rgba(251,249,244,.96);ba
 .cal-top{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:999px;background:linear-gradient(135deg,#4a3a22,#7a5c2e);color:#fff;text-decoration:none;font-weight:600;font-size:.9rem;white-space:nowrap;box-shadow:0 4px 12px rgba(40,30,10,.18);transition:transform .15s ease,box-shadow .15s ease}
 .cal-top:hover{color:#fff;transform:translateY(-2px);box-shadow:0 8px 18px rgba(40,30,10,.26)}
 .cal-top.current{box-shadow:0 0 0 3px #fff,0 0 0 5px #7a5c2e,0 6px 16px rgba(40,30,10,.20)}
+
+/* 상단 유투브방송전체 버튼 */
+.yt-top{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:999px;background:linear-gradient(135deg,#9a1f1f,#cc3b3b);color:#fff;text-decoration:none;font-weight:600;font-size:.9rem;white-space:nowrap;box-shadow:0 4px 12px rgba(154,31,31,.28);transition:transform .15s ease,box-shadow .15s ease}
+.yt-top:hover{color:#fff;transform:translateY(-2px);box-shadow:0 8px 18px rgba(154,31,31,.36)}
 
 /* 합동교단 로고 */
 .mark{width:46px;height:46px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:1px solid rgba(255,255,255,.6);box-shadow:0 2px 8px rgba(0,0,0,.12);overflow:hidden;flex:0 0 auto;position:relative;z-index:1}
@@ -222,6 +226,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         <strong>구미은혜로교회</strong>
       </a>
       <a class="cal-top" href="#calendar">📅 목회달력</a>
+      <a class="yt-top" href="https://www.youtube.com/@%EA%B5%AC%EB%AF%B8%EC%9D%80%ED%98%9C%EB%A1%9C%EA%B5%90%ED%9A%8C" target="_blank" rel="noopener">▶ 유투브방송전체</a>
     </div>
     <nav>
       <ul>
