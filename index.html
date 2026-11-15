@@ -10,15 +10,25 @@
 html{scroll-behavior:smooth}
 body{margin:0;font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:var(--ink);background:var(--paper);line-height:1.7}
 a{color:var(--accent)}
-header.site{position:sticky;top:0;z-index:10;background:rgba(251,249,244,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+header.site{position:sticky;top:0;z-index:10;background:rgba(251,249,244,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);box-shadow:0 4px 18px rgba(60,40,10,.05)}
 .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
-.brand{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
-.brand a.logo{text-decoration:none;color:var(--ink)}
-.brand strong{font-size:1.15rem;letter-spacing:-.02em}
-nav ul{list-style:none;display:flex;gap:18px;margin:0;padding:0;flex-wrap:wrap}
-nav a{text-decoration:none;color:var(--ink);font-size:.95rem;padding-bottom:3px;border-bottom:2px solid transparent}
-nav a:hover{color:var(--accent)}
-nav a.current{color:var(--accent);font-weight:600;border-bottom-color:var(--accent)}
+.brand{display:flex;align-items:center;justify-content:space-between;height:70px;gap:16px}
+.brand a.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);flex:0 0 auto}
+.brand strong{font-size:1.15rem;letter-spacing:-.02em;white-space:nowrap}
+
+/* 합동교단 로고 */
+.mark{width:46px;height:46px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line);box-shadow:0 2px 8px rgba(60,40,10,.10);overflow:hidden;flex:0 0 auto}
+.mark img{width:100%;height:100%;object-fit:contain;padding:3px}
+.mark-fb{display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:1.15rem;color:var(--accent);background:linear-gradient(135deg,#f6efe2,#e9dcc4)}
+.mark.nofile img{display:none}
+.mark.nofile .mark-fb{display:flex}
+
+/* 상단 메뉴 버튼 */
+nav ul{list-style:none;display:flex;gap:8px;margin:0;padding:0;flex-wrap:wrap;justify-content:flex-end}
+nav a.nav-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;text-decoration:none;font-size:.9rem;font-weight:600;letter-spacing:-.01em;border:0;box-shadow:0 4px 12px rgba(40,30,10,.14);transition:transform .15s ease,box-shadow .15s ease;white-space:nowrap}
+nav a.nav-btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(40,30,10,.20);color:#fff}
+nav a.nav-btn .ic{font-size:.95rem;line-height:1}
+nav a.nav-btn.current{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--c1),0 6px 16px rgba(40,30,10,.20)}
 
 .view{display:none}
 .view.active{display:block}
@@ -26,8 +36,9 @@ nav a.current{color:var(--accent);font-weight:600;border-bottom-color:var(--acce
 .hero{padding:120px 0 120px;color:#fff;background:linear-gradient(180deg,rgba(18,28,44,.35),rgba(18,28,44,.72)),url(images/church.png) center 40%/cover no-repeat}
 .hero h1{font-size:2.6rem;margin:0 0 14px;letter-spacing:-.03em;text-shadow:0 2px 18px rgba(0,0,0,.35)}
 .hero p{color:#f3ecdf;margin:0 0 30px;font-size:1.1rem;text-shadow:0 1px 10px rgba(0,0,0,.3)}
-.btn{display:inline-block;padding:11px 22px;border-radius:999px;background:var(--accent);color:#fff;text-decoration:none;font-weight:500;border:0;cursor:pointer;font-size:.95rem;font-family:inherit}
-.hero .btn{padding:13px 28px;font-size:1rem;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:999px;background:linear-gradient(135deg,#7a5c2e,#b08a4f);color:#fff;text-decoration:none;font-weight:600;border:0;cursor:pointer;font-size:.95rem;font-family:inherit;box-shadow:0 6px 18px rgba(122,92,46,.30);transition:transform .15s ease,box-shadow .15s ease}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(122,92,46,.38);color:#fff}
+.hero .btn{padding:14px 30px;font-size:1rem;box-shadow:0 10px 28px rgba(0,0,0,.30)}
 .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center}
 .hero-text{text-align:left}
 .hero-text p{margin-bottom:28px}
@@ -48,6 +59,16 @@ h3.sub{font-size:1.2rem;margin:36px 0 14px}
 .card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(60,40,10,.10)}
 .card h3{margin:0 0 8px;font-size:1.05rem}
 .card p{margin:0;color:var(--muted);font-size:.95rem}
+
+/* 홈 큰 버튼 (타일) */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+.tile{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:12px;padding:26px 24px;border-radius:20px;color:#fff;text-decoration:none;background:linear-gradient(135deg,var(--c1),var(--c2));box-shadow:0 12px 26px rgba(40,30,10,.16);transition:transform .2s ease,box-shadow .2s ease;min-height:160px}
+.tile::after{content:'';position:absolute;right:-40px;bottom:-40px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.12)}
+.tile:hover{transform:translateY(-4px);box-shadow:0 20px 36px rgba(40,30,10,.24);color:#fff}
+.tile .ic{width:54px;height:54px;border-radius:16px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:1.6rem;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+.tile h3{margin:0;font-size:1.22rem;letter-spacing:-.02em}
+.tile p{margin:0;font-size:.93rem;color:rgba(255,255,255,.90)}
+
 .photo-wide{width:100%;border-radius:14px;border:1px solid var(--line);margin-bottom:28px;display:block}
 .about-img{display:block;width:100%;max-width:620px;height:auto;margin:0 auto 36px;border-radius:14px;border:1px solid var(--line);box-shadow:0 10px 26px rgba(60,40,10,.10)}
 .about-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
@@ -110,25 +131,38 @@ form.post label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:
 .pbox .row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 .perr{color:#a33;font-size:.85rem;margin-top:6px;min-height:1.2em}
 footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid var(--line);text-align:center}
-@media(max-width:640px){.hero-grid{grid-template-columns:1fr}.hero-text{text-align:center}.hero h1{font-size:1.85rem}.hero{padding:110px 0 100px}form.post{grid-template-columns:1fr}nav ul{gap:12px}.music-row{grid-template-columns:1fr}.about-grid{grid-template-columns:1fr}}
+@media(max-width:900px){
+  .brand{height:auto;padding:12px 0;flex-direction:column;align-items:flex-start;gap:10px}
+  nav{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  nav::-webkit-scrollbar{display:none}
+  nav ul{flex-wrap:nowrap;justify-content:flex-start;width:max-content;padding-bottom:4px}
+}
+@media(max-width:640px){
+  .hero-grid{grid-template-columns:1fr}.hero-text{text-align:center}.hero h1{font-size:1.85rem}.hero{padding:110px 0 100px}
+  form.post{grid-template-columns:1fr}.music-row{grid-template-columns:1fr}.about-grid{grid-template-columns:1fr}
+  .tiles{grid-template-columns:1fr 1fr;gap:14px}.tile{min-height:140px;padding:20px 16px}.tile h3{font-size:1.05rem}.tile p{font-size:.85rem}
+}
 </style>
 </head>
 <body>
 
 <header class="site">
   <div class="wrap brand">
-    <a class="logo" href="#home"><strong>구미은혜로교회</strong></a>
+    <a class="logo" href="#home">
+      <span class="mark"><img src="images/hapdong-logo.png" alt="합동교단 로고" onerror="this.parentNode.classList.add('nofile')"><span class="mark-fb">✝</span></span>
+      <strong>구미은혜로교회</strong>
+    </a>
     <nav>
       <ul>
-        <li><a href="#about">교회소개</a></li>
-        <li><a href="#worship">예배안내</a></li>
-        <li><a href="#service">오늘의 예배</a></li>
-        <li><a href="#bulletin">주보</a></li>
-        <li><a href="#photo">사진</a></li>
-        <li><a href="#music">음악</a></li>
-        <li><a href="#articles">좋은 글</a></li>
-        <li><a href="#files">파일공유</a></li>
-        <li><a href="#visit">오시는 길</a></li>
+        <li><a class="nav-btn" href="#about"     style="--c1:#7a5c2e;--c2:#b08a4f"><span class="ic">🏛</span>교회소개</a></li>
+        <li><a class="nav-btn" href="#worship"   style="--c1:#3d6b8c;--c2:#5f93b8"><span class="ic">🕊</span>예배안내</a></li>
+        <li><a class="nav-btn" href="#service"   style="--c1:#9a4f5e;--c2:#c06f7d"><span class="ic">▶</span>오늘의 예배</a></li>
+        <li><a class="nav-btn" href="#bulletin"  style="--c1:#4f7a5a;--c2:#7fa887"><span class="ic">📰</span>주보</a></li>
+        <li><a class="nav-btn" href="#photo"     style="--c1:#6a4f8c;--c2:#9177b8"><span class="ic">📷</span>사진</a></li>
+        <li><a class="nav-btn" href="#music"     style="--c1:#2f7f85;--c2:#4fb0b5"><span class="ic">🎵</span>음악</a></li>
+        <li><a class="nav-btn" href="#articles"  style="--c1:#a0672b;--c2:#d18a4a"><span class="ic">📖</span>좋은 글</a></li>
+        <li><a class="nav-btn" href="#files"     style="--c1:#4a5a78;--c2:#6f80a6"><span class="ic">📁</span>파일공유</a></li>
+        <li><a class="nav-btn" href="#visit"     style="--c1:#8c4a3a;--c2:#b87262"><span class="ic">📍</span>오시는 길</a></li>
       </ul>
     </nav>
   </div>
@@ -152,16 +186,16 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   </div>
   <div class="page alt">
     <div class="wrap">
-      <div class="grid3">
-        <a class="card" href="#about"><h3>교회 소개</h3><p>비전과 섬기는 사역을 소개합니다.</p></a>
-        <a class="card" href="#worship"><h3>예배 안내</h3><p>주일과 기도회 시간을 확인하세요.</p></a>
-        <a class="card" href="#service"><h3>오늘의 예배</h3><p>예배 영상을 다시 볼 수 있습니다.</p></a>
-        <a class="card" href="#bulletin"><h3>주보</h3><p>매주 주보를 내려받을 수 있습니다.</p></a>
-        <a class="card" href="#photo"><h3>사진</h3><p>교회의 소중한 순간을 함께 봅니다.</p></a>
-        <a class="card" href="#music"><h3>음악</h3><p>찬양과 음악 링크를 나눕니다.</p></a>
-        <a class="card" href="#articles"><h3>좋은 글</h3><p>마음에 남는 글과 묵상을 나눕니다.</p></a>
-        <a class="card" href="#files"><h3>파일 공유</h3><p>문서와 파일을 함께 나눕니다.</p></a>
-        <a class="card" href="#visit"><h3>오시는 길</h3><p>주소와 연락처를 안내합니다.</p></a>
+      <div class="tiles">
+        <a class="tile" href="#about"    style="--c1:#7a5c2e;--c2:#b08a4f"><span class="ic">🏛</span><h3>교회 소개</h3><p>비전과 섬기는 사역을 소개합니다.</p></a>
+        <a class="tile" href="#worship"  style="--c1:#3d6b8c;--c2:#5f93b8"><span class="ic">🕊</span><h3>예배 안내</h3><p>주일과 기도회 시간을 확인하세요.</p></a>
+        <a class="tile" href="#service"  style="--c1:#9a4f5e;--c2:#c06f7d"><span class="ic">▶</span><h3>오늘의 예배</h3><p>예배 영상을 다시 볼 수 있습니다.</p></a>
+        <a class="tile" href="#bulletin" style="--c1:#4f7a5a;--c2:#7fa887"><span class="ic">📰</span><h3>주보</h3><p>매주 주보를 내려받을 수 있습니다.</p></a>
+        <a class="tile" href="#photo"    style="--c1:#6a4f8c;--c2:#9177b8"><span class="ic">📷</span><h3>사진</h3><p>교회의 소중한 순간을 함께 봅니다.</p></a>
+        <a class="tile" href="#music"    style="--c1:#2f7f85;--c2:#4fb0b5"><span class="ic">🎵</span><h3>음악</h3><p>찬양과 음악 링크를 나눕니다.</p></a>
+        <a class="tile" href="#articles" style="--c1:#a0672b;--c2:#d18a4a"><span class="ic">📖</span><h3>좋은 글</h3><p>마음에 남는 글과 묵상을 나눕니다.</p></a>
+        <a class="tile" href="#files"    style="--c1:#4a5a78;--c2:#6f80a6"><span class="ic">📁</span><h3>파일 공유</h3><p>문서와 파일을 함께 나눕니다.</p></a>
+        <a class="tile" href="#visit"    style="--c1:#8c4a3a;--c2:#b87262"><span class="ic">📍</span><h3>오시는 길</h3><p>주소와 연락처를 안내합니다.</p></a>
       </div>
     </div>
   </div>
