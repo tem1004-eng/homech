@@ -78,6 +78,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       <ul>
         <li><a href="#about">교회소개</a></li>
         <li><a href="#worship">예배안내</a></li>
+        <li><a href="#service">오늘의 예배</a></li>
         <li><a href="#bulletin">주보</a></li>
         <li><a href="#photo">사진</a></li>
         <li><a href="#music">음악</a></li>
@@ -104,6 +105,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       <div class="grid3">
         <a class="card" href="#about"><h3>교회 소개</h3><p>비전과 섬기는 사역을 소개합니다.</p></a>
         <a class="card" href="#worship"><h3>예배 안내</h3><p>주일과 기도회 시간을 확인하세요.</p></a>
+        <a class="card" href="#service"><h3>오늘의 예배</h3><p>예배 영상을 다시 볼 수 있습니다.</p></a>
         <a class="card" href="#bulletin"><h3>주보</h3><p>매주 주보를 내려받을 수 있습니다.</p></a>
         <a class="card" href="#photo"><h3>사진</h3><p>교회의 소중한 순간을 함께 봅니다.</p></a>
         <a class="card" href="#music"><h3>음악</h3><p>찬양과 음악 링크를 나눕니다.</p></a>
@@ -155,6 +157,16 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       <div class="card"><h3>11월 29일 (주일)</h3><p>성례주일</p></div>
       <div class="card"><h3>12월 6일 (주일)</h3><p>성탄트리 점등식</p></div>
     </div>
+  </div>
+</section>
+
+<section class="view page" data-view="service">
+  <div class="wrap">
+    <div class="page-head">
+      <h2>오늘의 예배</h2>
+      <p class="lead">유튜브 예배 영상 링크를 올려 주세요. 링크를 올리면 영상이 바로 보입니다.</p>
+    </div>
+    <div class="board" data-board="service"></div>
   </div>
 </section>
 
@@ -234,7 +246,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   const API_URL = 'https://script.google.com/macros/s/AKfycbwNoPdWnTnsKlFDRQzbCmZZLoeBxKHDsQ-uKqDYvuRVrnJrce67273kwXo6X3CS80YT/exec';
 
   /* ---------- 페이지 전환 (#about, #worship 등) ---------- */
-  const VIEWS = ['home','about','worship','bulletin','photo','music','articles','files','visit'];
+  const VIEWS = ['home','about','worship','service','bulletin','photo','music','articles','files','visit'];
   function route(){
     let name = (location.hash || '').slice(1);
     if(!VIEWS.includes(name)) name = 'home';
@@ -247,6 +259,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 
   /* ---------- 게시판 ---------- */
   const BOARDS = {
+    service:{fields:['title','link','body'], titleLabel:'예배 제목 (예: 2026.11.15 주일 오전예배)'},
     bulletin:{fields:['title','author','file'], accept:'image/*,application/pdf', titleLabel:'주보 제목 (예: 2026년 11월 15일 주보)'},
     photo:{fields:['title','author','file'], accept:'image/*', titleLabel:'사진 제목'},
     music:{fields:['title','author','link','body'], titleLabel:'곡명'},
@@ -276,9 +289,24 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     return el;
   }
 
+  function youtubeId(url){
+    const m = String(url||'').match(/(?:youtu\.be\/|[?&]v=|\/live\/|\/embed\/|\/shorts\/)([A-Za-z0-9_-]{11})/);
+    return m ? m[1] : '';
+  }
+
   function render(el, rows){
     const id = el.dataset.board, items = el.querySelector('[data-role="items"]');
     if(!rows.length){ items.innerHTML = '<div class="empty">아직 등록된 글이 없습니다.</div>'; return; }
+    if(id === 'service'){
+      items.innerHTML = rows.map(r => {
+        const yid = youtubeId(r.link);
+        const player = yid
+          ? `<div class="b" style="position:relative;padding-top:56.25%;margin-top:10px"><iframe src="https://www.youtube.com/embed/${yid}" title="${esc(r.title)}" allowfullscreen loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:10px"></iframe></div>`
+          : (r.link ? `<div class="b"><a href="${esc(r.link)}" target="_blank" rel="noopener">${esc(r.link)}</a></div>` : '');
+        return `<div class="item"><div class="t">${esc(r.title)}</div><div class="m">${fmt(r.createdAt)}</div>${player}${r.body ? `<div class="b">${esc(r.body)}</div>` : ''}</div>`;
+      }).join('');
+      return;
+    }
     if(id === 'photo'){
       const thumbs = rows.filter(r => r.fileUrl).map(r =>
         `<a href="${esc(r.fileUrl)}" target="_blank" rel="noopener" title="${esc(r.title)}"><img src="${esc(r.fileUrl)}" alt="${esc(r.title)}" loading="lazy"></a>`).join('');
