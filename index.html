@@ -67,6 +67,7 @@ form.post label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:
 .item .t{font-weight:600}
 .item .m{font-size:.82rem;color:var(--muted);margin-top:2px}
 .item .b{white-space:pre-wrap;margin-top:8px;font-size:.95rem}
+.shot{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line);background:#fff}
 .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-top:6px}
 .thumbs a{display:block;border-radius:10px;overflow:hidden;border:1px solid var(--line);aspect-ratio:4/3;background:#eee}
 .thumbs img{width:100%;height:100%;object-fit:cover;display:block}
@@ -192,7 +193,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   <div class="wrap">
     <div class="page-head">
       <h2>주보</h2>
-      <p class="lead">주보 파일(이미지 또는 PDF)을 올리고 내려받을 수 있습니다.</p>
+      <p class="lead">주보 이미지(여러 장 가능) 또는 PDF를 올리면 아래에서 바로 볼 수 있습니다.</p>
     </div>
     <div class="board" data-board="bulletin"></div>
   </div>
@@ -283,13 +284,13 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   /* ---------- 게시판 설정 ---------- */
   const BOARDS = {
     service:{fields:['title','link','body'], titleLabel:'예배 제목 (예: 2026.11.15 주일 오전예배)'},
-    bulletin:{fields:['title','file'], accept:'image/*,application/pdf', titleLabel:'주보 제목 (예: 2026년 11월 15일 주보)'},
+    bulletin:{fields:['title','file'], accept:'image/*,application/pdf', multiple:true, titleLabel:'주보 제목 (예: 2026년 11월 15일 주보)'},
     photo:{fields:['title','file'], accept:'image/*', titleLabel:'사진 제목'},
     music:{fields:['title','link','body'], titleLabel:'곡명'},
     articles:{fields:['title','body'], titleLabel:'글 제목'},
     files:{fields:['title','file'], accept:'*/*', titleLabel:'파일 제목'}
   };
-  const LABELS = {link:'음악 링크 (URL)', body:'내용 / 메모', file:'첨부 파일 (최대 10MB)'};
+  const LABELS = {link:'음악 링크 (URL)', body:'내용 / 메모', file:'첨부 파일 (최대 10MB)', fileMulti:'첨부 파일 (여러 장 선택 가능, 각 10MB 이하)'};
 
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmt = ts => ts ? new Date(Number(ts)).toLocaleString('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
@@ -325,7 +326,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         <div class="full"><label>작성자 이름 (선택)</label><input name="author" maxlength="40"></div>
         ${cfg.fields.includes('link') ? `<div class="full"><label>${LABELS.link}</label><input name="link" type="url" placeholder="https://..."></div>` : ''}
         ${cfg.fields.includes('body') ? `<div class="full"><label>${LABELS.body}</label><textarea name="body" maxlength="5000"></textarea></div>` : ''}
-        ${cfg.fields.includes('file') ? `<div class="full"><label>${LABELS.file}</label><input name="file" type="file" ${cfg.accept ? `accept="${cfg.accept}"` : ''}></div>` : ''}
+        ${cfg.fields.includes('file') ? `<div class="full"><label>${cfg.multiple ? LABELS.fileMulti : LABELS.file}</label><input name="file" type="file" ${cfg.multiple ? 'multiple' : ''} ${cfg.accept ? `accept="${cfg.accept}"` : ''}></div>` : ''}
         <div class="full"><label>비밀번호 (나중에 수정·삭제할 때 필요, 4자 이상)</label><input name="pw" type="password" required minlength="4" maxlength="30"></div>
         <div class="full"><button class="btn" type="submit">등록하기</button></div>
       </form>
@@ -364,6 +365,18 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
           ? `<div class="b" style="position:relative;padding-top:56.25%;margin-top:10px"><iframe src="https://www.youtube.com/embed/${yid}" title="${esc(r.title)}" allowfullscreen loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:10px"></iframe></div>`
           : (r.link ? `<div class="b"><a href="${esc(r.link)}" target="_blank" rel="noopener">${esc(r.link)}</a></div>` : '');
         return `<div class="item"><div class="t">${esc(r.title)}</div><div class="m">${esc(r.author)} · ${fmt(r.createdAt)}</div>${player}${r.body ? `<div class="b">${esc(r.body)}</div>` : ''}</div>`;
+      }).join('');
+      return;
+    }
+    if(id === 'bulletin'){
+      items.innerHTML = rows.map(r => {
+        let view = '';
+        if(r.fileUrl && isImage(r.fileType)){
+          view = `<a href="${esc(r.fileUrl)}" target="_blank" rel="noopener"><img class="shot" src="${esc(r.fileUrl)}" alt="${esc(r.title)}" loading="lazy"></a>`;
+        } else if(r.fileUrl){
+          view = `<div class="b">📎 <a href="${esc(r.fileUrl)}" target="_blank" rel="noopener">${esc(r.fileName || '첨부 파일 내려받기')}</a></div>`;
+        }
+        return `<div class="item"><div class="t">${esc(r.title)}</div><div class="m">${esc(r.author)} · ${fmt(r.createdAt)}</div><div class="b">${view}</div>${r.body ? `<div class="b">${esc(r.body)}</div>` : ''}</div>`;
       }).join('');
       return;
     }
@@ -491,25 +504,32 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     form.addEventListener('submit', async e => {
       e.preventDefault();
       const fd = new FormData(form);
-      const payload = { action:'create', board: id, password: (fd.get('pw') || '').toString() };
-      ['title','author','link','body'].forEach(k => { const v = (fd.get(k) || '').toString().trim(); if(v) payload[k] = v; });
-      const file = fd.get('file');
+      const base = { action:'create', board: id, password: (fd.get('pw') || '').toString() };
+      ['title','author','link','body'].forEach(k => { const v = (fd.get(k) || '').toString().trim(); if(v) base[k] = v; });
+      // 선택한 파일마다 글을 하나씩 등록합니다 (주보는 여러 장 가능)
+      const files = fd.getAll('file').filter(f => f && f.size);
+      const jobs = files.length ? files : [null];
       try{
-        status.textContent = '등록 중…';
-        if(file && file.size){
-          if(file.size > 10 * 1024 * 1024){ status.textContent = '파일은 10MB 이하만 올릴 수 있습니다.'; return; }
-          payload.fileName = file.name;
-          payload.fileType = file.type || 'application/octet-stream';
-          payload.fileData = await readFileBase64(file);
+        for(let i = 0; i < jobs.length; i++){
+          const file = jobs[i];
+          const payload = { ...base };
+          status.textContent = jobs.length > 1 ? `등록 중… (${i + 1}/${jobs.length})` : '등록 중…';
+          if(file){
+            if(file.size > 10 * 1024 * 1024){ status.textContent = '파일은 10MB 이하만 올릴 수 있습니다.'; return; }
+            payload.fileName = file.name;
+            payload.fileType = file.type || 'application/octet-stream';
+            payload.fileData = await readFileBase64(file);
+          }
+          const out = await postJSON(payload);
+          if(!out.ok) throw new Error(out.error || 'failed');
         }
-        const out = await postJSON(payload);
-        if(!out.ok) throw new Error(out.error || 'failed');
         form.reset();
-        status.textContent = '등록되었습니다.';
+        status.textContent = jobs.length > 1 ? `${jobs.length}개 파일을 등록했습니다.` : '등록되었습니다.';
         loadBoard(el);
       }catch(err){
         console.error(err);
         status.textContent = errText(err.message);
+        loadBoard(el);
       }
     });
   }
