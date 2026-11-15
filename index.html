@@ -14,6 +14,9 @@ header.site{position:sticky;top:0;z-index:10;background:rgba(251,249,244,.96);ba
 .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
 .brand{max-width:1760px;display:flex;align-items:center;justify-content:space-between;gap:12px 16px;min-height:76px;padding:10px 20px;flex-wrap:wrap}
 
+/* 맨 왼쪽: 교회 이름 상자 + 목회달력 버튼 */
+.brand-left{display:flex;align-items:center;gap:10px;flex:0 0 auto;flex-wrap:wrap}
+
 /* 왼쪽 교회 이름 상자 (움직이는 그라데이션) */
 .brand a.logo.logo-box{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:12px;padding:8px 18px 8px 8px;border-radius:18px;text-decoration:none;color:#fff;flex:0 0 auto;background:linear-gradient(120deg,#7a5c2e,#3d6b8c,#4f7a5a,#9a4f5e,#2f7f85,#7a5c2e);background-size:300% 300%;animation:gradMove 9s ease infinite;box-shadow:0 8px 22px rgba(40,30,10,.22)}
 .brand a.logo.logo-box::before{content:'';position:absolute;top:0;left:-75%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);animation:sheen 4.5s ease-in-out infinite;pointer-events:none}
@@ -22,6 +25,11 @@ header.site{position:sticky;top:0;z-index:10;background:rgba(251,249,244,.96);ba
 @keyframes gradMove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 @keyframes sheen{0%{left:-75%}60%,100%{left:125%}}
 @media (prefers-reduced-motion:reduce){.brand a.logo.logo-box,.brand a.logo.logo-box::before{animation:none}}
+
+/* 상단 목회달력 버튼 */
+.cal-top{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:999px;background:linear-gradient(135deg,#4a3a22,#7a5c2e);color:#fff;text-decoration:none;font-weight:600;font-size:.9rem;white-space:nowrap;box-shadow:0 4px 12px rgba(40,30,10,.18);transition:transform .15s ease,box-shadow .15s ease}
+.cal-top:hover{color:#fff;transform:translateY(-2px);box-shadow:0 8px 18px rgba(40,30,10,.26)}
+.cal-top.current{box-shadow:0 0 0 3px #fff,0 0 0 5px #7a5c2e,0 6px 16px rgba(40,30,10,.20)}
 
 /* 합동교단 로고 */
 .mark{width:46px;height:46px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:1px solid rgba(255,255,255,.6);box-shadow:0 2px 8px rgba(0,0,0,.12);overflow:hidden;flex:0 0 auto;position:relative;z-index:1}
@@ -205,10 +213,13 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 
 <header class="site">
   <div class="wrap brand">
-    <a class="logo logo-box" href="#home">
-      <span class="mark"><img src="images/hapdong-logo.png" alt="합동교단 로고" onerror="this.parentNode.classList.add('nofile')"><span class="mark-fb">✝</span></span>
-      <strong>구미은혜로교회</strong>
-    </a>
+    <div class="brand-left">
+      <a class="logo logo-box" href="#home">
+        <span class="mark"><img src="images/hapdong-logo.png" alt="합동교단 로고" onerror="this.parentNode.classList.add('nofile')"><span class="mark-fb">✝</span></span>
+        <strong>구미은혜로교회</strong>
+      </a>
+      <a class="cal-top" href="#calendar">📅 목회달력</a>
+    </div>
     <nav>
       <ul>
         <li><a class="nav-btn" href="#about"     style="--c1:#7a5c2e;--c2:#b08a4f"><span class="ic">🏛</span>교회소개</a></li>
@@ -472,6 +483,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     if(!VIEWS.includes(name)) name = 'home';
     document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.dataset.view === name));
     document.querySelectorAll('nav a').forEach(a => a.classList.toggle('current', a.getAttribute('href') === '#' + name));
+    document.querySelectorAll('.cal-top').forEach(a => a.classList.toggle('current', name === 'calendar'));
     window.scrollTo(0, 0);
   }
 
