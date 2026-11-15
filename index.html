@@ -10,6 +10,13 @@
 html{scroll-behavior:smooth}
 body{margin:0;font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:var(--ink);background:var(--paper);line-height:1.7}
 a{color:var(--accent)}
+.topbar{background:#2b2a27;color:#f3ecdf;font-size:.86rem}
+.topbar .wrap{display:flex;justify-content:flex-end;align-items:center;gap:12px;min-height:44px;flex-wrap:wrap;padding-top:6px;padding-bottom:6px}
+.who{color:#f3ecdf}
+.who em{font-style:normal;color:#e0c891;margin-left:6px}
+.authnote{color:#cfc2a3}
+.topbar .mini{background:transparent;color:#f3ecdf;border-color:#6b645a}
+.topbar .mini:hover{color:#fff;border-color:#e0c891}
 header.site{position:sticky;top:0;z-index:10;background:rgba(251,249,244,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
 .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
 .brand{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
@@ -70,10 +77,9 @@ form.post label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:
 .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-top:6px}
 .thumbs a{display:block;border-radius:10px;overflow:hidden;border:1px solid var(--line);aspect-ratio:4/3;background:#eee}
 .thumbs img{width:100%;height:100%;object-fit:cover;display:block}
-.banner{padding:12px 16px;background:#fff7e6;border:1px solid #ecd9ad;border-radius:10px;color:#6b5320;font-size:.92rem;margin-bottom:16px}
 .empty{color:var(--muted);font-size:.95rem;padding:10px 0}
 .mbar{display:flex;gap:6px;margin-top:10px}
-.mini{padding:4px 12px;border:1px solid var(--line);background:#fff;border-radius:8px;font:inherit;font-size:.82rem;cursor:pointer;color:var(--muted)}
+.mini{padding:4px 12px;border:1px solid var(--line);background:#fff;border-radius:8px;font:inherit;font-size:.82rem;cursor:pointer;color:var(--muted);text-decoration:none;display:inline-block}
 .mini:hover{border-color:var(--accent);color:var(--accent)}
 .mini.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
 .mini.danger{color:#a33;border-color:#e3b5b5}
@@ -88,6 +94,10 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 </style>
 </head>
 <body>
+
+<div class="topbar">
+  <div class="wrap" id="authbox"></div>
+</div>
 
 <header class="site">
   <div class="wrap brand">
@@ -150,7 +160,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     <img class="photo-wide" src="images/church.png" alt="구미은혜로교회 조감도">
     <div class="grid3">
       <div class="card"><h3>우리의 비전</h3><p>복음: 성경통독 30독 · 예배: 성령충만한 예배 · 전도: 30명의 현장예배 · 교육: 예수님의 제자 되기 · 선교: 섬김의 현장을 허락해 주소서</p></div>
-      <div class="card"><h3>담임목사 백성현</h3><p>전도사 김명길과 함께 섬기고 있습니다. [인사말을 여기에 입력하세요]</p></div>
+      <div class="card"><h3>섬기는 분들</h3><p>담임목사 백성현목사<br>협동목사 변용세목사<br>전도사 김명길전도사<br>파송선교사 이장현선교사</p></div>
       <div class="card"><h3>섬기는 사역</h3><p>새벽·금요·수요 기도회, 주일학교·중고등부·청년회, 파송 선교사 기도와 후원, 지역 섬김 사역을 함께합니다.</p></div>
       <div class="card"><h3>헌금 계좌</h3><p>농협 351-0985-0331-13<br>(예금주: 구미은혜로교회)</p></div>
     </div>
@@ -174,13 +184,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     <p class="note">* 예배 시간은 교회 간판과 주보를 기준으로 했으며, 장소는 확인이 필요합니다.</p>
 
     <h3 class="sub">2026년 3/4분기 일정</h3>
-    <div class="grid3">
-      <div class="card"><h3>11월 15일 (주일)</h3><p>추수감사주일</p></div>
-      <div class="card"><h3>11월 21일 (토)</h3><p>성도 자녀 결혼식 · 오후 5시 (교회 출발 오후 4시)</p></div>
-      <div class="card"><h3>11월 22일 (주일)</h3><p>오후 예배는 구미노회 40주년 선교기념대회 · 오후 3시 (구미상모교회)</p></div>
-      <div class="card"><h3>11월 29일 (주일)</h3><p>성례주일</p></div>
-      <div class="card"><h3>12월 6일 (주일)</h3><p>성탄트리 점등식</p></div>
-    </div>
+    <div class="grid3" id="schedule"></div>
   </div>
 </section>
 
@@ -269,10 +273,31 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   <div class="wrap">구미은혜로교회 · 39229 구미시 금오시장로8길 20 · 070-7138-0691<br>© 구미은혜로교회. All rights reserved.</div>
 </footer>
 
+<script src="https://accounts.google.com/gsi/client" async defer onload="window.onGisLoad && window.onGisLoad()"></script>
 <script>
 (function(){
-  /* ★ 설정: 구글 Apps Script 배포 후 받은 '웹 앱 URL'을 아래에 붙여 넣으세요. */
-  const API_URL = 'https://script.google.com/macros/s/AKfycbx3byKA6OXbe6TUdeLDtK2OxlccX88JweyIBClMBVBA9Hv3PGPodiDAujqnoo2XND3r/exec';
+  /* ★ 설정 1: 구글 Apps Script 웹 앱 URL */
+  const API_URL = 'https://script.google.com/macros/s/AKfycbwgNBsn74tdIg3isXmpM5dbzgxkCwlljy6mBvqEQS2NAQ3Iugy_iPKzlAFfChzq50g7/exec';
+  /* ★ 설정 2: 주계정 로그인용 구글 클라이언트 ID */
+  const GOOGLE_CLIENT_ID = 'PASTE_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com';
+
+  const configured = !!API_URL && !API_URL.startsWith('PASTE_');
+  const googleReady = !!GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.startsWith('PASTE_');
+
+  /* ---------- 상태 (주계정 로그인만 사용) ---------- */
+  let owner = null;                    // 주계정 로그인 시 {name}
+  let token = sessionStorage.getItem('gtoken') || '';
+  let gisReady = false;
+  let authMsg = '';
+
+  function tokenValid(t){
+    try{
+      const p = JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+      return p.exp * 1000 > Date.now() + 60000;
+    }catch(e){ return false; }
+  }
+  if(!tokenValid(token)){ token = ''; sessionStorage.removeItem('gtoken'); }
+  const isOwner = () => !!owner;
 
   /* ---------- 페이지 전환 (#about, #worship 등) ---------- */
   const VIEWS = ['home','about','worship','service','bulletin','photo','music','articles','files','visit'];
@@ -283,40 +308,59 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     document.querySelectorAll('nav a').forEach(a => a.classList.toggle('current', a.getAttribute('href') === '#' + name));
     window.scrollTo(0, 0);
   }
-  window.addEventListener('hashchange', route);
-  route();
 
-  /* ---------- 게시판 ---------- */
+  /* ---------- 게시판 설정 ---------- */
   const BOARDS = {
     service:{fields:['title','link','body'], titleLabel:'예배 제목 (예: 2026.11.15 주일 오전예배)'},
-    bulletin:{fields:['title','author','file'], accept:'image/*,application/pdf', titleLabel:'주보 제목 (예: 2026년 11월 15일 주보)'},
-    photo:{fields:['title','author','file'], accept:'image/*', titleLabel:'사진 제목'},
-    music:{fields:['title','author','link','body'], titleLabel:'곡명'},
-    articles:{fields:['title','author','body'], titleLabel:'글 제목'},
-    files:{fields:['title','author','file'], accept:'*/*', titleLabel:'파일 제목'}
+    bulletin:{fields:['title','file'], accept:'image/*,application/pdf', titleLabel:'주보 제목 (예: 2026년 11월 15일 주보)'},
+    photo:{fields:['title','file'], accept:'image/*', titleLabel:'사진 제목'},
+    music:{fields:['title','link','body'], titleLabel:'곡명'},
+    articles:{fields:['title','body'], titleLabel:'글 제목'},
+    files:{fields:['title','file'], accept:'*/*', titleLabel:'파일 제목'}
   };
-  const LABELS = {author:'작성자', link:'음악 링크 (URL)', body:'내용 / 메모', file:'첨부 파일 (최대 10MB)'};
+  const LABELS = {link:'음악 링크 (URL)', body:'내용 / 메모', file:'첨부 파일 (최대 10MB)'};
 
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmt = ts => ts ? new Date(Number(ts)).toLocaleString('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
   const isImage = t => (t||'').startsWith('image/');
-  const configured = API_URL && !API_URL.startsWith('PASTE_');
+
+  /* ★ 일정 수정: 아래 목록만 고치면 됩니다. [날짜, 제목, 내용] 순서 (내용은 없으면 '' 로 두세요) */
+  const SCHEDULE = [
+    ['11월 15일 (주일)', '추수감사주일', ''],
+    ['11월 21일 (토)', '성도 자녀 결혼식', '오후 5시 (교회 출발 오후 4시)'],
+    ['11월 22일 (주일)', '구미노회 40주년 선교기념대회', '오후 예배 · 오후 3시 (구미상모교회)'],
+    ['11월 29일 (주일)', '성례주일', ''],
+    ['12월 6일 (주일)', '성탄트리 점등식', '']
+  ];
+  document.getElementById('schedule').innerHTML = SCHEDULE.map(([d, t, m]) =>
+    `<div class="card"><h3>${esc(d)}</h3><p>${esc(t)}${m ? ' · ' + esc(m) : ''}</p></div>`).join('');
+
+  const ERR = {
+    'wrong password': '비밀번호가 맞지 않습니다.',
+    'password required': '비밀번호는 4자 이상 입력해 주세요.',
+    'title required': '제목을 입력해 주세요.',
+    'not found': '글을 찾을 수 없습니다. 새로고침 후 다시 시도해 주세요.',
+    'unknown board': '게시판을 찾을 수 없습니다.',
+    'file too large': '파일은 10MB 이하만 올릴 수 있습니다.'
+  };
+  const errText = msg => ERR[msg] || '처리에 실패했습니다. 잠시 후 다시 시도해 주세요.';
 
   function mountBoard(el){
     const id = el.dataset.board, cfg = BOARDS[id];
+    const pwReq = !isOwner();
+    const pwLabel = pwReq ? '비밀번호 (나중에 수정·삭제할 때 필요, 4자 이상)' : '비밀번호 (주계정은 비워도 됩니다)';
     el.innerHTML = `
       <div class="status" data-role="status"></div>
       <form class="post" data-role="form">
-        <div><label>${cfg.titleLabel}</label><input name="title" required maxlength="120"></div>
-        ${cfg.fields.includes('author') ? `<div><label>${LABELS.author}</label><input name="author" maxlength="40"></div>` : ''}
+        <div class="full"><label>${cfg.titleLabel}</label><input name="title" required maxlength="120"></div>
+        <div class="full"><label>작성자 이름 (선택)</label><input name="author" maxlength="40"></div>
         ${cfg.fields.includes('link') ? `<div class="full"><label>${LABELS.link}</label><input name="link" type="url" placeholder="https://..."></div>` : ''}
         ${cfg.fields.includes('body') ? `<div class="full"><label>${LABELS.body}</label><textarea name="body" maxlength="5000"></textarea></div>` : ''}
-        ${cfg.fields.includes('file') ? `<div class="full"><label>${LABELS.file}</label><input name="file" type="file" ${cfg.accept?`accept="${cfg.accept}"`:''}></div>` : ''}
-        <div class="full"><label>비밀번호 (나중에 수정·삭제할 때 필요, 4자 이상)</label><input name="pw" type="password" required minlength="4" maxlength="30"></div>
+        ${cfg.fields.includes('file') ? `<div class="full"><label>${LABELS.file}</label><input name="file" type="file" ${cfg.accept ? `accept="${cfg.accept}"` : ''}></div>` : ''}
+        <div class="full"><label>${pwLabel}</label><input name="pw" type="password" maxlength="30" ${pwReq ? 'required minlength="4"' : ''}></div>
         <div class="full"><button class="btn" type="submit">등록하기</button></div>
       </form>
       <div class="items" data-role="items"><div class="empty">불러오는 중…</div></div>`;
-    return el;
   }
 
   function youtubeId(url){
@@ -332,7 +376,6 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 
   function decorate(el, rows){
     const items = el.querySelector('[data-role="items"]');
-    if(!rows.length) return;
     items.querySelectorAll('.item').forEach((it, i) => {
       const r = rows[i];
       if(!r) return;
@@ -351,7 +394,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         const player = yid
           ? `<div class="b" style="position:relative;padding-top:56.25%;margin-top:10px"><iframe src="https://www.youtube.com/embed/${yid}" title="${esc(r.title)}" allowfullscreen loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:10px"></iframe></div>`
           : (r.link ? `<div class="b"><a href="${esc(r.link)}" target="_blank" rel="noopener">${esc(r.link)}</a></div>` : '');
-        return `<div class="item"><div class="t">${esc(r.title)}</div><div class="m">${fmt(r.createdAt)}</div>${player}${r.body ? `<div class="b">${esc(r.body)}</div>` : ''}</div>`;
+        return `<div class="item"><div class="t">${esc(r.title)}</div><div class="m">${esc(r.author)} · ${fmt(r.createdAt)}</div>${player}${r.body ? `<div class="b">${esc(r.body)}</div>` : ''}</div>`;
       }).join('');
       return;
     }
@@ -373,15 +416,9 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     }).join('');
   }
 
-  const ERR = {
-    'wrong password': '비밀번호가 맞지 않습니다.',
-    'not found': '글을 찾을 수 없습니다. 새로고침 후 다시 시도해 주세요.',
-    'title required': '제목을 입력해 주세요.'
-  };
-  const errText = code => ERR[code] || '처리에 실패했습니다. 잠시 후 다시 시도해 주세요.';
-
+  /* 주계정 토큰이 있으면 함께 보냅니다 (없으면 비밀번호 방식으로 처리) */
   function postJSON(payload){
-    return fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload) })
+    return fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({ ...payload, token }) })
       .then(r => r.json());
   }
 
@@ -401,16 +438,17 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     });
   }
 
+  const pwField = () => isOwner() ? '' : `<label>비밀번호 (글 쓸 때 정한 비밀번호)</label><input name="pw" type="password" placeholder="4자 이상">`;
+
   function openEdit(el, item, panel){
     const cfg = BOARDS[el.dataset.board];
     const row = (el._rows || []).find(r => r.id === item.dataset.id) || {};
     panel.innerHTML = `
       <div class="pbox">
         <label>제목</label><input name="title" maxlength="120" value="${esc(row.title)}">
-        ${cfg.fields.includes('author') ? `<label>작성자</label><input name="author" maxlength="40" value="${esc(row.author)}">` : ''}
         ${cfg.fields.includes('link') ? `<label>링크</label><input name="link" type="url" value="${esc(row.link)}">` : ''}
         ${cfg.fields.includes('body') ? `<label>내용</label><textarea name="body" maxlength="5000">${esc(row.body)}</textarea>` : ''}
-        <label>비밀번호</label><input name="pw" type="password" placeholder="작성할 때 정한 비밀번호">
+        ${pwField()}
         <div class="row"><button class="mini primary" type="button" data-act="save">저장</button><button class="mini" type="button" data-act="cancel">취소</button></div>
         <div class="perr" data-role="err"></div>
       </div>`;
@@ -419,8 +457,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   function openDelete(panel){
     panel.innerHTML = `
       <div class="pbox">
-        <label>삭제하려면 비밀번호를 입력하세요</label>
-        <input name="pw" type="password" placeholder="작성할 때 정한 비밀번호">
+        <label>이 글을 삭제할까요?</label>
+        ${pwField()}
         <div class="row"><button class="mini danger" type="button" data-act="remove">삭제 확인</button><button class="mini" type="button" data-act="cancel">취소</button></div>
         <div class="perr" data-role="err"></div>
       </div>`;
@@ -428,15 +466,12 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 
   async function saveEdit(el, item, panel){
     const err = panel.querySelector('[data-role="err"]');
-    const g = n => { const x = panel.querySelector(`[name="${n}"]`); return x ? x.value.trim() : undefined; };
-    const pw = g('pw');
-    if(!pw){ err.textContent = '비밀번호를 입력해 주세요.'; return; }
-    const payload = { action:'update', board: el.dataset.board, id: item.dataset.id, password: pw };
-    ['title','author','link','body'].forEach(k => { const v = g(k); if(v !== undefined) payload[k] = v; });
-    if(!payload.title){ err.textContent = '제목을 입력해 주세요.'; return; }
+    const g = n => { const x = panel.querySelector(`[name="${n}"]`); return x ? x.value.trim() : ''; };
+    const title = g('title');
+    if(!title){ err.textContent = '제목을 입력해 주세요.'; return; }
     err.textContent = '저장 중…';
     try{
-      const out = await postJSON(payload);
+      const out = await postJSON({ action:'update', board: el.dataset.board, id: item.dataset.id, title, link: g('link'), body: g('body'), password: g('pw') });
       if(!out.ok) throw new Error(out.error);
       loadBoard(el);
     }catch(e){
@@ -446,11 +481,10 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 
   async function removePost(el, item, panel){
     const err = panel.querySelector('[data-role="err"]');
-    const pw = (panel.querySelector('[name="pw"]').value || '').trim();
-    if(!pw){ err.textContent = '비밀번호를 입력해 주세요.'; return; }
+    const pw = panel.querySelector('[name="pw"]');
     err.textContent = '삭제 중…';
     try{
-      const out = await postJSON({ action:'delete', board: el.dataset.board, id: item.dataset.id, password: pw });
+      const out = await postJSON({ action:'delete', board: el.dataset.board, id: item.dataset.id, password: pw ? pw.value.trim() : '' });
       if(!out.ok) throw new Error(out.error);
       loadBoard(el);
     }catch(e){
@@ -466,9 +500,11 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   });
 
   async function loadBoard(el){
-    const id = el.dataset.board, items = el.querySelector('[data-role="items"]');
+    const items = el.querySelector('[data-role="items"]');
+    if(!items) return;
+    if(!configured){ items.innerHTML = '<div class="empty">표시할 글이 없습니다.</div>'; return; }
     try{
-      const res = await fetch(`${API_URL}?board=${encodeURIComponent(id)}`);
+      const res = await fetch(`${API_URL}?board=${encodeURIComponent(el.dataset.board)}`);
       const rows = await res.json();
       if(rows.error) throw new Error(rows.error);
       render(el, rows);
@@ -487,7 +523,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     form.addEventListener('submit', async e => {
       e.preventDefault();
       const fd = new FormData(form);
-      const payload = { board: id, password: (fd.get('pw') || '').toString() };
+      const payload = { action:'create', board: id, password: (fd.get('pw') || '').toString() };
       ['title','author','link','body'].forEach(k => { const v = (fd.get(k) || '').toString().trim(); if(v) payload[k] = v; });
       const file = fd.get('file');
       try{
@@ -498,23 +534,88 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
           payload.fileType = file.type || 'application/octet-stream';
           payload.fileData = await readFileBase64(file);
         }
-        // text/plain 으로 보내야 브라우저의 사전 요청(CORS) 없이 Apps Script 로 전달됩니다.
-        const res = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload) });
-        const out = await res.json();
+        const out = await postJSON(payload);
         if(!out.ok) throw new Error(out.error || 'failed');
         form.reset();
         status.textContent = '등록되었습니다.';
         loadBoard(el);
       }catch(err){
         console.error(err);
-        status.textContent = '등록에 실패했습니다. 잠시 후 다시 시도해 주세요.';
+        status.textContent = errText(err.message);
       }
     });
   }
 
-  const boardEls = [...document.querySelectorAll('.board[data-board]')].map(mountBoard);
-  boardEls.forEach(wireForm);
-  boardEls.forEach(wireManage);
+  const boardEls = [...document.querySelectorAll('.board[data-board]')];
+  function refreshBoards(){
+    boardEls.forEach(el => { mountBoard(el); wireForm(el); loadBoard(el); });
+  }
+
+  /* ---------- 주계정 구글 로그인 ---------- */
+  function initGis(){
+    if(gisReady || !googleReady || !window.google || !google.accounts) return;
+    gisReady = true;
+    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: onCredential });
+    renderAuth();
+  }
+  window.onGisLoad = initGis;
+
+  function renderAuth(){
+    const box = document.getElementById('authbox');
+    if(!googleReady){
+      box.innerHTML = '<span class="authnote">구글 로그인 설정 전 (index.html 의 GOOGLE_CLIENT_ID)</span>';
+      return;
+    }
+    if(owner){
+      box.innerHTML = `<span class="who">주계정 로그인<em>${esc(owner.name)}</em></span><button class="mini" type="button" id="logout">로그아웃</button>`;
+      document.getElementById('logout').onclick = logout;
+      return;
+    }
+    if(!gisReady){ box.innerHTML = '<span class="authnote">로그인 준비 중…</span>'; return; }
+    box.innerHTML = (authMsg ? `<span class="authnote">${esc(authMsg)}</span>` : '') + '<div id="gbtn"></div>';
+    google.accounts.id.renderButton(document.getElementById('gbtn'), {theme:'outline', size:'medium', text:'signin_with', locale:'ko'});
+  }
+
+  async function onCredential(resp){
+    await checkLogin(resp.credential);
+  }
+
+  async function checkLogin(t){
+    token = t || '';
+    owner = null;
+    if(token){
+      try{
+        const out = await (await fetch(`${API_URL}?action=me&token=${encodeURIComponent(token)}`)).json();
+        if(!out.ok) throw new Error(out.error);
+        if(out.owner){
+          owner = { name: out.name };
+          authMsg = '';
+          sessionStorage.setItem('gtoken', token);
+        } else {
+          token = '';
+          authMsg = '주계정으로만 로그인할 수 있습니다.';
+          if(gisReady) google.accounts.id.disableAutoSelect();
+        }
+      }catch(e){
+        console.error(e);
+        token = '';
+        authMsg = '로그인 확인에 실패했습니다. 다시 시도해 주세요.';
+      }
+    }
+    if(!owner) sessionStorage.removeItem('gtoken');
+    renderAuth();
+    refreshBoards();
+  }
+
+  function logout(){
+    token = ''; owner = null; authMsg = '';
+    sessionStorage.removeItem('gtoken');
+    if(gisReady) google.accounts.id.disableAutoSelect();
+    renderAuth();
+    refreshBoards();
+  }
+
+  /* ---------- 최신 예배 영상 (첫 화면) ---------- */
   async function loadLatestService(){
     const box = document.getElementById('latest-video'), cap = document.getElementById('latest-cap');
     if(!box) return;
@@ -532,12 +633,16 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       box.innerHTML = '<div class="ph">예배 영상을 불러오지 못했습니다.</div>';
     }
   }
-  loadLatestService();
 
-  boardEls.forEach(el => {
-    if(configured) loadBoard(el);
-    else el.querySelector('[data-role="items"]').innerHTML = '<div class="empty">표시할 글이 없습니다.</div>';
-  });
+  /* ---------- 시작 ---------- */
+  boardEls.forEach(wireManage);
+  window.addEventListener('hashchange', route);
+  loadLatestService();
+  route();
+  if(window.google) initGis();
+  refreshBoards();
+  if(token) checkLogin(token);
+  else renderAuth();
 })();
 </script>
 </body>
