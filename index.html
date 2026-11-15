@@ -438,6 +438,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
             <div class="full"><label>사진 (선택, 1장)</label><input name="file" type="file" accept="image/*"></div>
             <div class="full"><label>비밀번호 (수정·삭제할 때 필요, 4자 이상)</label><input name="pw" type="password" required minlength="4" maxlength="30"></div>
             <div class="full"><button class="btn" type="submit">등록하기</button></div>
+            <div class="full note">광고·음란·이단·타종교·폭력·비방 성격의 내용은 등록되지 않습니다.</div>
           </form>
         </div>
       </div>
@@ -569,6 +570,29 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   };
   const errText = msg => ERR[msg] || '처리에 실패했습니다. 잠시 후 다시 시도해 주세요.';
 
+  /* ---------- 글 검열 (등록·수정 직전 마지막 확인) ----------
+     단어 목록은 교회 상황에 맞게 언제든 고쳐 쓰실 수 있습니다.
+     걸린 단어는 사용자에게 보여주지 않고, 분류 이름만 알려 드립니다. */
+  const CENSOR = [
+    {cat:'성적·음란 표현', words:['야동','야설','포르노','porn','섹스','성관계','자위','음란','성인물','누드','노출사진','19금','성매매','조건만남']},
+    {cat:'광고·홍보', words:['카톡문의','카카오톡문의','오픈채팅','텔레그램','수익보장','고수익','부업으로','재택알바','대출상담','할인코드','지금클릭','바로가기클릭','카지노','토토사이트','도박사이트','리딩방','코인리딩']},
+    {cat:'이단성', words:['신천지','이만희','하나님의교회','안상홍','통일교','문선명','세계평화통일가정연합','구원파','여호와의증인','몰몬','모르몬','전능신교','영생교','오대양','이재록']},
+    {cat:'폭력·선정적 내용', words:['살인','살해','폭행','칼부림','고문','잔인','피범벅','시체','자살방법','자해방법','마약','필로폰']},
+    {cat:'타종교', words:['불교','부처님','석가모니','불상','법당','스님','조계종','원불교','천도교','증산교','대종교','이슬람','무함마드','코란','힌두교','점집','사주팔자','타로','무당','부적','굿판','신내림','관세음보살','미륵불']},
+    {cat:'비방·비판적 내용', words:['사기꾼','도둑놈','거짓말쟁이','위선자','협잡꾼','배신자','개새끼','씨발','병신','지랄','꺼져','미친놈','미친년','나쁜목사','돈만밝히','교회를망','목사를욕','비리목사','횡령목사','사이비목사']}
+  ];
+  // 띄어쓰기·문장부호를 없애고 비교해서 "씨 발"처럼 띄워 쓴 말도 찾습니다.
+  const normText = s => String(s || '').toLowerCase().replace(/[\s\-_.,!?~`'"()\[\]{}<>|\/\\:;*#@&^%$+=·…]/g, '');
+  /* 걸린 분류 이름을 돌려주고, 아무 것도 없으면 빈 문자열을 돌려줍니다. */
+  function censorCheck(texts){
+    const joined = texts.map(normText).join('\n');
+    for(const group of CENSOR){
+      if(group.words.some(w => joined.includes(normText(w)))) return group.cat;
+    }
+    return '';
+  }
+  const censorMsg = cat => `등록할 수 없는 내용이 포함되어 있습니다 (${cat}). 내용을 고쳐 주세요.`;
+
   /* 게시판 화면: 왼쪽 = 올라온 글, 오른쪽 = 새로 올리기 */
   function mountBoard(el){
     const id = el.dataset.board, cfg = BOARDS[id];
@@ -592,6 +616,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
             ${cfg.fields.includes('file') ? `<div class="full"><label>${cfg.multiple ? LABELS.fileMulti : LABELS.file}</label><input name="file" type="file" ${cfg.multiple ? 'multiple' : ''} ${cfg.accept ? `accept="${cfg.accept}"` : ''}></div>` : ''}
             <div class="full"><label>비밀번호 (나중에 수정·삭제할 때 필요, 4자 이상)</label><input name="pw" type="password" required minlength="4" maxlength="30"></div>
             <div class="full"><button class="btn" type="submit">등록하기</button></div>
+            <div class="full note">광고·음란·이단·타종교·폭력·비방 성격의 내용은 등록되지 않습니다.</div>
           </form>
         </div>
       </div>`;
@@ -744,6 +769,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     const date = g('date'), time = g('time'), title = g('title'), memo = g('memo'), pw = g('pw');
     if(!DATE_RE.test(date)){ err.textContent = '날짜를 선택해 주세요.'; return; }
     if(!title){ err.textContent = '행사 이름을 입력해 주세요.'; return; }
+    const bad = censorCheck([title, memo]);
+    if(bad){ err.textContent = censorMsg(bad); return; }
     err.textContent = '저장 중…';
     try{
       const out = await postJSON({
@@ -785,6 +812,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     let title = g('title');
     if(!title && el.dataset.board === 'articles') title = firstLine(g('body')).slice(0, 120);
     if(!title){ err.textContent = '제목을 입력해 주세요.'; return; }
+    const bad = censorCheck([title, g('link'), g('body')]);
+    if(bad){ err.textContent = censorMsg(bad); return; }
     err.textContent = '저장 중…';
     try{
       const out = await postJSON({ action:'update', board: el.dataset.board, id: item.dataset.id, title, link: g('link'), body: g('body'), password: g('pw') });
@@ -848,6 +877,9 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       }
       // 선택한 파일마다 글을 하나씩 등록합니다 (주보·사진은 여러 장 가능)
       const files = fd.getAll('file').filter(f => f && f.size);
+      // 마지막 확인: 금지된 내용이 있으면 서버로 보내지 않습니다.
+      const bad = censorCheck([base.title, base.author, base.link, base.body, ...files.map(f => f.name)]);
+      if(bad){ status.textContent = censorMsg(bad); return; }
       const jobs = files.length ? files : [null];
       try{
         for(let i = 0; i < jobs.length; i++){
@@ -1089,17 +1121,21 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       const time = (fd.get('time') || '').toString();
       const title = (fd.get('title') || '').toString().trim();
       const memo = (fd.get('memo') || '').toString().trim();
+      const author = (fd.get('author') || '').toString().trim();
+      const file = fd.get('file');
       if(!DATE_RE.test(date)){ status.textContent = '날짜를 선택해 주세요.'; return; }
       if(!title){ status.textContent = '행사 이름을 입력해 주세요.'; return; }
+      // 마지막 확인: 금지된 내용이 있으면 서버로 보내지 않습니다.
+      const bad = censorCheck([title, memo, author, file && file.name ? file.name : '']);
+      if(bad){ status.textContent = censorMsg(bad); return; }
       // 시간은 메모 맨 앞줄에 저장합니다 (예: ⏰ 15:00)
       const body = (time ? `⏰ ${time}\n` : '') + memo;
       const payload = {
         action:'create', board:'calendar', title, link: date,
-        author: (fd.get('author') || '').toString().trim(),
+        author: author,
         body: body,
         password: (fd.get('pw') || '').toString()
       };
-      const file = fd.get('file');
       try{
         status.textContent = '등록 중…';
         if(file && file.size){
