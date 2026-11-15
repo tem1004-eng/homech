@@ -295,6 +295,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmt = ts => ts ? new Date(Number(ts)).toLocaleString('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
   const isImage = t => (t||'').startsWith('image/');
+  const driveId = url => { const m = String(url||'').match(/[?&]id=([^&]+)/); return m ? m[1] : ''; };
+  const shotUrl = url => { const id = driveId(url); return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w1600` : url; };
 
   /* ★ 일정 수정: 아래 목록만 고치면 됩니다. [날짜, 제목, 내용] 순서 (내용은 없으면 '' 로 두세요) */
   const SCHEDULE = [
@@ -372,7 +374,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       items.innerHTML = rows.map(r => {
         let view = '';
         if(r.fileUrl && isImage(r.fileType)){
-          view = `<a href="${esc(r.fileUrl)}" target="_blank" rel="noopener"><img class="shot" src="${esc(r.fileUrl)}" alt="${esc(r.title)}" loading="lazy"></a>`;
+          view = `<a href="${esc(r.fileUrl)}" target="_blank" rel="noopener"><img class="shot" src="${esc(shotUrl(r.fileUrl))}" alt="${esc(r.title)}" loading="lazy" onerror="this.onerror=null;this.src='${esc(r.fileUrl)}'"></a>`;
         } else if(r.fileUrl){
           view = `<div class="b">📎 <a href="${esc(r.fileUrl)}" target="_blank" rel="noopener">${esc(r.fileName || '첨부 파일 내려받기')}</a></div>`;
         }
