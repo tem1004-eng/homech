@@ -47,6 +47,7 @@ nav a.nav-btn.current{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--c1),0 6px 16px r
 .hero p{color:#f3ecdf;margin:0 0 30px;font-size:1.1rem;text-shadow:0 1px 10px rgba(0,0,0,.3)}
 .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:999px;background:linear-gradient(135deg,#7a5c2e,#b08a4f);color:#fff;text-decoration:none;font-weight:600;border:0;cursor:pointer;font-size:.95rem;font-family:inherit;box-shadow:0 6px 18px rgba(122,92,46,.30);transition:transform .15s ease,box-shadow .15s ease}
 .btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(122,92,46,.38);color:#fff}
+.btn.sm{padding:8px 16px;font-size:.88rem;box-shadow:0 4px 12px rgba(122,92,46,.25)}
 .hero .btn{padding:14px 30px;font-size:1rem;box-shadow:0 10px 28px rgba(0,0,0,.30)}
 .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center}
 .hero-text{text-align:left}
@@ -63,11 +64,18 @@ h2{font-size:1.7rem;margin:0 0 6px;letter-spacing:-.02em;position:relative;paddi
 h2::before{content:'';position:absolute;left:0;top:.25em;bottom:.25em;width:4px;border-radius:2px;background:var(--accent)}
 .lead{color:var(--muted);margin:0 0 28px}
 h3.sub{font-size:1.2rem;margin:36px 0 14px}
+.sched-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:36px 0 14px}
+.sched-head h3.sub{margin:0}
 .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
 .card{display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;text-decoration:none;color:inherit;transition:transform .2s ease,box-shadow .2s ease}
 .card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(60,40,10,.10)}
 .card h3{margin:0 0 8px;font-size:1.05rem}
 .card p{margin:0;color:var(--muted);font-size:.95rem}
+.ev-card.past{opacity:.6}
+.ev-card.today{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.ev-date{font-size:.85rem;color:var(--accent);font-weight:700;margin-bottom:6px}
+.badge{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;background:var(--accent);color:#fff;font-size:.72rem;font-weight:600}
+.ev-img{width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-top:10px;border:1px solid var(--line)}
 
 /* 홈 큰 버튼 (타일) */
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
@@ -126,6 +134,7 @@ form.post label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:
 .item .t{font-weight:600}
 .item .m{font-size:.82rem;color:var(--muted);margin-top:2px}
 .item .b{white-space:pre-wrap;margin-top:8px;font-size:.95rem}
+.item.ch-item{background:#fdf8ec;border-color:#ecdcb4}
 .shot{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line);background:#fff}
 .music-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,400px);gap:18px;align-items:start}
 .music-info .b{margin-top:6px}
@@ -148,6 +157,29 @@ form.post label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:
 .pbox textarea{min-height:90px;resize:vertical}
 .pbox .row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 .perr{color:#a33;font-size:.85rem;margin-top:6px;min-height:1.2em}
+
+/* 목회달력 */
+.cal-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.cal-nav strong{font-size:1.15rem;margin-right:auto}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal-dow{text-align:center;font-size:.8rem;font-weight:700;color:var(--muted);padding:4px 0}
+.cal-dow.sun{color:#b04a4a}
+.cal-dow.sat{color:#3d6b8c}
+.cal-cell{min-height:72px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:4px;text-align:left;font:inherit;cursor:pointer;display:flex;flex-direction:column;gap:2px;overflow:hidden;color:inherit}
+.cal-cell.blank{background:transparent;border-color:transparent;cursor:default}
+.cal-cell:not(.blank):hover{border-color:var(--accent)}
+.cal-cell.today{box-shadow:inset 0 0 0 2px var(--accent)}
+.cal-cell.sel{background:var(--accent-soft)}
+.cal-cell.sun .dn{color:#b04a4a}
+.cal-cell .dn{font-size:.85rem;font-weight:700}
+.lab{font-size:.68rem;line-height:1.3;border-radius:4px;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lab.ch{background:#f3e7c9;color:#7a5c2e}
+.lab.ev{background:#dbe9f3;color:#2c5b7a}
+.cal-legend{font-size:.8rem;color:var(--muted);margin:10px 0 16px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.lg{display:inline-block;width:10px;height:10px;border-radius:3px;margin-left:8px}
+.lg.ch{background:#f3e7c9;border:1px solid #7a5c2e}
+.lg.ev{background:#dbe9f3;border:1px solid #2c5b7a}
+
 footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid var(--line);text-align:center}
 
 /* 화면 너비에 따른 조절 */
@@ -165,6 +197,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   .hero-grid{grid-template-columns:1fr}.hero-text{text-align:center}.hero h1{font-size:1.85rem}.hero{padding:110px 0 100px}
   form.post{grid-template-columns:1fr}.music-row{grid-template-columns:1fr}.about-grid{grid-template-columns:1fr}
   .tiles{grid-template-columns:1fr 1fr;gap:14px}.tile{min-height:140px;padding:20px 16px}.tile h3{font-size:1.05rem}.tile p{font-size:.85rem}
+  .cal-cell{min-height:52px}.lab{font-size:.6rem}
 }
 </style>
 </head>
@@ -294,8 +327,11 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     </table>
     <p class="note">* 예배 시간은 교회 간판과 주보를 기준으로 했으며, 장소는 확인이 필요합니다.</p>
 
-    <h3 class="sub">2026년 3/4분기 일정</h3>
-    <div class="grid3" id="schedule"></div>
+    <div class="sched-head">
+      <h3 class="sub" id="sched-title"></h3>
+      <a class="btn sm" href="#calendar">목회달력</a>
+    </div>
+    <div class="grid3" id="schedule"><div class="empty">불러오는 중…</div></div>
   </div>
 </section>
 
@@ -359,7 +395,45 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   </div>
 </section>
 
-<section class="view page alt" data-view="visit">
+<section class="view page alt" data-view="calendar">
+  <div class="wrap">
+    <div class="page-head">
+      <h2>목회달력</h2>
+      <p class="lead">절기와 교회 행사를 날짜별로 확인하고, 날짜를 골라 일정과 사진을 올릴 수 있습니다.</p>
+    </div>
+    <div class="cal-app" id="cal-app" data-board="calendar">
+      <div class="split">
+        <div class="split-left">
+          <div class="cal-nav">
+            <button class="mini" type="button" data-cal="prev">‹ 이전달</button>
+            <strong id="cal-month"></strong>
+            <button class="mini" type="button" data-cal="today">오늘</button>
+            <button class="mini" type="button" data-cal="next">다음달 ›</button>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+          <div class="cal-legend"><span class="lg ch"></span>절기<span class="lg ev"></span>교회 행사</div>
+          <div class="split-title" id="cal-daytitle"></div>
+          <div class="items" id="cal-dayitems"></div>
+        </div>
+        <div class="split-right">
+          <div class="split-title">일정 올리기</div>
+          <div class="status" data-role="status"></div>
+          <form class="post" data-role="form">
+            <div class="full"><label>날짜</label><input name="date" type="date" required></div>
+            <div class="full"><label>행사 이름</label><input name="title" maxlength="120" required></div>
+            <div class="full"><label>작성자 이름 (선택)</label><input name="author" maxlength="40"></div>
+            <div class="full"><label>메모 (시간·장소 등)</label><textarea name="memo" maxlength="2000"></textarea></div>
+            <div class="full"><label>사진 (선택, 1장)</label><input name="file" type="file" accept="image/*"></div>
+            <div class="full"><label>비밀번호 (삭제할 때 필요, 4자 이상)</label><input name="pw" type="password" required minlength="4" maxlength="30"></div>
+            <div class="full"><button class="btn" type="submit">등록하기</button></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="view page" data-view="visit">
   <div class="wrap">
     <div class="page-head">
       <h2>오시는 길</h2>
@@ -392,7 +466,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   const configured = !!API_URL && !API_URL.startsWith('PASTE_');
 
   /* ---------- 페이지 전환 (#about, #worship 등) ---------- */
-  const VIEWS = ['home','about','worship','service','bulletin','photo','music','articles','files','visit'];
+  const VIEWS = ['home','about','worship','service','bulletin','photo','music','articles','files','calendar','visit'];
   function route(){
     let name = (location.hash || '').slice(1);
     if(!VIEWS.includes(name)) name = 'home';
@@ -448,6 +522,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     files:{fields:['title','file'], accept:'*/*', titleLabel:'파일 제목'}
   };
   const LABELS = {link:'음악 링크 (URL)', body:'내용 / 메모', file:'첨부 파일 (최대 10MB)', fileMulti:'첨부 파일 (여러 장 선택 가능, 각 10MB 이하)'};
+  const WD = ['일','월','화','수','목','금','토'];
+  const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmt = ts => ts ? new Date(Number(ts)).toLocaleString('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
@@ -455,17 +531,19 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   const driveId = url => { const m = String(url||'').match(/[?&]id=([^&]+)/); return m ? m[1] : ''; };
   const shotUrl = url => { const id = driveId(url); return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w1600` : url; };
   const firstLine = text => String(text || '').split('\n').map(s => s.trim()).find(Boolean) || '';
+  const pad = n => String(n).padStart(2, '0');
+  const ymdFromDate = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  /* 오늘 날짜 (한국 시간, YYYY-MM-DD) */
+  const kstToday = () => new Date().toLocaleDateString('sv-SE', {timeZone:'Asia/Seoul'});
 
-  /* ★ 일정 수정: 아래 목록만 고치면 됩니다. [날짜, 제목, 내용] 순서 (내용은 없으면 '' 로 두세요) */
+  /* ★ 기본 목회 일정: [날짜(YYYY-MM-DD), 제목, 메모] 형식으로 고쳐 쓰세요. 목회달력에서 추가한 일정과 함께 보입니다. */
   const SCHEDULE = [
-    ['11월 15일 (주일)', '추수감사주일', ''],
-    ['11월 21일 (토)', '성도 자녀 결혼식', '오후 5시 (교회 출발 오후 4시)'],
-    ['11월 22일 (주일)', '구미노회 40주년 선교기념대회', '오후 예배 · 오후 3시 (구미상모교회)'],
-    ['11월 29일 (주일)', '성례주일', ''],
-    ['12월 6일 (주일)', '성탄트리 점등식', '']
+    ['2026-11-15', '추수감사주일', ''],
+    ['2026-11-21', '성도 자녀 결혼식', '오후 5시 (교회 출발 오후 4시)'],
+    ['2026-11-22', '구미노회 40주년 선교기념대회', '오후 예배 · 오후 3시 (구미상모교회)'],
+    ['2026-11-29', '성례주일', ''],
+    ['2026-12-06', '성탄트리 점등식', '']
   ];
-  document.getElementById('schedule').innerHTML = SCHEDULE.map(([d, t, m]) =>
-    `<div class="card"><h3>${esc(d)}</h3><p>${esc(t)}${m ? ' · ' + esc(m) : ''}</p></div>`).join('');
 
   const ERR = {
     'wrong password': '비밀번호가 맞지 않습니다.',
@@ -639,6 +717,11 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       </div>`;
   }
 
+  /* 수정·삭제 후 다시 불러오기 */
+  function reload(el){
+    return el.dataset.board === 'calendar' ? loadCalendar() : loadBoard(el);
+  }
+
   async function saveEdit(el, item, panel){
     const err = panel.querySelector('[data-role="err"]');
     const g = n => { const x = panel.querySelector(`[name="${n}"]`); return x ? x.value.trim() : ''; };
@@ -649,7 +732,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     try{
       const out = await postJSON({ action:'update', board: el.dataset.board, id: item.dataset.id, title, link: g('link'), body: g('body'), password: g('pw') });
       if(!out.ok) throw new Error(out.error);
-      loadBoard(el);
+      reload(el);
     }catch(e){
       err.textContent = errText(e.message);
     }
@@ -662,7 +745,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     try{
       const out = await postJSON({ action:'delete', board: el.dataset.board, id: item.dataset.id, password: pw ? pw.value.trim() : '' });
       if(!out.ok) throw new Error(out.error);
-      loadBoard(el);
+      reload(el);
     }catch(e){
       err.textContent = errText(e.message);
     }
@@ -739,6 +822,236 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     boardEls.forEach(el => { mountBoard(el); wireForm(el); loadBoard(el); });
   }
 
+  /* ---------- 목회 일정 데이터 (기본 일정 + 목회달력에서 추가한 일정) ---------- */
+  let calRows = [];   // 목회달력 게시판 글 (link = 날짜, body = 메모)
+
+  function userEvents(){
+    const seeds = SCHEDULE.map(([date, title, memo]) => ({date, title, memo, seed:true}));
+    return [...seeds, ...calRows];
+  }
+
+  /* 절기: 부활절 날짜 계산 (Meeus/Jones/Butcher 방식) */
+  function easter(y){
+    const a = y % 19, b = Math.floor(y / 100), c = y % 100;
+    const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31);
+    const day = ((h + l - 7 * m + 114) % 31) + 1;
+    return new Date(y, month - 1, day);
+  }
+  function christianEvents(y){
+    const e = easter(y);
+    const add = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+    const nth = (m, n) => { const f = new Date(y, m, 1); const s = 1 + ((7 - f.getDay()) % 7); return new Date(y, m, s + 7 * (n - 1)); };
+    const last = m => { const l = new Date(y, m + 1, 0); return new Date(y, m, l.getDate() - l.getDay()); };
+    let advent = new Date(y, 10, 27); while(advent.getDay() !== 0) advent = add(advent, 1);
+    const list = [
+      [nth(0, 1), '신년감사주일'],
+      [add(e, -46), '재의 수요일 (사순절 시작)'],
+      [add(e, -7), '종려주일'],
+      [add(e, -2), '고난주간 금요일'],
+      [e, '부활절'],
+      [add(e, 49), '성령강림주일'],
+      [nth(6, 1), '맥추감사주일'],
+      [nth(10, 3), '추수감사주일'],
+      [last(9), '종교개혁주일'],
+      [advent, '대림절 첫 주'],
+      [new Date(y, 11, 25), '성탄절']
+    ];
+    return list.map(([d, t]) => ({date: ymdFromDate(d), title: t, christian: true}));
+  }
+
+  /* 예배 안내의 일정 목록: 오늘 기준 지난 행사 1개 + 앞으로의 행사 7개 */
+  function renderWorshipSchedule(){
+    const today = kstToday();
+    const [ty, tm] = today.split('-').map(Number);
+    const q = Math.floor((tm - 1) / 3) + 1;
+    document.getElementById('sched-title').textContent = `${ty}년 ${q}/4분기 일정`;
+
+    const all = userEvents().slice().sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
+    let idx = all.findIndex(ev => ev.date >= today);
+    if(idx < 0) idx = all.length;
+    const start = Math.max(0, idx - 1);
+    const list = all.slice(start, start + 8);
+
+    document.getElementById('schedule').innerHTML = list.length ? list.map(ev => {
+      const [y, m, d] = ev.date.split('-').map(Number);
+      const isPast = ev.date < today, isToday = ev.date === today;
+      const state = isPast ? 'past' : (isToday ? 'today' : '');
+      const badge = isPast ? '지난 행사' : (isToday ? '오늘' : '');
+      const photo = ev.fileUrl && isImage(ev.fileType)
+        ? `<img class="ev-img" src="${esc(shotUrl(ev.fileUrl))}" alt="${esc(ev.title)}" loading="lazy">` : '';
+      return `<div class="card ev-card ${state}">
+        <div class="ev-date">${m}월 ${d}일 (${WD[new Date(y, m - 1, d).getDay()]})${badge ? `<span class="badge">${badge}</span>` : ''}</div>
+        <h3>${esc(ev.title)}</h3>
+        ${ev.memo ? `<p>${esc(ev.memo)}</p>` : ''}
+        ${photo}
+      </div>`;
+    }).join('') : '<div class="empty">등록된 일정이 없습니다.</div>';
+  }
+
+  /* ---------- 목회달력 ---------- */
+  const calRoot = document.getElementById('cal-app');
+  const calState = { y:0, m:0, sel:'' };
+
+  function initCalState(){
+    const t = kstToday();
+    calState.y = Number(t.slice(0, 4));
+    calState.m = Number(t.slice(5, 7)) - 1;
+    calState.sel = t;
+  }
+
+  function renderCalendar(){
+    const {y, m} = calState;
+    document.getElementById('cal-month').textContent = `${y}년 ${m + 1}월`;
+    const first = new Date(y, m, 1).getDay();
+    const days = new Date(y, m + 1, 0).getDate();
+    const today = kstToday();
+    const ch = christianEvents(y);
+    const ue = userEvents();
+
+    let html = WD.map((w, i) => `<div class="cal-dow${i === 0 ? ' sun' : ''}${i === 6 ? ' sat' : ''}">${w}</div>`).join('');
+    for(let i = 0; i < first; i++) html += '<div class="cal-cell blank"></div>';
+    for(let d = 1; d <= days; d++){
+      const key = ymdFromDate(new Date(y, m, d));
+      const labels = [
+        ...ch.filter(e => e.date === key).map(e => `<span class="lab ch">${esc(e.title)}</span>`),
+        ...ue.filter(e => e.date === key).map(e => `<span class="lab ev">${esc(e.title)}</span>`)
+      ].slice(0, 3).join('');
+      const cls = ['cal-cell', key === today ? 'today' : '', key === calState.sel ? 'sel' : '', new Date(y, m, d).getDay() === 0 ? 'sun' : ''].join(' ').replace(/\s+/g, ' ');
+      html += `<button type="button" class="${cls}" data-date="${key}"><span class="dn">${d}</span>${labels}</button>`;
+    }
+    document.getElementById('cal-grid').innerHTML = html;
+    calRoot.querySelector('input[name="date"]').value = calState.sel;
+    renderDayList();
+  }
+
+  function renderDayList(){
+    const key = calState.sel;
+    const [y, m, d] = key.split('-').map(Number);
+    document.getElementById('cal-daytitle').textContent = `${y}년 ${m}월 ${d}일 (${WD[new Date(y, m - 1, d).getDay()]})`;
+    const ch = christianEvents(y).filter(e => e.date === key);
+    const seeds = SCHEDULE.filter(s => s[0] === key);
+    const mine = calRows.filter(r => r.date === key);
+
+    let html = ch.map(e => `<div class="item ch-item"><div class="t">${esc(e.title)}</div><div class="m">절기</div></div>`).join('');
+    html += seeds.map(([, t, memo]) => `<div class="item"><div class="t">${esc(t)}</div>${memo ? `<div class="b">${esc(memo)}</div>` : ''}<div class="m">교회 기본 일정</div></div>`).join('');
+    html += mine.map(r => {
+      const photo = r.fileUrl && isImage(r.fileType)
+        ? `<div class="b"><a href="${esc(r.fileUrl)}" target="_blank" rel="noopener"><img class="shot" src="${esc(shotUrl(r.fileUrl))}" alt="${esc(r.title)}" loading="lazy"></a></div>` : '';
+      return `<div class="item" data-id="${esc(r.id)}">
+        <div class="t">${esc(r.title)}</div>
+        <div class="m">${esc(r.author)} · ${fmt(r.createdAt)}</div>
+        ${photo}
+        ${r.memo ? `<div class="b">${esc(r.memo)}</div>` : ''}
+        <div class="mbar"><button class="mini" type="button" data-act="delete">삭제</button></div>
+        <div class="panel" data-role="panel"></div>
+      </div>`;
+    }).join('');
+    if(!html) html = '<div class="empty">이 날짜에는 일정이 없습니다. 오른쪽에서 추가해 보세요.</div>';
+    document.getElementById('cal-dayitems').innerHTML = html;
+  }
+
+  async function loadCalendar(){
+    if(configured){
+      try{
+        const res = await fetch(`${API_URL}?board=calendar`);
+        const rows = await res.json();
+        if(rows.error) throw new Error(rows.error);
+        calRows = (Array.isArray(rows) ? rows : [])
+          .filter(r => DATE_RE.test(String(r.link || '')))
+          .map(r => ({...r, date: String(r.link), memo: r.body || ''}));
+      }catch(err){
+        console.error(err);
+      }
+    }
+    renderCalendar();
+    renderWorshipSchedule();
+  }
+
+  function wireCalendarUI(){
+    // 달 이동
+    calRoot.addEventListener('click', e => {
+      const b = e.target.closest('[data-cal]');
+      if(!b) return;
+      const k = b.dataset.cal;
+      if(k === 'today'){
+        const t = kstToday();
+        calState.y = Number(t.slice(0, 4));
+        calState.m = Number(t.slice(5, 7)) - 1;
+        calState.sel = t;
+      } else {
+        calState.m += k === 'prev' ? -1 : 1;
+        if(calState.m < 0){ calState.m = 11; calState.y--; }
+        if(calState.m > 11){ calState.m = 0; calState.y++; }
+      }
+      renderCalendar();
+    });
+    // 날짜 고르기
+    document.getElementById('cal-grid').addEventListener('click', e => {
+      const c = e.target.closest('.cal-cell[data-date]');
+      if(!c) return;
+      calState.sel = c.dataset.date;
+      renderCalendar();
+    });
+    // 입력 칸의 날짜를 바꾸면 그 날짜로 이동
+    calRoot.querySelector('input[name="date"]').addEventListener('change', e => {
+      const v = e.target.value;
+      if(!DATE_RE.test(v)) return;
+      calState.y = Number(v.slice(0, 4));
+      calState.m = Number(v.slice(5, 7)) - 1;
+      calState.sel = v;
+      renderCalendar();
+    });
+  }
+
+  function wireCalForm(){
+    const form = calRoot.querySelector('[data-role="form"]');
+    const status = calRoot.querySelector('[data-role="status"]');
+    if(!configured){
+      status.innerHTML = '<div class="banner">게시판 연결 설정이 필요합니다 (index.html 의 API_URL).</div>';
+      return;
+    }
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const date = (fd.get('date') || '').toString();
+      const title = (fd.get('title') || '').toString().trim();
+      if(!DATE_RE.test(date)){ status.textContent = '날짜를 선택해 주세요.'; return; }
+      if(!title){ status.textContent = '행사 이름을 입력해 주세요.'; return; }
+      const payload = {
+        action:'create', board:'calendar', title, link: date,
+        author: (fd.get('author') || '').toString().trim(),
+        body: (fd.get('memo') || '').toString().trim(),
+        password: (fd.get('pw') || '').toString()
+      };
+      const file = fd.get('file');
+      try{
+        status.textContent = '등록 중…';
+        if(file && file.size){
+          if(file.size > 10 * 1024 * 1024) throw new Error('file too large');
+          payload.fileName = file.name;
+          payload.fileType = file.type || 'application/octet-stream';
+          payload.fileData = await readFileBase64(file);
+        }
+        const out = await postJSON(payload);
+        if(!out.ok) throw new Error(out.error || 'failed');
+        form.reset();
+        calState.y = Number(date.slice(0, 4));
+        calState.m = Number(date.slice(5, 7)) - 1;
+        calState.sel = date;
+        status.textContent = '등록되었습니다.';
+        await loadCalendar();
+        form.elements.date.value = date;
+      }catch(err){
+        console.error(err);
+        status.textContent = errText(err.message);
+      }
+    });
+  }
+
   /* ---------- 최신 예배 영상 (첫 화면) ---------- */
   async function loadLatestService(){
     const box = document.getElementById('latest-video'), cap = document.getElementById('latest-cap');
@@ -759,11 +1072,18 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   }
 
   /* ---------- 시작 ---------- */
+  initCalState();
   boardEls.forEach(wireManage);
+  wireManage(calRoot);
+  wireCalendarUI();
+  wireCalForm();
   window.addEventListener('hashchange', route);
   loadLatestService();
   route();
   refreshBoards();
+  renderCalendar();
+  renderWorshipSchedule();
+  loadCalendar();
 })();
 </script>
 </body>
