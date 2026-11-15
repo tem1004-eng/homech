@@ -23,11 +23,18 @@ nav a.current{color:var(--accent);font-weight:600;border-bottom-color:var(--acce
 .view{display:none}
 .view.active{display:block}
 
-.hero{padding:150px 0 140px;text-align:center;color:#fff;background:linear-gradient(180deg,rgba(18,28,44,.35),rgba(18,28,44,.72)),url(images/church.png) center 40%/cover no-repeat}
+.hero{padding:120px 0 120px;color:#fff;background:linear-gradient(180deg,rgba(18,28,44,.35),rgba(18,28,44,.72)),url(images/church.png) center 40%/cover no-repeat}
 .hero h1{font-size:2.6rem;margin:0 0 14px;letter-spacing:-.03em;text-shadow:0 2px 18px rgba(0,0,0,.35)}
 .hero p{color:#f3ecdf;margin:0 0 30px;font-size:1.1rem;text-shadow:0 1px 10px rgba(0,0,0,.3)}
 .btn{display:inline-block;padding:11px 22px;border-radius:999px;background:var(--accent);color:#fff;text-decoration:none;font-weight:500;border:0;cursor:pointer;font-size:.95rem;font-family:inherit}
 .hero .btn{padding:13px 28px;font-size:1rem;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center}
+.hero-text{text-align:left}
+.hero-text p{margin-bottom:28px}
+.hero-video{position:relative;padding-top:56.25%;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 18px 40px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18)}
+.hero-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.hero-video .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;color:#f3ecdf;font-size:.95rem;background:rgba(0,0,0,.45)}
+.hero-cap{color:#f3ecdf;font-size:.88rem;margin-top:10px;text-shadow:0 1px 8px rgba(0,0,0,.35);min-height:1.4em}
 
 .page{padding:60px 0 80px;min-height:70vh}
 .page.alt{background:#f6f2ea}
@@ -65,8 +72,19 @@ form.post label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:
 .thumbs img{width:100%;height:100%;object-fit:cover;display:block}
 .banner{padding:12px 16px;background:#fff7e6;border:1px solid #ecd9ad;border-radius:10px;color:#6b5320;font-size:.92rem;margin-bottom:16px}
 .empty{color:var(--muted);font-size:.95rem;padding:10px 0}
+.mbar{display:flex;gap:6px;margin-top:10px}
+.mini{padding:4px 12px;border:1px solid var(--line);background:#fff;border-radius:8px;font:inherit;font-size:.82rem;cursor:pointer;color:var(--muted)}
+.mini:hover{border-color:var(--accent);color:var(--accent)}
+.mini.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.mini.danger{color:#a33;border-color:#e3b5b5}
+.pbox{margin-top:12px;padding:14px;border:1px dashed var(--line);border-radius:10px;background:#fcfbf8}
+.pbox label{display:block;font-size:.82rem;color:var(--muted);margin-top:8px}
+.pbox input,.pbox textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff}
+.pbox textarea{min-height:90px;resize:vertical}
+.pbox .row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.perr{color:#a33;font-size:.85rem;margin-top:6px;min-height:1.2em}
 footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid var(--line);text-align:center}
-@media(max-width:640px){.hero h1{font-size:1.85rem}.hero{padding:110px 0 100px}form.post{grid-template-columns:1fr}nav ul{gap:12px}}
+@media(max-width:640px){.hero-grid{grid-template-columns:1fr}.hero-text{text-align:center}.hero h1{font-size:1.85rem}.hero{padding:110px 0 100px}form.post{grid-template-columns:1fr}nav ul{gap:12px}}
 </style>
 </head>
 <body>
@@ -94,10 +112,16 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 
 <section class="view" data-view="home">
   <div class="hero">
-    <div class="wrap">
-      <h1>구미은혜로교회에 오신 것을 환영합니다</h1>
-      <p>하나님의 은혜 안에서 함께 예배하고, 나누고, 세워져 가는 공동체입니다.</p>
-      <a class="btn" href="#worship">예배 안내 보기</a>
+    <div class="wrap hero-grid">
+      <div class="hero-text">
+        <h1>구미은혜로교회에 오신 것을 환영합니다</h1>
+        <p>하나님의 은혜 안에서 함께 예배하고, 나누고, 세워져 가는 공동체입니다.</p>
+        <a class="btn" href="#worship">예배 안내 보기</a>
+      </div>
+      <div>
+        <div class="hero-video" id="latest-video"><div class="ph">최신 예배 영상을 불러오는 중…</div></div>
+        <div class="hero-cap" id="latest-cap"></div>
+      </div>
     </div>
   </div>
   <div class="page alt">
@@ -231,6 +255,11 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       <div class="card"><h3>연락처</h3><p>070-7138-0691</p></div>
       <div class="card"><h3>주차 안내</h3><p>[주차 안내를 입력하세요]</p></div>
     </div>
+
+    <div class="map" style="margin-top:28px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#fff">
+      <iframe title="구미은혜로교회 위치" src="https://www.google.com/maps?q=%EA%B5%AC%EB%AF%B8%EC%8B%9C+%EA%B8%88%EC%98%A4%EC%8B%9C%EC%9E%A5%EB%A1%9C8%EA%B8%B8+20&amp;output=embed" width="100%" height="380" style="border:0;display:block" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+    <p class="note"><a href="https://www.google.com/maps/search/?api=1&amp;query=%EA%B5%AC%EB%AF%B8%EC%8B%9C+%EA%B8%88%EC%98%A4%EC%8B%9C%EC%9E%A5%EB%A1%9C8%EA%B8%B8+20" target="_blank" rel="noopener">구글 지도에서 크게 보기 / 길찾기</a></p>
   </div>
 </section>
 
@@ -283,6 +312,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         ${cfg.fields.includes('link') ? `<div class="full"><label>${LABELS.link}</label><input name="link" type="url" placeholder="https://..."></div>` : ''}
         ${cfg.fields.includes('body') ? `<div class="full"><label>${LABELS.body}</label><textarea name="body" maxlength="5000"></textarea></div>` : ''}
         ${cfg.fields.includes('file') ? `<div class="full"><label>${LABELS.file}</label><input name="file" type="file" ${cfg.accept?`accept="${cfg.accept}"`:''}></div>` : ''}
+        <div class="full"><label>비밀번호 (나중에 수정·삭제할 때 필요, 4자 이상)</label><input name="pw" type="password" required minlength="4" maxlength="30"></div>
         <div class="full"><button class="btn" type="submit">등록하기</button></div>
       </form>
       <div class="items" data-role="items"><div class="empty">불러오는 중…</div></div>`;
@@ -295,6 +325,24 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   }
 
   function render(el, rows){
+    el._rows = rows;
+    renderList(el, rows);
+    decorate(el, rows);
+  }
+
+  function decorate(el, rows){
+    const items = el.querySelector('[data-role="items"]');
+    if(!rows.length) return;
+    items.querySelectorAll('.item').forEach((it, i) => {
+      const r = rows[i];
+      if(!r) return;
+      it.dataset.id = r.id;
+      it.insertAdjacentHTML('beforeend',
+        '<div class="mbar"><button class="mini" type="button" data-act="edit">수정</button><button class="mini" type="button" data-act="delete">삭제</button></div><div class="panel" data-role="panel"></div>');
+    });
+  }
+
+  function renderList(el, rows){
     const id = el.dataset.board, items = el.querySelector('[data-role="items"]');
     if(!rows.length){ items.innerHTML = '<div class="empty">아직 등록된 글이 없습니다.</div>'; return; }
     if(id === 'service'){
@@ -323,6 +371,91 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       if(r.body) extra += `<div class="b">${esc(r.body)}</div>`;
       return `<div class="item"><div class="t">${esc(r.title)}</div><div class="m">${esc(r.author)} · ${fmt(r.createdAt)}</div>${extra}</div>`;
     }).join('');
+  }
+
+  const ERR = {
+    'wrong password': '비밀번호가 맞지 않습니다.',
+    'not found': '글을 찾을 수 없습니다. 새로고침 후 다시 시도해 주세요.',
+    'title required': '제목을 입력해 주세요.'
+  };
+  const errText = code => ERR[code] || '처리에 실패했습니다. 잠시 후 다시 시도해 주세요.';
+
+  function postJSON(payload){
+    return fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload) })
+      .then(r => r.json());
+  }
+
+  function wireManage(el){
+    el.addEventListener('click', e => {
+      const btn = e.target.closest('button[data-act]');
+      if(!btn || !el.contains(btn)) return;
+      const item = btn.closest('.item');
+      const panel = item && item.querySelector('[data-role="panel"]');
+      if(!panel) return;
+      const act = btn.dataset.act;
+      if(act === 'cancel') panel.innerHTML = '';
+      else if(act === 'edit') openEdit(el, item, panel);
+      else if(act === 'delete') openDelete(panel);
+      else if(act === 'save') saveEdit(el, item, panel);
+      else if(act === 'remove') removePost(el, item, panel);
+    });
+  }
+
+  function openEdit(el, item, panel){
+    const cfg = BOARDS[el.dataset.board];
+    const row = (el._rows || []).find(r => r.id === item.dataset.id) || {};
+    panel.innerHTML = `
+      <div class="pbox">
+        <label>제목</label><input name="title" maxlength="120" value="${esc(row.title)}">
+        ${cfg.fields.includes('author') ? `<label>작성자</label><input name="author" maxlength="40" value="${esc(row.author)}">` : ''}
+        ${cfg.fields.includes('link') ? `<label>링크</label><input name="link" type="url" value="${esc(row.link)}">` : ''}
+        ${cfg.fields.includes('body') ? `<label>내용</label><textarea name="body" maxlength="5000">${esc(row.body)}</textarea>` : ''}
+        <label>비밀번호</label><input name="pw" type="password" placeholder="작성할 때 정한 비밀번호">
+        <div class="row"><button class="mini primary" type="button" data-act="save">저장</button><button class="mini" type="button" data-act="cancel">취소</button></div>
+        <div class="perr" data-role="err"></div>
+      </div>`;
+  }
+
+  function openDelete(panel){
+    panel.innerHTML = `
+      <div class="pbox">
+        <label>삭제하려면 비밀번호를 입력하세요</label>
+        <input name="pw" type="password" placeholder="작성할 때 정한 비밀번호">
+        <div class="row"><button class="mini danger" type="button" data-act="remove">삭제 확인</button><button class="mini" type="button" data-act="cancel">취소</button></div>
+        <div class="perr" data-role="err"></div>
+      </div>`;
+  }
+
+  async function saveEdit(el, item, panel){
+    const err = panel.querySelector('[data-role="err"]');
+    const g = n => { const x = panel.querySelector(`[name="${n}"]`); return x ? x.value.trim() : undefined; };
+    const pw = g('pw');
+    if(!pw){ err.textContent = '비밀번호를 입력해 주세요.'; return; }
+    const payload = { action:'update', board: el.dataset.board, id: item.dataset.id, password: pw };
+    ['title','author','link','body'].forEach(k => { const v = g(k); if(v !== undefined) payload[k] = v; });
+    if(!payload.title){ err.textContent = '제목을 입력해 주세요.'; return; }
+    err.textContent = '저장 중…';
+    try{
+      const out = await postJSON(payload);
+      if(!out.ok) throw new Error(out.error);
+      loadBoard(el);
+    }catch(e){
+      err.textContent = errText(e.message);
+    }
+  }
+
+  async function removePost(el, item, panel){
+    const err = panel.querySelector('[data-role="err"]');
+    const pw = (panel.querySelector('[name="pw"]').value || '').trim();
+    if(!pw){ err.textContent = '비밀번호를 입력해 주세요.'; return; }
+    err.textContent = '삭제 중…';
+    try{
+      const out = await postJSON({ action:'delete', board: el.dataset.board, id: item.dataset.id, password: pw });
+      if(!out.ok) throw new Error(out.error);
+      loadBoard(el);
+    }catch(e){
+      err.textContent = errText(e.message);
+    }
   }
 
   const readFileBase64 = file => new Promise((resolve, reject) => {
@@ -354,7 +487,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     form.addEventListener('submit', async e => {
       e.preventDefault();
       const fd = new FormData(form);
-      const payload = { board: id };
+      const payload = { board: id, password: (fd.get('pw') || '').toString() };
       ['title','author','link','body'].forEach(k => { const v = (fd.get(k) || '').toString().trim(); if(v) payload[k] = v; });
       const file = fd.get('file');
       try{
@@ -381,6 +514,26 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 
   const boardEls = [...document.querySelectorAll('.board[data-board]')].map(mountBoard);
   boardEls.forEach(wireForm);
+  boardEls.forEach(wireManage);
+  async function loadLatestService(){
+    const box = document.getElementById('latest-video'), cap = document.getElementById('latest-cap');
+    if(!box) return;
+    if(!configured){ box.innerHTML = '<div class="ph">예배 영상 연결 설정 전입니다.</div>'; return; }
+    try{
+      const res = await fetch(`${API_URL}?board=service`);
+      const rows = await res.json();
+      // 서버에서 최신순으로 내려오므로, 유튜브 링크가 있는 첫 번째 글이 가장 최근 영상입니다.
+      const latest = (Array.isArray(rows) ? rows : []).find(r => youtubeId(r.link));
+      if(!latest){ box.innerHTML = '<div class="ph">아직 등록된 예배 영상이 없습니다.</div>'; cap.textContent = ''; return; }
+      box.innerHTML = `<iframe src="https://www.youtube.com/embed/${youtubeId(latest.link)}" title="${esc(latest.title)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
+      cap.textContent = `${latest.title} · ${fmt(latest.createdAt)}`;
+    }catch(err){
+      console.error(err);
+      box.innerHTML = '<div class="ph">예배 영상을 불러오지 못했습니다.</div>';
+    }
+  }
+  loadLatestService();
+
   boardEls.forEach(el => {
     if(configured) loadBoard(el);
     else el.querySelector('[data-role="items"]').innerHTML = '<div class="empty">표시할 글이 없습니다.</div>';
