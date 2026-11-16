@@ -246,7 +246,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 <header class="site">
   <div class="wrap brand">
     <div class="brand-left">
-      <a class="logo logo-box" href="https://tem1004-eng.github.io/homech">
+      <a class="logo logo-box" href="#home">
         <span class="mark"><img src="images/hapdong-logo.png" alt="합동교단 로고" onerror="this.parentNode.classList.add('nofile')"><span class="mark-fb">✝</span></span>
         <strong>구미은혜로교회</strong>
       </a>
@@ -517,6 +517,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.dataset.view === name));
     document.querySelectorAll('nav a').forEach(a => a.classList.toggle('current', a.getAttribute('href') === '#' + name));
     document.querySelectorAll('.cal-top').forEach(a => a.classList.toggle('current', name === 'calendar'));
+    const bEl = document.querySelector(`.board[data-board="${name}"]`);
+    if(bEl) loadBoard(bEl);
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
 
@@ -1256,6 +1258,9 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         return `<img src="${esc(shotUrl(item.url))}" alt="${esc(item.title)}" onerror="this.onerror=null;this.src='${esc(item.url)}'"><span class="vbadge">${label}</span>`;
       }
       case 'articles':
+        if(item.url){
+          return `<img src="${esc(shotUrl(item.url))}" alt="${esc(item.title)}" onerror="this.onerror=null;this.src='${esc(item.url)}'"><span class="vbadge">좋은 글</span><div class="vcap">${esc(item.title)}</div>`;
+        }
         return `<div class="vtext"><span class="vtag">좋은 글</span><div class="vtitle">${esc(item.title)}</div><div class="vexcerpt">${esc(item.excerpt)}</div></div>`;
       default:
         return '';
@@ -1323,7 +1328,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       const title = String(r.title || '');
       const lines = String(r.body || '').split('\n').map(s => s.trim()).filter(Boolean);
       const rest = lines[0] === title.trim() ? lines.slice(1) : lines;
-      return { title, excerpt: rest.join(' ').slice(0, 120) };
+      return { title, excerpt: rest.join(' ').slice(0, 120), url: isImg(r) ? r.fileUrl : '' };
     });
 
     heroCards = [
@@ -1388,8 +1393,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   wireHero();
   loadHero();
   heroStart();
+  boardEls.forEach(el => { mountBoard(el); wireForm(el); });
   route();
-  refreshBoards();
   renderCalendar();
   renderWorshipSchedule();
   loadCalendar();
