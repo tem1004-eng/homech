@@ -193,6 +193,7 @@ form.post label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:
 .pbox textarea{min-height:90px;resize:vertical}
 .pbox .row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 .perr{color:#a33;font-size:.85rem;margin-top:6px;min-height:1.2em}
+.pbox .admin-hint{font-size:.78rem;color:var(--muted);margin-top:4px}
 
 /* 목회달력 */
 .cal-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
@@ -820,11 +821,15 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     }
   }
 
+  /* 삭제 칸: 글 쓴 사람의 비밀번호 또는 관리자 비밀번호 중 하나로 삭제할 수 있습니다. */
   function openDelete(panel){
     panel.innerHTML = `
       <div class="pbox">
         <label>이 글을 삭제할까요?</label>
         ${pwField()}
+        <label>관리자 비밀번호 (다른 사람의 글을 지울 때만 입력)</label>
+        <input name="adminpw" type="password" placeholder="관리자만 입력">
+        <div class="admin-hint">관리자 비밀번호를 넣으면 글 쓴 사람의 비밀번호는 필요 없습니다.</div>
         <div class="row"><button class="mini danger" type="button" data-act="remove">삭제 확인</button><button class="mini" type="button" data-act="cancel">취소</button></div>
         <div class="perr" data-role="err"></div>
       </div>`;
@@ -856,9 +861,16 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   async function removePost(el, item, panel){
     const err = panel.querySelector('[data-role="err"]');
     const pw = panel.querySelector('[name="pw"]');
+    const adm = panel.querySelector('[name="adminpw"]');
     err.textContent = '삭제 중…';
     try{
-      const out = await postJSON({ action:'delete', board: el.dataset.board, id: item.dataset.id, password: pw ? pw.value.trim() : '' });
+      const out = await postJSON({
+        action:'delete',
+        board: el.dataset.board,
+        id: item.dataset.id,
+        password: pw ? pw.value.trim() : '',
+        adminPassword: adm ? adm.value.trim() : ''
+      });
       if(!out.ok) throw new Error(out.error);
       reload(el);
     }catch(e){
