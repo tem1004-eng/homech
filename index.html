@@ -517,7 +517,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.dataset.view === name));
     document.querySelectorAll('nav a').forEach(a => a.classList.toggle('current', a.getAttribute('href') === '#' + name));
     document.querySelectorAll('.cal-top').forEach(a => a.classList.toggle('current', name === 'calendar'));
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }
 
   /* ---------- 계좌번호 복사 ---------- */
