@@ -60,31 +60,32 @@ nav a.nav-btn.current{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--c1),0 6px 16px r
 .view{display:none}
 .view.active{display:block}
 
-/* 첫 화면: 인사말(맨 위) → 사진 슬라이드 + 유튜브 영상 (두 박스는 같은 크기) */
+/* 첫 화면: 인사말 + 뷰어 한 줄 (4.5초마다 한 칸씩 왼쪽으로 넘어갑니다) */
 .hero{padding:90px 0 90px;color:#fff;background:linear-gradient(180deg,rgba(18,28,44,.40),rgba(18,28,44,.78)),url(images/church.png) center 40%/cover no-repeat}
 .hero-title{font-size:2.4rem;margin:0 0 36px;letter-spacing:-.03em;text-align:center;text-shadow:0 2px 18px rgba(0,0,0,.35)}
-.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:stretch}
-.hero-col{position:relative;aspect-ratio:16/9}
 
-/* 왼쪽: 사진 슬라이드 (칸 전체를 채움) */
-.slider{position:absolute;inset:0;border-radius:18px;overflow:hidden;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.25);box-shadow:0 18px 40px rgba(0,0,0,.35)}
-.slide{position:absolute;inset:0;opacity:0;transition:opacity .8s ease;cursor:pointer;background:#000}
-.slide.on{opacity:1}
-.slide img{width:100%;height:100%;object-fit:cover;display:block}
-.slide-cap{position:absolute;left:0;right:0;bottom:0;padding:26px 16px 12px;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;font-size:.92rem;text-shadow:0 1px 6px rgba(0,0,0,.4)}
-.sl-btn{position:absolute;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;border:0;background:rgba(0,0,0,.35);color:#fff;font-size:.9rem;line-height:1;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center;transition:background .15s ease}
-.sl-btn:hover{background:rgba(0,0,0,.6)}
-.sl-btn.prev{left:8px}
-.sl-btn.next{right:8px}
-.slider .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;color:#f3ecdf;font-size:.95rem;background:rgba(0,0,0,.45)}
-
-/* 오른쪽: 유튜브 영상 박스 (칸 전체를 채움) */
-.hero-video-box{position:absolute;inset:0;padding:12px;border-radius:20px;background:linear-gradient(135deg,rgba(255,255,255,.38),rgba(255,255,255,.08));border:1px solid rgba(255,255,255,.3);box-shadow:0 20px 44px rgba(0,0,0,.35)}
-.hero-video{position:absolute;inset:12px;border-radius:14px;overflow:hidden;background:#000;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
-.hero-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.hero-video .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;color:#f3ecdf;font-size:.95rem;background:rgba(0,0,0,.45)}
-.hero-cap{position:absolute;left:12px;right:12px;bottom:12px;padding:24px 14px 10px;border-radius:0 0 14px 14px;background:linear-gradient(transparent,rgba(0,0,0,.7));color:#fff;font-size:.88rem;text-shadow:0 1px 8px rgba(0,0,0,.35);pointer-events:none}
-.hero-cap:empty{display:none}
+.hero-window{position:relative;overflow:hidden;border-radius:20px}
+.hero-track{display:flex;width:100%;transition:transform .8s ease;will-change:transform}
+.vcard{flex:0 0 calc(100% / var(--per, 2));position:relative;aspect-ratio:16/9;cursor:pointer}
+/* 테두리: 맨 위 메뉴 글상자와 같은 그라데이션 (--c1, --c2는 뷰어마다 다릅니다) */
+.vbox{position:absolute;top:0;bottom:0;left:10px;right:10px;border-radius:18px;overflow:hidden;border:4px solid transparent;background:linear-gradient(#15110c,#15110c) padding-box,linear-gradient(135deg,var(--c1),var(--c2)) border-box;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.vcontent{position:absolute;inset:0}
+.vcontent>*{animation:vfade .7s ease}
+@keyframes vfade{from{opacity:0}to{opacity:1}}
+.vcontent>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.vcontent>iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vempty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;color:#f3ecdf;font-size:.95rem;background:#3a3126}
+.vtext{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:26px 28px;background:linear-gradient(135deg,#fffdf8,#f3ead8);color:var(--ink)}
+.vtag{display:inline-block;align-self:flex-start;padding:3px 10px;border-radius:999px;background:var(--accent);color:#fff;font-size:.78rem;font-weight:600;margin-bottom:12px}
+.vtitle{font-size:1.2rem;font-weight:700;line-height:1.4;margin-bottom:10px;letter-spacing:-.02em}
+.vexcerpt{font-size:.95rem;color:var(--muted);line-height:1.7;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.vcap{position:absolute;left:0;right:0;bottom:0;padding:26px 16px 12px;background:linear-gradient(transparent,rgba(0,0,0,.7));color:#fff;font-size:.92rem;text-shadow:0 1px 6px rgba(0,0,0,.4);pointer-events:none}
+.vplay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:58px;height:58px;border-radius:50%;background:rgba(204,59,59,.92);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.3rem;box-shadow:0 8px 20px rgba(0,0,0,.35);padding-left:4px;box-sizing:border-box}
+.vbadge{position:absolute;top:12px;left:12px;padding:4px 12px;border-radius:999px;background:rgba(0,0,0,.6);color:#fff;font-size:.82rem;font-weight:600}
+.vbox .sl-btn{position:absolute;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;border:0;background:rgba(0,0,0,.4);color:#fff;font-size:1rem;line-height:1;cursor:pointer;z-index:3;display:flex;align-items:center;justify-content:center;transition:background .15s ease}
+.vbox .sl-btn:hover{background:rgba(0,0,0,.7)}
+.vbox .sl-btn.prev{left:12px}
+.vbox .sl-btn.next{right:12px}
 
 .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:999px;background:linear-gradient(135deg,#7a5c2e,#b08a4f);color:#fff;text-decoration:none;font-weight:600;border:0;cursor:pointer;font-size:.95rem;font-family:inherit;box-shadow:0 6px 18px rgba(122,92,46,.30);transition:transform .15s ease,box-shadow .15s ease}
 .btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(122,92,46,.38);color:#fff}
@@ -230,10 +231,10 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   nav ul{width:max-content;justify-content:flex-start;padding-bottom:4px}
   .hero{padding:80px 0 70px}
   .hero-title{font-size:1.8rem;margin-bottom:26px}
-  .hero-grid{grid-template-columns:1fr;gap:26px}
   form.post{grid-template-columns:1fr}.music-row{grid-template-columns:1fr}.about-grid{grid-template-columns:1fr}
   .tiles{grid-template-columns:1fr 1fr;gap:14px}.tile{min-height:140px;padding:20px 16px}.tile h3{font-size:1.05rem}.tile p{font-size:.85rem}
   .cal-cell{min-height:52px}.lab{font-size:.6rem}
+  .vtitle{font-size:1rem}
 }
 </style>
 </head>
@@ -271,15 +272,9 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   <div class="hero">
     <div class="wrap">
       <h1 class="hero-title">구미은혜로교회에 오신 것을 환영합니다</h1>
-      <div class="hero-grid">
-        <div class="hero-col">
-          <div class="slider" id="photo-slider"><div class="ph">사진을 불러오는 중…</div></div>
-        </div>
-        <div class="hero-col">
-          <div class="hero-video-box">
-            <div class="hero-video" id="latest-video"><div class="ph">최신 예배 영상을 불러오는 중…</div></div>
-            <div class="hero-cap" id="latest-cap"></div>
-          </div>
+      <div class="hero-window" id="hero-window">
+        <div class="hero-track" id="hero-track">
+          <div class="vcard"><div class="vbox"><div class="vcontent"><div class="vempty">불러오는 중…</div></div></div></div>
         </div>
       </div>
     </div>
@@ -931,7 +926,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         form.reset();
         status.textContent = jobs.length > 1 ? `${jobs.length}개 파일을 등록했습니다.` : '등록되었습니다.';
         loadBoard(el);
-        if(id === 'photo') loadSlider();
+        loadHero();
       }catch(err){
         console.error(err);
         status.textContent = errText(err.message);
@@ -1194,66 +1189,174 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     });
   }
 
-  /* ---------- 최신 예배 영상 (첫 화면) ---------- */
-  async function loadLatestService(){
-    const box = document.getElementById('latest-video'), cap = document.getElementById('latest-cap');
-    if(!box) return;
-    if(!configured){ box.innerHTML = '<div class="ph">예배 영상 연결 설정 전입니다.</div>'; return; }
-    try{
-      const res = await fetch(`${API_URL}?board=service`);
-      const rows = await res.json();
-      // 서버에서 최신순으로 내려오므로, 유튜브 링크가 있는 첫 번째 글이 가장 최근 영상입니다.
-      const latest = (Array.isArray(rows) ? rows : []).find(r => youtubeId(r.link));
-      if(!latest){ box.innerHTML = '<div class="ph">아직 등록된 예배 영상이 없습니다.</div>'; cap.textContent = ''; return; }
-      box.innerHTML = `<iframe src="https://www.youtube.com/embed/${youtubeId(latest.link)}" title="${esc(latest.title)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
-      cap.textContent = `${latest.title} · ${fmt(latest.createdAt)}`;
-    }catch(err){
-      console.error(err);
-      box.innerHTML = '<div class="ph">예배 영상을 불러오지 못했습니다.</div>';
+  /* ---------- 첫 화면 뷰어 한 줄: 사진 · 예배영상 · 음악 · 주보 · 좋은 글 ----------
+     모든 뷰어는 같은 주기(HERO_STEP_MS)로 움직입니다.
+     - 줄 전체가 한 칸씩 왼쪽으로 넘어가고(화면이 넓으면 두 칸, 휴대폰은 한 칸 보임)
+     - 각 뷰어 안의 내용도 같은 순간에 다음 항목으로 바뀝니다.
+     - 테두리 색은 맨 위 메뉴 글상자의 색과 같습니다 (c1, c2). */
+  const HERO_STEP_MS = 4500;
+  const HERO_EMPTY = {
+    photo:'아직 올라온 사진이 없습니다.',
+    video:'아직 등록된 예배 영상이 없습니다.',
+    music:'아직 올라온 음악이 없습니다.',
+    bulletin:'아직 올라온 주보가 없습니다.',
+    articles:'아직 올라온 좋은 글이 없습니다.'
+  };
+  // 메뉴 글상자와 같은 색 (사진, 오늘의 예배, 음악, 주보, 좋은 글)
+  const HERO_COLORS = {
+    photo:['#6a4f8c','#9177b8'],
+    video:['#9a4f5e','#c06f7d'],
+    music:['#2f7f85','#4fb0b5'],
+    bulletin:['#4f7a5a','#7fa887'],
+    articles:['#a0672b','#d18a4a']
+  };
+  let heroCards = [];            // 다섯 개 뷰어 정보
+  let heroExtra = [0,0,0,0,0];   // 뷰어마다 좌우 버튼으로 더 넘긴 칸 수
+  let heroC = 0;                 // 내용 넘김 횟수
+  let heroOff = 0;               // 줄이 보이는 위치 (0~4, 5는 처음 칸을 복제해 둔 자리)
+  let heroTimer = null;
+  const heroTrackEl = () => document.getElementById('hero-track');
+  const heroPer = () => (window.matchMedia('(max-width:640px)').matches ? 1 : 2);
+  const mod = (a, n) => ((a % n) + n) % n;
+
+  function heroSetTrack(animate){
+    const track = heroTrackEl(); if(!track) return;
+    track.style.setProperty('--per', heroPer());
+    track.style.transition = animate ? '' : 'none';
+    track.style.transform = `translateX(-${heroOff * 100 / heroPer()}%)`;
+  }
+
+  function heroItemHTML(card, item, idx, n){
+    switch(card.kind){
+      case 'photo':
+        return `<img src="${esc(shotUrl(item.url))}" alt="${esc(item.title)}" onerror="this.onerror=null;this.src='${esc(item.url)}'"><div class="vcap">${esc(item.title)}</div>`;
+      case 'music':
+        return `<img src="https://img.youtube.com/vi/${item.yid}/hqdefault.jpg" alt="${esc(item.title)}"><span class="vplay">▶</span><div class="vcap">${esc(item.title)}</div>`;
+      case 'bulletin': {
+        const label = n === 2 ? (idx === 0 ? '앞면' : '뒷면') : '최근 주보';
+        return `<img src="${esc(shotUrl(item.url))}" alt="${esc(item.title)}" onerror="this.onerror=null;this.src='${esc(item.url)}'"><span class="vbadge">${label}</span>`;
+      }
+      case 'articles':
+        return `<div class="vtext"><span class="vtag">좋은 글</span><div class="vtitle">${esc(item.title)}</div><div class="vexcerpt">${esc(item.excerpt)}</div></div>`;
+      default:
+        return '';
     }
   }
 
-  /* ---------- 첫 화면 사진 슬라이드 (사진 게시판 이미지, 자동 넘김) ---------- */
-  let sliderTimer = null;
-  async function loadSlider(){
-    const box = document.getElementById('photo-slider');
-    if(!box) return;
-    if(!configured){ box.innerHTML = '<div class="ph">사진 연결 설정 전입니다.</div>'; return; }
-    try{
-      const res = await fetch(`${API_URL}?board=photo`);
-      const rows = await res.json();
-      const photos = (Array.isArray(rows) ? rows : []).filter(r => r.fileUrl && isImage(r.fileType));
-      if(sliderTimer){ clearInterval(sliderTimer); sliderTimer = null; }
-      if(!photos.length){ box.innerHTML = '<div class="ph">아직 올라온 사진이 없습니다.</div>'; return; }
+  /* 각 뷰어 안의 내용을 현재 순서에 맞춰 바꿉니다 (바뀐 칸만 다시 그립니다) */
+  function heroUpdateSlots(){
+    const track = heroTrackEl(); if(!track) return;
+    track.querySelectorAll('.vcard').forEach(el => {
+      const k = Number(el.dataset.k), card = heroCards[k];
+      if(!card || card.kind === 'video') return;
+      const cont = el.querySelector('.vcontent'); if(!cont) return;
+      const n = card.items.length;
+      if(!n){
+        if(el.dataset.idx !== 'empty'){
+          el.dataset.idx = 'empty';
+          cont.innerHTML = `<div class="vempty">${esc(card.empty)}</div>`;
+        }
+        return;
+      }
+      const idx = mod(heroC + heroExtra[k], n);
+      if(el.dataset.idx === String(idx)) return;
+      el.dataset.idx = String(idx);
+      cont.innerHTML = heroItemHTML(card, card.items[idx], idx, n);
+    });
+  }
 
-      box.innerHTML = photos.map((r, i) => `
-        <div class="slide${i === 0 ? ' on' : ''}" data-i="${i}" title="사진 게시판으로 이동">
-          <img src="${esc(shotUrl(r.fileUrl))}" alt="${esc(r.title)}" loading="lazy" onerror="this.onerror=null;this.src='${esc(r.fileUrl)}'">
-          <div class="slide-cap">${esc(r.title)}</div>
-        </div>`).join('') + `
-        <button class="sl-btn prev" type="button" aria-label="이전 사진">‹</button>
-        <button class="sl-btn next" type="button" aria-label="다음 사진">›</button>`;
+  /* 화면에 보일 줄을 만듭니다: 다섯 개 뷰어 + 앞의 두 개를 뒤에 복제 */
+  function heroBuild(){
+    const track = heroTrackEl(); if(!track || !heroCards.length) return;
+    const N = heroCards.length;
+    track.innerHTML = [0,1,2,3,4,5,6].map(j => {
+      const k = j % N, card = heroCards[k];
+      const [c1, c2] = HERO_COLORS[card.kind];
+      const inner = card.kind === 'video'
+        ? card.html
+        : `<div class="vcontent"></div>` + (card.kind === 'photo'
+            ? `<button class="sl-btn prev" data-dir="-1" type="button" aria-label="이전 사진">‹</button><button class="sl-btn next" data-dir="1" type="button" aria-label="다음 사진">›</button>`
+            : '');
+      return `<div class="vcard" data-k="${k}" data-route="${card.route}" style="--c1:${c1};--c2:${c2}"><div class="vbox">${inner}</div></div>`;
+    }).join('');
+    heroSetTrack(false);
+    heroUpdateSlots();
+  }
 
-      const slides = [...box.querySelectorAll('.slide')];
-      let cur = 0;
-      const show = n => {
-        cur = (n + slides.length) % slides.length;
-        slides.forEach((s, i) => s.classList.toggle('on', i === cur));
-      };
-      const start = () => { stop(); if(slides.length > 1) sliderTimer = setInterval(() => show(cur + 1), 4500); };
-      const stop = () => { if(sliderTimer){ clearInterval(sliderTimer); sliderTimer = null; } };
+  async function loadHero(){
+    const get = async b => {
+      if(!configured) return [];
+      try{
+        const r = await fetch(`${API_URL}?board=${b}`);
+        const j = await r.json();
+        return Array.isArray(j) ? j : [];
+      }catch(err){ console.error(err); return []; }
+    };
+    const [ph, sv, mu, bu, ar] = await Promise.all(['photo','service','music','bulletin','articles'].map(get));
+    const isImg = r => r.fileUrl && isImage(r.fileType);
 
-      box.querySelector('.prev').addEventListener('click', e => { e.stopPropagation(); show(cur - 1); start(); });
-      box.querySelector('.next').addEventListener('click', e => { e.stopPropagation(); show(cur + 1); start(); });
-      // 사진을 누르면 사진 게시판으로 이동합니다.
-      slides.forEach(s => s.addEventListener('click', () => { location.hash = '#photo'; }));
-      box.addEventListener('mouseenter', stop);
-      box.addEventListener('mouseleave', start);
-      start();
-    }catch(err){
-      console.error(err);
-      box.innerHTML = '<div class="ph">사진을 불러오지 못했습니다.</div>';
-    }
+    const photos = ph.filter(isImg).slice(0, 10).map(r => ({title: r.title, url: r.fileUrl}));
+    const video = sv.find(r => youtubeId(r.link));
+    const music = mu.filter(r => youtubeId(r.link)).slice(0, 5).map(r => ({title: r.title, yid: youtubeId(r.link)}));
+    // 주보: 가장 최근 이미지 2장 중 먼저 올린 것을 앞면, 나중에 올린 것을 뒷면으로 봅니다.
+    const bulletin = bu.filter(isImg).slice(0, 2).reverse().map(r => ({title: r.title, url: r.fileUrl}));
+    const articles = ar.slice(0, 5).map(r => {
+      const title = String(r.title || '');
+      const lines = String(r.body || '').split('\n').map(s => s.trim()).filter(Boolean);
+      const rest = lines[0] === title.trim() ? lines.slice(1) : lines;
+      return { title, excerpt: rest.join(' ').slice(0, 120) };
+    });
+
+    heroCards = [
+      {kind:'photo', route:'#photo', items: photos, empty: HERO_EMPTY.photo},
+      {kind:'video', route:'#service', items: [], html: video
+        ? `<div class="vcontent"><iframe src="https://www.youtube.com/embed/${youtubeId(video.link)}" title="${esc(video.title)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div><div class="vcap">${esc(video.title)} · ${fmt(video.createdAt)}</div>`
+        : `<div class="vcontent"><div class="vempty">${HERO_EMPTY.video}</div></div>`},
+      {kind:'music', route:'#music', items: music, empty: HERO_EMPTY.music},
+      {kind:'bulletin', route:'#bulletin', items: bulletin, empty: HERO_EMPTY.bulletin},
+      {kind:'articles', route:'#articles', items: articles, empty: HERO_EMPTY.articles}
+    ];
+    heroBuild();
+  }
+
+  function heroTick(){
+    if(!heroCards.length) return;
+    heroC++;
+    heroOff++;
+    heroSetTrack(true);
+    heroUpdateSlots();
+  }
+  function heroStart(){ heroStop(); heroTimer = setInterval(heroTick, HERO_STEP_MS); }
+  function heroStop(){ if(heroTimer){ clearInterval(heroTimer); heroTimer = null; } }
+
+  function wireHero(){
+    const track = heroTrackEl(), win = document.getElementById('hero-window');
+    if(!track || !win) return;
+    // 줄이 복제 칸까지 넘어가면, 보이는 모습은 그대로 두고 처음 자리로 조용히 되돌립니다.
+    track.addEventListener('transitionend', e => {
+      if(e.target !== track || heroOff < heroCards.length) return;
+      heroOff -= heroCards.length;
+      heroSetTrack(false);
+      void track.offsetWidth;
+      track.style.transition = '';
+    });
+    // 좌우 버튼은 사진 뷰어만 넘기고, 나머지 뷰어를 누르면 해당 게시판으로 이동합니다.
+    track.addEventListener('click', e => {
+      const card = e.target.closest('.vcard');
+      if(!card) return;
+      const btn = e.target.closest('.sl-btn');
+      if(btn){
+        e.stopPropagation();
+        const k = Number(card.dataset.k);
+        heroExtra[k] += Number(btn.dataset.dir);
+        heroUpdateSlots();
+        return;
+      }
+      location.hash = card.dataset.route;
+    });
+    win.addEventListener('mouseenter', heroStop);
+    win.addEventListener('mouseleave', heroStart);
+    window.addEventListener('resize', () => heroSetTrack(false));
   }
 
   /* ---------- 시작 ---------- */
@@ -1263,8 +1366,9 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   wireCalendarUI();
   wireCalForm();
   window.addEventListener('hashchange', route);
-  loadLatestService();
-  loadSlider();
+  wireHero();
+  loadHero();
+  heroStart();
   route();
   refreshBoards();
   renderCalendar();
