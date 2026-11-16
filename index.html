@@ -644,7 +644,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
             <div class="full"><label>작성자 이름 (선택)</label><input name="author" maxlength="40"></div>
             ${cfg.fields.includes('link') ? `<div class="full"><label>${LABELS.link}</label><input name="link" type="url" placeholder="https://..."></div>` : ''}
             ${cfg.fields.includes('body') ? `<div class="full"><label>${bodyLabel}</label><textarea name="body" maxlength="5000"></textarea></div>` : ''}
-            ${cfg.fields.includes('file') ? `<div class="full"><label>${cfg.multiple ? LABELS.fileMulti : LABELS.file}</label><input name="file" type="file" ${cfg.multiple ? 'multiple' : ''} ${cfg.accept ? `accept="${cfg.accept}"` : ''}></div>` : ''}
+            ${cfg.fields.includes('file') ? `<div class="full"><label>${id === 'files' ? '첨부 파일 (최대 50MB)' : (cfg.multiple ? LABELS.fileMulti : LABELS.file)}            </label><input name="file" type="file" ${cfg.multiple ? 'multiple' : ''} ${cfg.accept ? `accept="${cfg.accept}"` : ''}></div>` : ''}
             <div class="full"><label>비밀번호 (나중에 수정·삭제할 때 필요, 4자 이상)</label><input name="pw" type="password" required minlength="4" maxlength="30"></div>
             <div class="full"><button class="btn" type="submit">등록하기</button></div>
             <div class="full note">광고·음란·이단·타종교·폭력·비방 성격의 내용은 등록되지 않습니다.</div>
@@ -929,7 +929,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
           const payload = { ...base };
           status.textContent = jobs.length > 1 ? `등록 중… (${i + 1}/${jobs.length})` : '등록 중…';
           if(file){
-            if(file.size > 10 * 1024 * 1024){ status.textContent = '파일은 10MB 이하만 올릴 수 있습니다.'; return; }
+            const limitMB = id === 'files' ? 50 : 10;
+            if(file.size > limitMB * 1024 * 1024){ status.textContent = `파일은 ${limitMB}MB 이하만 올릴 수 있습니다.`; return; }
             payload.fileName = file.name;
             payload.fileType = file.type || 'application/octet-stream';
             payload.fileData = await readFileBase64(file);
