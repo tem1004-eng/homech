@@ -953,9 +953,6 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   }
 
   const boardEls = [...document.querySelectorAll('.board[data-board]')];
-  function refreshBoards(){
-    boardEls.forEach(el => { mountBoard(el); wireForm(el); loadBoard(el); });
-  }
 
   /* ---------- 목회 일정 데이터 (기본 일정 + 목회달력에서 추가한 일정) ---------- */
   let calRows = [];   // 목회달력 게시판 글 (link = 날짜, body = [⏰ 시간 줄] + 메모)
