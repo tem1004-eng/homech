@@ -166,6 +166,12 @@ h3.sub{font-size:1.2rem;margin:36px 0 14px}
 .about-panel li:last-child{border-bottom:0}
 .about-panel li::before{content:'';flex:0 0 9px;height:9px;margin-top:.55em;border-radius:50%;background:var(--c)}
 .about-panel .k{flex:0 0 auto;min-width:4.2em;font-weight:700;color:var(--c)}
+.about-panel li .tv{flex:1 1 auto;min-width:0}
+.about-panel .ed-btn{margin-left:auto;flex:0 0 auto}
+.about-panel li.tx-editor{display:block;padding:0 0 8px;border-bottom:0}
+.about-panel li.tx-editor::before{display:none}
+.about-panel li.tx-editor .pbox{margin-top:4px}
+.about-panel li.tx-editor textarea{min-height:70px}
 .c-brown{--c:#7a5c2e}
 .c-green{--c:#4f7a5a}
 .c-blue{--c:#3d6b8c}
@@ -375,12 +381,12 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     <div class="about-grid">
       <div class="about-panel c-brown">
         <div class="about-head"><span class="ico">✝</span>우리의 비전</div>
-        <ul>
-          <li><span class="k">복음</span><span>성경통독 30독</span></li>
-          <li><span class="k">예배</span><span>성령충만한 예배</span></li>
-          <li><span class="k">전도</span><span>50명의 현장예배</span></li>
-          <li><span class="k">교육</span><span>예수님의 제자 되기</span></li>
-          <li><span class="k">선교</span><span>섬김의 현장을 허락해 주소서</span></li>
+        <ul id="vision-list">
+          <li><span class="k">복음</span><span class="tv">성경통독 30독</span></li>
+          <li><span class="k">예배</span><span class="tv">성령충만한 예배</span></li>
+          <li><span class="k">전도</span><span class="tv">50명의 현장예배</span></li>
+          <li><span class="k">교육</span><span class="tv">예수님의 제자 되기</span></li>
+          <li><span class="k">선교</span><span class="tv">섬김의 현장을 허락해 주소서</span></li>
         </ul>
       </div>
 
@@ -406,11 +412,11 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 
       <div class="about-panel c-blue">
         <div class="about-head"><span class="ico">🙏</span>섬기는 사역</div>
-        <ul>
-          <li><span class="k">기도회</span><span>새벽기도회 · 수요 기도회</span></li>
-          <li><span class="k">교육부</span><span>주일학교 · 중고등부 · 청년회</span></li>
-          <li><span class="k">선교</span><span>파송 선교사 기도와 후원</span></li>
-          <li><span class="k">지역</span><span>지역 섬김 사역</span></li>
+        <ul id="mission-list">
+          <li><span class="k">기도회</span><span class="tv">새벽기도회 · 수요 기도회</span></li>
+          <li><span class="k">교육부</span><span class="tv">주일학교 · 중고등부 · 청년회</span></li>
+          <li><span class="k">선교</span><span class="tv">파송 선교사 기도와 후원</span></li>
+          <li><span class="k">지역</span><span class="tv">지역 섬김 사역</span></li>
         </ul>
       </div>
     </div>
@@ -1693,6 +1699,108 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     window.addEventListener('scroll', () => zoom.classList.remove('show'), {passive:true});
   }
 
+  /* ---------- 교회소개: 우리의 비전 · 섬기는 사역 (항목별 수정, 관리자 비밀번호가 맞을 때만 저장) ----------
+     화면에서 확인하는 것은 편의를 위한 것이고, 실제 보호는 Apps Script 서버가 관리자 비밀번호를 확인해서 합니다. */
+  const VISION_ITEMS = [
+    ['복음','성경통독 30독'],
+    ['예배','성령충만한 예배'],
+    ['전도','50명의 현장예배'],
+    ['교육','예수님의 제자 되기'],
+    ['선교','섬김의 현장을 허락해 주소서']
+  ];
+  const MISSION_ITEMS = [
+    ['기도회','새벽기도회 · 수요 기도회'],
+    ['교육부','주일학교 · 중고등부 · 청년회'],
+    ['선교','파송 선교사 기도와 후원'],
+    ['지역','지역 섬김 사역']
+  ];
+  const TEXT_BOARDS = {
+    vision:{ ul:'vision-list', items:VISION_ITEMS, rows:{} },
+    mission:{ ul:'mission-list', items:MISSION_ITEMS, rows:{} }
+  };
+
+  async function loadTextBoard(board){
+    const cfg = TEXT_BOARDS[board];
+    const ul = document.getElementById(cfg.ul);
+    if(!ul) return;
+    let rows = [];
+    if(configured){
+      try{
+        const res = await fetch(`${API_URL}?board=${board}`);
+        const j = await res.json();
+        if(Array.isArray(j)) rows = j;
+      }catch(err){ console.error(err); }
+    }
+    // 목록은 최신순이므로, 같은 항목에서 처음 만나는 글이 가장 최근 글입니다.
+    const byKey = {};
+    rows.forEach(r => { if(!byKey[r.title]) byKey[r.title] = r; });
+    cfg.rows = byKey;
+    ul.innerHTML = cfg.items.map(([key, def]) => {
+      const row = byKey[key];
+      const text = row ? String(row.body || '') : def;
+      return `<li data-key="${esc(key)}"><span class="k">${esc(key)}</span><span class="tv">${esc(text)}</span><button class="mini ed-btn" type="button" data-edit="${board}" data-key="${esc(key)}">수정</button></li>`;
+    }).join('');
+  }
+
+  // 수정 칸 열기
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-edit]');
+    if(!btn) return;
+    const board = btn.dataset.edit, key = btn.dataset.key;
+    const cfg = TEXT_BOARDS[board];
+    const li = btn.closest('li');
+    document.querySelectorAll('.tx-editor').forEach(x => x.remove());
+    const row = cfg.rows[key];
+    const def = (cfg.items.find(i => i[0] === key) || [])[1] || '';
+    const cur = row ? String(row.body || '') : def;
+    const ed = document.createElement('li');
+    ed.className = 'tx-editor';
+    ed.dataset.board = board;
+    ed.dataset.key = key;
+    ed.innerHTML = `
+      <div class="pbox">
+        <label>${esc(key)} 내용</label>
+        <textarea maxlength="300">${esc(cur)}</textarea>
+        <label>관리자 비밀번호</label>
+        <input type="password" placeholder="관리자만 입력" maxlength="30">
+        <div class="row"><button class="mini primary" type="button" data-save>저장</button><button class="mini" type="button" data-cancel>취소</button></div>
+        <div class="perr"></div>
+      </div>`;
+    li.after(ed);
+    ed.querySelector('textarea').focus();
+  });
+
+  // 저장 / 취소
+  document.addEventListener('click', async e => {
+    const cancel = e.target.closest('.tx-editor [data-cancel]');
+    if(cancel){ cancel.closest('.tx-editor').remove(); return; }
+    const save = e.target.closest('.tx-editor [data-save]');
+    if(!save) return;
+    const ed = save.closest('.tx-editor');
+    const board = ed.dataset.board, key = ed.dataset.key, cfg = TEXT_BOARDS[board];
+    const text = ed.querySelector('textarea').value.trim();
+    const pw = ed.querySelector('input[type="password"]').value.trim();
+    const err = ed.querySelector('.perr');
+    if(!text){ err.textContent = '내용을 입력해 주세요.'; return; }
+    if(pw.length < 4){ err.textContent = '관리자 비밀번호를 입력해 주세요.'; return; }
+    if(!configured){ err.textContent = '게시판 연결 설정이 필요합니다.'; return; }
+    const bad = censorCheck([text]);
+    if(bad){ err.textContent = censorMsg(bad); return; }
+    err.textContent = '저장 중…';
+    const row = cfg.rows[key];
+    const payload = row
+      ? { action:'update', board, id: row.id, title: key, body: text, password: pw, adminPassword: pw }
+      : { action:'create', board, title: key, body: text, password: pw, adminPassword: pw };
+    try{
+      const out = await postJSON(payload);
+      if(!out.ok) throw new Error(out.error || 'failed');
+      await loadTextBoard(board);
+    }catch(er){
+      console.error(er);
+      err.textContent = errText(er.message);
+    }
+  });
+
   /* ---------- 시작 ---------- */
   initCalState();
   boardEls.forEach(wireManage);
@@ -1712,6 +1820,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   wireStaff();
   wireStaffZoom();
   loadStaff();
+  loadTextBoard('vision');
+  loadTextBoard('mission');
 })();
 </script>
 </body>
