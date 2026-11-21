@@ -115,6 +115,10 @@ nav a.nav-btn.current{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--c1),0 6px 16px r
 .vbox .sl-btn:hover{background:rgba(0,0,0,.7)}
 .vbox .sl-btn.prev{left:12px}
 .vbox .sl-btn.next{right:12px}
+/* 마우스를 올리면 그 뷰어가 어떤 뷰어인지 왼쪽 위에 보여줍니다 (기존 표시는 잠시 가려집니다) */
+.vbadge.vhover{z-index:4;opacity:0;transition:opacity .25s ease;pointer-events:none}
+.vcard:hover .vbadge.vhover{opacity:1}
+.vcard:hover .vbadge:not(.vhover),.vcard:hover .vtag{visibility:hidden}
 
 .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:999px;background:linear-gradient(135deg,#7a5c2e,#b08a4f);color:#fff;text-decoration:none;font-weight:600;border:0;cursor:pointer;font-size:.95rem;font-family:inherit;box-shadow:0 6px 18px rgba(122,92,46,.30);transition:transform .15s ease,box-shadow .15s ease}
 .btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(122,92,46,.38);color:#fff}
@@ -1335,7 +1339,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
      모든 뷰어는 같은 주기(HERO_STEP_MS)로 움직입니다.
      - 줄 전체가 한 칸씩 왼쪽으로 넘어가고(넓은 화면은 세 칸, 중간 화면은 두 칸, 휴대폰은 한 칸 보임)
      - 각 뷰어 안의 내용도 같은 순간에 다음 항목으로 바뀝니다.
-     - 테두리 색은 맨 위 메뉴 글상자의 색과 같습니다 (c1, c2). */
+     - 테두리 색은 맨 위 메뉴 글상자의 색과 같습니다 (c1, c2).
+     - 마우스를 올리면 왼쪽 위에 그 뷰어의 이름이 나타납니다. */
   const HERO_STEP_MS = 4500;
   const HERO_EMPTY = {
     photo:'아직 올라온 사진이 없습니다.',
@@ -1351,6 +1356,14 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     music:['#2f7f85','#4fb0b5'],
     bulletin:['#4f7a5a','#7fa887'],
     articles:['#a0672b','#d18a4a']
+  };
+  // 마우스를 올렸을 때 왼쪽 위에 보이는 뷰어 이름
+  const HERO_LABEL = {
+    photo:'사진',
+    video:'오늘의 예배',
+    music:'음악',
+    bulletin:'주보',
+    articles:'좋은 글'
   };
   let heroCards = [];            // 다섯 개 뷰어 정보
   let heroExtra = [0,0,0,0,0];   // 뷰어마다 좌우 버튼으로 더 넘긴 칸 수
@@ -1429,7 +1442,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         : `<div class="vcontent"></div>` + (card.kind === 'photo'
             ? `<button class="sl-btn prev" data-dir="-1" type="button" aria-label="이전 사진">‹</button><button class="sl-btn next" data-dir="1" type="button" aria-label="다음 사진">›</button>`
             : '');
-      return `<div class="vcard" data-k="${k}" data-route="${card.route}" style="--c1:${c1};--c2:${c2}"><div class="vbox">${inner}</div></div>`;
+      const name = `<span class="vbadge vhover">${HERO_LABEL[card.kind]}</span>`;
+      return `<div class="vcard" data-k="${k}" data-route="${card.route}" style="--c1:${c1};--c2:${c2}"><div class="vbox">${inner}${name}</div></div>`;
     }).join('');
     heroSetTrack(false);
     heroUpdateSlots();
