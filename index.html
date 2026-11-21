@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="google-site-verification" content="Blm4YCB3VgCF25k7j4712unQfqm-8bFj6Dq11x_B_Gs" />
 <title>구미은혜로교회 홈페이지</title>
 <meta name="description" content="구미은혜로교회 홈페이지 입니다 교회주보와 예배 영상을 볼수 있고 교회의 소식을 볼수 있습니다">
 <meta property="og:type" content="website">
@@ -66,7 +65,9 @@ nav a.nav-btn.current{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--c1),0 6px 16px r
 .hero-title{font-size:2.4rem;margin:0 0 36px;letter-spacing:-.03em;text-align:center;text-shadow:0 2px 18px rgba(0,0,0,.35)}
 
 /* 뷰어 줄: 화면 좌우 끝까지 넓힙니다 */
-.hero-window{position:relative;overflow:hidden;border-radius:0}
+.hero-window{position:relative;overflow:hidden;border-radius:0;cursor:grab;touch-action:pan-y;user-select:none}
+.hero-window.dragging{cursor:grabbing}
+.hero-track img,.hero-track iframe{pointer-events:none;-webkit-user-drag:none}
 /* 줄 전체의 이동: 1.2초 동안 천천히 출발해서 천천히 멈춥니다 */
 .hero-track{display:flex;width:100%;transition:transform 1.2s cubic-bezier(.45,.05,.25,1);will-change:transform}
 .vcard{flex:0 0 calc(100% / var(--per, 3));position:relative;aspect-ratio:16/9;cursor:pointer}
@@ -219,6 +220,21 @@ form.post label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:
 .lg.ch{background:#f3e7c9;border:1px solid #7a5c2e}
 .lg.ev{background:#dbe9f3;border:1px solid #2c5b7a}
 
+.social{display:flex;align-items:center;gap:12px;margin-top:10px;font-size:.85rem;color:var(--muted);flex-wrap:wrap}
+.like-btn{padding:4px 12px;border:1px solid var(--line);background:#fff;border-radius:999px;font:inherit;font-size:.85rem;cursor:pointer;color:var(--muted)}
+.like-btn:hover{border-color:#c0504d;color:#c0504d}
+.like-btn.on{border-color:#c0504d;color:#c0504d;background:#fdf1f0}
+.like-btn:disabled{opacity:.6;cursor:default}
+.vcount{color:var(--muted)}
+.staff-ph{width:40px;height:40px;flex:0 0 40px;border-radius:50%;object-fit:cover;border:1px solid var(--line);background:#f1e9da;color:var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:1rem}
+#staff-list li{align-items:center}
+#staff-list li::before{display:none}
+.staff-up{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.staff-up-title{font-weight:700;font-size:.92rem;color:var(--accent);margin-bottom:6px}
+#staff-form{display:grid;gap:8px}
+#staff-form select,#staff-form input[type=file],#staff-form input[type=password]{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:.9rem;background:#fff}
+#staff-form .mini{justify-self:start}
+
 footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid var(--line);text-align:center}
 
 /* 화면 너비에 따른 조절 */
@@ -323,12 +339,22 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 
       <div class="about-panel c-green">
         <div class="about-head"><span class="ico">👥</span>섬기는 분들</div>
-        <ul>
-          <li><span class="k">담임목사</span><span>백성현목사</span></li>
-          <li><span class="k">협동목사</span><span>변용세목사</span></li>
-          <li><span class="k">전도사</span><span>김명길전도사</span></li>
-          <li><span class="k">파송선교사</span><span>이장현선교사</span></li>
+        <ul id="staff-list">
+          <li><span class="staff-ph">✝</span><span class="k">담임목사</span><span>백성현목사</span></li>
+          <li><span class="staff-ph">✝</span><span class="k">협동목사</span><span>변용세목사</span></li>
+          <li><span class="staff-ph">✝</span><span class="k">전도사</span><span>김명길전도사</span></li>
+          <li><span class="staff-ph">✝</span><span class="k">파송선교사</span><span>이장현선교사</span></li>
         </ul>
+        <div class="staff-up">
+          <div class="staff-up-title">사진 올리기</div>
+          <div class="status" data-role="staff-status"></div>
+          <form id="staff-form">
+            <select name="role"></select>
+            <input name="file" type="file" accept="image/*">
+            <input name="pw" type="password" placeholder="비밀번호 (4자 이상)" minlength="4" maxlength="30" required>
+            <button class="mini primary" type="submit">사진 올리기</button>
+          </form>
+        </div>
       </div>
 
       <div class="about-panel c-blue">
@@ -667,13 +693,21 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     decorate(el, rows);
   }
 
+  /* 좋아요와 조회수 줄 */
+  function isLiked(id){ try{ return localStorage.getItem('liked:' + id) === '1'; }catch(e){ return false; } }
+  function setLiked(id, on){ try{ if(on) localStorage.setItem('liked:' + id, '1'); else localStorage.removeItem('liked:' + id); }catch(e){} }
+  function socialHTML(r){
+    const liked = isLiked(r.id);
+    return `<div class="social"><button class="like-btn${liked ? ' on' : ''}" type="button" data-like="${esc(r.id)}">${liked ? '♥' : '♡'} <span>${Number(r.likes) || 0}</span></button><span class="vcount">👁 <span>${Number(r.views) || 0}</span></span></div>`;
+  }
+
   function decorate(el, rows){
     const items = el.querySelector('[data-role="items"]');
     items.querySelectorAll('.item').forEach((it, i) => {
       const r = rows[i];
       if(!r) return;
       it.dataset.id = r.id;
-      it.insertAdjacentHTML('beforeend',
+      it.insertAdjacentHTML('beforeend', socialHTML(r) +
         '<div class="mbar"><button class="mini" type="button" data-act="edit">수정</button><button class="mini" type="button" data-act="delete">삭제</button></div><div class="panel" data-role="panel"></div>');
     });
   }
@@ -1230,6 +1264,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   let heroC = 0;                 // 내용 넘김 횟수
   let heroOff = 0;               // 줄이 보이는 위치 (0~4, 뒤에 복제해 둔 칸을 보여준 뒤 처음 자리로 되돌아감)
   let heroTimer = null;
+  let heroDrag = null;           // 끌고 있는 중이면 드래그 정보
+  let heroMoved = false;         // 끌었다가 놓은 뒤에는 클릭으로 치지 않습니다
   const heroTrackEl = () => document.getElementById('hero-track');
   // 화면 폭에 따라 한 번에 보이는 뷰어 수: 넓으면 3개, 중간이면 2개, 휴대폰이면 1개
   const heroPer = () => {
@@ -1342,7 +1378,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   }
 
   function heroTick(){
-    if(!heroCards.length) return;
+    if(!heroCards.length || heroDrag) return;
+    if(heroOff >= heroCards.length){ heroOff -= heroCards.length; heroSetTrack(false); }
     heroC++;
     heroOff++;
     heroSetTrack(true);
@@ -1366,6 +1403,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     track.addEventListener('click', e => {
       const card = e.target.closest('.vcard');
       if(!card) return;
+      if(heroMoved){ heroMoved = false; return; }
       const btn = e.target.closest('.sl-btn');
       if(btn){
         e.stopPropagation();
@@ -1376,9 +1414,141 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       }
       location.hash = card.dataset.route;
     });
+    /* 드래그: 마우스나 손가락으로 끌면 뷰어가 따라 움직이고, 놓으면 가장 가까운 칸에 맞춰 멈춥니다. */
+    win.addEventListener('pointerdown', e => {
+      if(!heroCards.length || e.button > 0 || e.target.closest('.sl-btn')) return;
+      const N = heroCards.length;
+      heroStop();
+      if(heroOff === 0){ heroOff = N; heroSetTrack(false); }   // 같은 모습의 복제 칸으로 옮겨 둡니다
+      heroMoved = false;
+      heroDrag = { x: e.clientX, startOff: heroOff, off: heroOff, width: win.clientWidth };
+      track.style.transition = 'none';
+      win.classList.add('dragging');
+    });
+    window.addEventListener('pointermove', e => {
+      if(!heroDrag) return;
+      const dx = e.clientX - heroDrag.x;
+      if(Math.abs(dx) > 6) heroMoved = true;
+      const per = heroPer(), hi = heroCards.length + 3 - per;
+      const off = Math.min(hi, Math.max(0, heroDrag.startOff - dx / (heroDrag.width / per)));
+      heroDrag.off = off;
+      track.style.transform = `translateX(-${off * 100 / per}%)`;
+    });
+    const heroEndDrag = () => {
+      if(!heroDrag) return;
+      const per = heroPer(), hi = heroCards.length + 3 - per;
+      const target = Math.min(hi, Math.max(0, Math.round(heroDrag.off)));
+      heroDrag = null;
+      win.classList.remove('dragging');
+      heroOff = target;
+      track.style.transition = 'transform .45s cubic-bezier(.2,.8,.3,1)';
+      track.style.transform = `translateX(-${target * 100 / per}%)`;
+      if(!win.matches(':hover')) heroStart();
+    };
+    window.addEventListener('pointerup', heroEndDrag);
+    window.addEventListener('pointercancel', heroEndDrag);
     win.addEventListener('mouseenter', heroStop);
     win.addEventListener('mouseleave', heroStart);
     window.addEventListener('resize', () => heroSetTrack(false));
+  }
+
+  /* ---------- 좋아요: 한 기기에서는 글마다 한 번만 누를 수 있고, 다시 누르면 취소됩니다 ---------- */
+  document.addEventListener('click', async e => {
+    const btn = e.target.closest('.like-btn[data-like]');
+    if(!btn) return;
+    const board = btn.closest('.board'); if(!board) return;
+    const id = btn.dataset.like, wasOn = isLiked(id), next = !wasOn;
+    const before = Number(btn.querySelector('span').textContent) || 0;
+    const show = (on, n) => { btn.classList.toggle('on', on); btn.innerHTML = `${on ? '♥' : '♡'} <span>${n}</span>`; };
+    show(next, Math.max(0, before + (next ? 1 : -1)));
+    btn.disabled = true;
+    try{
+      const out = await postJSON({ action:'like', board: board.dataset.board, id, on: next });
+      if(!out.ok) throw new Error(out.error || 'failed');
+      setLiked(id, next);
+      show(next, out.likes);
+    }catch(err){
+      console.error(err);
+      show(wasOn, before);
+    }finally{
+      btn.disabled = false;
+    }
+  });
+
+  /* ---------- 조회수: 글 내용을 누르면 올라갑니다 (버튼·링크·영상 칸을 누른 경우는 세지 않습니다) ---------- */
+  document.addEventListener('click', e => {
+    const item = e.target.closest('.board .item');
+    if(!item || !item.dataset.id) return;
+    if(e.target.closest('button,a,iframe,input,textarea,select,label,form,.mbar,.panel,.social')) return;
+    const board = item.closest('.board'); if(!board) return;
+    const v = item.querySelector('.vcount span');
+    if(v) v.textContent = (Number(v.textContent) || 0) + 1;
+    postJSON({ action:'view', board: board.dataset.board, id: item.dataset.id })
+      .then(out => { if(out && out.ok && v) v.textContent = out.views; })
+      .catch(() => {});
+  });
+
+  /* ---------- 섬기는 분들 사진 ---------- */
+  const STAFF = [
+    {role:'담임목사', name:'백성현목사'},
+    {role:'협동목사', name:'변용세목사'},
+    {role:'전도사', name:'김명길전도사'},
+    {role:'파송선교사', name:'이장현선교사'}
+  ];
+
+  async function loadStaff(){
+    const photos = {};
+    if(configured){
+      try{
+        const res = await fetch(`${API_URL}?board=staff`);
+        const rows = await res.json();
+        // 목록은 최신순이므로, 같은 직분에서 처음 만나는 사진이 가장 최근 사진입니다.
+        if(Array.isArray(rows)) rows.forEach(r => { if(!photos[r.title] && r.fileUrl && isImage(r.fileType)) photos[r.title] = r.fileUrl; });
+      }catch(err){ console.error(err); }
+    }
+    const list = document.getElementById('staff-list');
+    if(!list) return;
+    list.innerHTML = STAFF.map(s => {
+      const url = photos[s.role];
+      const ph = url
+        ? `<img class="staff-ph" src="${esc(shotUrl(url))}" alt="${esc(s.name)}" onerror="this.onerror=null;this.src='${esc(url)}'">`
+        : '<span class="staff-ph">✝</span>';
+      return `<li>${ph}<span class="k">${esc(s.role)}</span><span>${esc(s.name)}</span></li>`;
+    }).join('');
+  }
+
+  function wireStaff(){
+    const form = document.getElementById('staff-form'), status = document.querySelector('[data-role="staff-status"]');
+    if(!form || !status) return;
+    form.querySelector('select[name="role"]').innerHTML = STAFF.map(s => `<option value="${esc(s.role)}">${esc(s.role)} · ${esc(s.name)}</option>`).join('');
+    if(!configured){
+      status.innerHTML = '<div class="banner">게시판 연결 설정이 필요합니다 (index.html 의 API_URL).</div>';
+      return;
+    }
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const role = (fd.get('role') || '').toString();
+      const f = fd.get('file');
+      const pw = (fd.get('pw') || '').toString();
+      if(!f || !f.size){ status.textContent = '사진을 골라 주세요.'; return; }
+      if(f.size > 10 * 1024 * 1024){ status.textContent = '파일은 10MB 이하만 올릴 수 있습니다.'; return; }
+      if(pw.length < 4){ status.textContent = '비밀번호는 4자 이상 입력해 주세요.'; return; }
+      status.textContent = '올리는 중…';
+      try{
+        const out = await postJSON({
+          action:'create', board:'staff', title: role, password: pw,
+          fileName: f.name, fileType: f.type || 'image/jpeg', fileData: await readFileBase64(f)
+        });
+        if(!out.ok) throw new Error(out.error || 'failed');
+        form.reset();
+        status.textContent = '사진을 올렸습니다.';
+        loadStaff();
+      }catch(err){
+        console.error(err);
+        status.textContent = errText(err.message);
+      }
+    });
   }
 
   /* ---------- 시작 ---------- */
@@ -1396,6 +1566,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   renderCalendar();
   renderWorshipSchedule();
   loadCalendar();
+  wireStaff();
+  loadStaff();
 })();
 </script>
 </body>
