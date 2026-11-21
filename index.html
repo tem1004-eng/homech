@@ -235,6 +235,16 @@ form.post label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:
 #staff-form select,#staff-form input[type=file],#staff-form input[type=password]{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:.9rem;background:#fff}
 #staff-form .mini{justify-self:start}
 
+/* 메뉴 설명창 (마우스를 올리거나 키보드로 포커스하면 나타납니다) */
+nav a.nav-btn{position:relative}
+.nav-tip{position:absolute;top:calc(100% + 16px);left:50%;width:250px;padding:16px 18px 15px;border-radius:16px;background:rgba(255,255,255,.98);color:var(--muted);border:1px solid var(--line);box-shadow:0 20px 44px rgba(40,30,10,.20);font-size:.86rem;font-weight:400;line-height:1.7;letter-spacing:0;text-align:left;white-space:normal;pointer-events:none;opacity:0;transform:translate(-50%,10px) scale(.96);transform-origin:top center;transition:opacity .28s ease,transform .32s cubic-bezier(.2,.8,.3,1);z-index:30}
+.nav-tip::before{content:'';position:absolute;left:18px;right:18px;top:-1px;height:4px;border-radius:0 0 4px 4px;background:linear-gradient(90deg,var(--c1),var(--c2))}
+.nav-tip::after{content:'';position:absolute;top:-8px;left:50%;margin-left:-8px;width:14px;height:14px;background:rgba(255,255,255,.98);border-left:1px solid var(--line);border-top:1px solid var(--line);transform:rotate(45deg)}
+.nav-tip b{display:block;margin-bottom:4px;font-size:.98rem;font-weight:700;letter-spacing:-.02em;background:linear-gradient(90deg,var(--c1),var(--c2));-webkit-background-clip:text;background-clip:text;color:transparent}
+nav a.nav-btn:hover .nav-tip,nav a.nav-btn:focus-visible .nav-tip{opacity:1;transform:translate(-50%,0) scale(1)}
+nav li:last-child .nav-tip{left:auto;right:0;transform:translate(0,10px) scale(.96);transform-origin:top right}
+nav li:last-child a.nav-btn:hover .nav-tip,nav li:last-child a.nav-btn:focus-visible .nav-tip{transform:translate(0,0) scale(1)}
+
 footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid var(--line);text-align:center}
 
 /* 화면 너비에 따른 조절 */
@@ -249,6 +259,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   nav::-webkit-scrollbar{display:none}
   nav ul{width:max-content;justify-content:flex-start;padding-bottom:4px}
+  .nav-tip{display:none}
   .hero{padding:80px 0 70px}
   .hero-title{font-size:1.8rem;margin-bottom:26px}
   form.post{grid-template-columns:1fr}.music-row{grid-template-columns:1fr}.about-grid{grid-template-columns:1fr}
@@ -272,15 +283,15 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     </div>
     <nav>
       <ul>
-        <li><a class="nav-btn" href="#about"     style="--c1:#7a5c2e;--c2:#b08a4f"><span class="ic">🏛</span>교회소개</a></li>
-        <li><a class="nav-btn" href="#worship"   style="--c1:#3d6b8c;--c2:#5f93b8"><span class="ic">🕊</span>예배안내</a></li>
-        <li><a class="nav-btn" href="#service"   style="--c1:#9a4f5e;--c2:#c06f7d"><span class="ic">▶</span>오늘의 예배</a></li>
-        <li><a class="nav-btn" href="#bulletin"  style="--c1:#4f7a5a;--c2:#7fa887"><span class="ic">📰</span>주보</a></li>
-        <li><a class="nav-btn" href="#photo"     style="--c1:#6a4f8c;--c2:#9177b8"><span class="ic">📷</span>사진</a></li>
-        <li><a class="nav-btn" href="#music"     style="--c1:#2f7f85;--c2:#4fb0b5"><span class="ic">🎵</span>음악</a></li>
-        <li><a class="nav-btn" href="#articles"  style="--c1:#a0672b;--c2:#d18a4a"><span class="ic">📖</span>좋은 글</a></li>
-        <li><a class="nav-btn" href="#files"     style="--c1:#4a5a78;--c2:#6f80a6"><span class="ic">📁</span>파일공유</a></li>
-        <li><a class="nav-btn" href="#visit"     style="--c1:#8c4a3a;--c2:#b87262"><span class="ic">📍</span>오시는 길</a></li>
+        <li><a class="nav-btn" href="#about" style="--c1:#7a5c2e;--c2:#b08a4f"><span class="ic">🏛</span>교회소개<span class="nav-tip"><b>교회소개</b>구미은혜로교회의 비전, 섬기는 분들, 섬기는 사역을 소개합니다.</span></a></li>
+        <li><a class="nav-btn" href="#worship" style="--c1:#3d6b8c;--c2:#5f93b8"><span class="ic">🕊</span>예배안내<span class="nav-tip"><b>예배안내</b>예배 시간과 분기별 교회 일정을 안내합니다.</span></a></li>
+        <li><a class="nav-btn" href="#service" style="--c1:#9a4f5e;--c2:#c06f7d"><span class="ic">▶</span>오늘의 예배<span class="nav-tip"><b>오늘의 예배</b>최근 예배의 유튜브 영상을 다시 볼 수 있습니다.</span></a></li>
+        <li><a class="nav-btn" href="#bulletin" style="--c1:#4f7a5a;--c2:#7fa887"><span class="ic">📰</span>주보<span class="nav-tip"><b>주보</b>이번 주 주보와 이전 주보를 볼 수 있습니다.</span></a></li>
+        <li><a class="nav-btn" href="#photo" style="--c1:#6a4f8c;--c2:#9177b8"><span class="ic">📷</span>사진<span class="nav-tip"><b>사진</b>교회 행사 사진과 말씀 이미지를 모아 봅니다.</span></a></li>
+        <li><a class="nav-btn" href="#music" style="--c1:#2f7f85;--c2:#4fb0b5"><span class="ic">🎵</span>음악<span class="nav-tip"><b>음악</b>유튜브 찬양 중 좋아하는 추천 찬양들을 나눕니다.</span></a></li>
+        <li><a class="nav-btn" href="#articles" style="--c1:#a0672b;--c2:#d18a4a"><span class="ic">📖</span>좋은 글<span class="nav-tip"><b>좋은 글</b>남기고 싶은 글과 이미지 글들을 모았습니다.</span></a></li>
+        <li><a class="nav-btn" href="#files" style="--c1:#4a5a78;--c2:#6f80a6"><span class="ic">📁</span>파일공유<span class="nav-tip"><b>파일공유</b>유익한 파일을 내려받을 수 있습니다.</span></a></li>
+        <li><a class="nav-btn" href="#visit" style="--c1:#8c4a3a;--c2:#b87262"><span class="ic">📍</span>오시는 길<span class="nav-tip"><b>오시는 길</b>교회 찾아오시는 길을 안내합니다.</span></a></li>
       </ul>
     </nav>
   </div>
