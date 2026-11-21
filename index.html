@@ -60,12 +60,37 @@ nav a.nav-btn.current{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--c1),0 6px 16px r
 .view{display:none}
 .view.active{display:block}
 
-/* 첫 화면: 인사말 + 뷰어 한 줄 (4.5초마다 한 칸씩 왼쪽으로 넘어갑니다) */
-.hero{padding:90px 0 90px;color:#fff;background:linear-gradient(180deg,rgba(18,28,44,.40),rgba(18,28,44,.78)),url(images/church.png) center 40%/cover no-repeat}
-.hero-title{font-size:2.4rem;margin:0 0 36px;letter-spacing:-.03em;text-align:center;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+/* 첫 화면: 제목을 메뉴와 뷰어 사이의 가운데에 두고, 아래에 뷰어 한 줄 (4.5초마다 한 칸씩 왼쪽으로 넘어갑니다) */
+.hero{position:relative;min-height:min(78vh,660px);display:flex;flex-direction:column;justify-content:center;padding:70px 0 60px;color:#fff;background:linear-gradient(180deg,rgba(18,28,44,.40),rgba(18,28,44,.78)),url(images/church.png) center 40%/cover no-repeat;overflow:hidden}
+/* 가장자리를 살짝 어둡게 해서 가운데 글씨가 또렷하게 보이도록 합니다 */
+.hero::after{content:'';position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse at center,rgba(8,12,22,0) 35%,rgba(8,12,22,.45) 100%);pointer-events:none}
+.hero .wrap{position:relative;z-index:1;text-align:center}
+/* 위쪽 작은 영문 라벨 */
+.hero-kicker{display:flex;align-items:center;justify-content:center;gap:14px;font-size:.76rem;font-weight:500;letter-spacing:.42em;text-transform:uppercase;color:rgba(255,241,214,.9);margin:0 0 18px;animation:heroRise 1s ease both}
+.hero-kicker::before,.hero-kicker::after{content:'';width:48px;height:1px;background:linear-gradient(90deg,transparent,#e7c98a)}
+.hero-kicker::after{background:linear-gradient(90deg,#e7c98a,transparent)}
+/* 메인 제목: 흰색, 가운데 정렬, 아래 금빛 장식선, 마우스를 올리면 물결이 칩니다 */
+.hero-title{position:relative;font-size:clamp(1.7rem,3.6vw,2.9rem);font-weight:700;line-height:1.35;margin:0 0 42px;letter-spacing:-.03em;text-align:center;word-break:keep-all;text-shadow:0 2px 24px rgba(0,0,0,.45);animation:heroRise 1.2s .15s ease both;cursor:default}
+.hero-title::after{content:'';display:block;width:72px;height:2px;margin:22px auto 0;border-radius:2px;background:linear-gradient(90deg,transparent,#e7c98a,transparent)}
+@keyframes heroRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.hero-kicker,.hero-title{animation:none}}
+
+/* 글자 물결: 글자 하나하나가 따로 출렁입니다 */
+.hero-title .wd{display:inline-block;white-space:nowrap}
+.hero-title .wc{display:inline-block;transform-origin:50% 85%;will-change:transform}
+.hero-title .wc.wv{animation:waveBob .95s ease both}
+@keyframes waveBob{
+  0%{transform:translateY(0) scale(1);text-shadow:0 2px 24px rgba(0,0,0,.45)}
+  30%{transform:translateY(-7px) scale(1.05);text-shadow:0 -2px 18px rgba(190,230,255,.9),0 2px 24px rgba(0,0,0,.45)}
+  60%{transform:translateY(3px) scale(.98)}
+  100%{transform:translateY(0) scale(1);text-shadow:0 2px 24px rgba(0,0,0,.45)}
+}
+/* 배가 지나간 자리에 퍼지는 물결 원 */
+.hero-title .ripple{position:absolute;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;border:1.5px solid rgba(220,240,255,.85);box-shadow:0 0 14px rgba(180,220,255,.5),inset 0 0 8px rgba(200,235,255,.4);pointer-events:none;opacity:0;animation:ripple 1.1s ease-out forwards}
+@keyframes ripple{from{transform:scale(.2);opacity:.9}to{transform:scale(7);opacity:0}}
 
 /* 뷰어 줄: 화면 좌우 끝까지 넓힙니다 */
-.hero-window{position:relative;overflow:hidden;border-radius:0;cursor:grab;touch-action:pan-y;user-select:none}
+.hero-window{position:relative;z-index:1;overflow:hidden;border-radius:0;cursor:grab;touch-action:pan-y;user-select:none}
 .hero-window.dragging{cursor:grabbing}
 .hero-track img,.hero-track iframe{pointer-events:none;-webkit-user-drag:none}
 /* 줄 전체의 이동: 1.2초 동안 천천히 출발해서 천천히 멈춥니다 */
@@ -260,8 +285,9 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   nav::-webkit-scrollbar{display:none}
   nav ul{width:max-content;justify-content:flex-start;padding-bottom:4px}
   .nav-tip{display:none}
-  .hero{padding:80px 0 70px}
-  .hero-title{font-size:1.8rem;margin-bottom:26px}
+  .hero{min-height:auto;padding:60px 0 56px}
+  .hero-kicker{letter-spacing:.3em;font-size:.68rem}
+  .hero-title{font-size:1.5rem;margin-bottom:26px}
   form.post{grid-template-columns:1fr}.music-row{grid-template-columns:1fr}.about-grid{grid-template-columns:1fr}
   .tiles{grid-template-columns:1fr 1fr;gap:14px}.tile{min-height:140px;padding:20px 16px}.tile h3{font-size:1.05rem}.tile p{font-size:.85rem}
   .cal-cell{min-height:52px}.lab{font-size:.6rem}
@@ -302,6 +328,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 <section class="view" data-view="home">
   <div class="hero">
     <div class="wrap">
+      <p class="hero-kicker">Welcome</p>
       <h1 class="hero-title">구미은혜로교회에 오신 것을 환영합니다</h1>
     </div>
     <div class="hero-window" id="hero-window">
@@ -1252,6 +1279,58 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     });
   }
 
+  /* ---------- 첫 화면 제목 물결 효과 ----------
+     제목의 글자를 하나씩 나눈 뒤, 마우스가 지나가면 가까운 글자부터 출렁이고
+     지나간 자리에 물결 원이 퍼집니다. 움직임을 줄이기로 설정한 기기에서는 쉬어 갑니다. */
+  function initTitleWave(){
+    const h = document.querySelector('.hero-title');
+    if(!h || h.dataset.wave) return;
+    h.dataset.wave = '1';
+    const text = h.textContent.trim();
+    h.setAttribute('aria-label', text);
+    h.textContent = '';
+    text.split(' ').forEach((word, wi, arr) => {
+      const w = document.createElement('span');
+      w.className = 'wd';
+      w.setAttribute('aria-hidden', 'true');
+      [...word].forEach(c => {
+        const s = document.createElement('span');
+        s.className = 'wc';
+        s.textContent = c;
+        w.appendChild(s);
+      });
+      h.appendChild(w);
+      if(wi < arr.length - 1) h.appendChild(document.createTextNode(' '));
+    });
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduce) return;
+    let last = 0;
+    h.addEventListener('pointermove', e => {
+      const now = performance.now();
+      if(now - last < 45) return;          // 너무 자주 그리지 않도록 조금 쉬어 갑니다
+      last = now;
+      const hr = h.getBoundingClientRect();
+      const x = e.clientX, y = e.clientY;
+      // 배가 지나간 자리의 물결 원
+      const r = document.createElement('span');
+      r.className = 'ripple';
+      r.style.left = (x - hr.left) + 'px';
+      r.style.top = (y - hr.top) + 'px';
+      h.appendChild(r);
+      r.addEventListener('animationend', () => r.remove());
+      // 가까운 글자부터 차례로 출렁이게 합니다
+      h.querySelectorAll('.wc').forEach(c => {
+        const cr = c.getBoundingClientRect();
+        const d = Math.abs(cr.left + cr.width / 2 - x);
+        if(d > 140) return;
+        c.style.animationDelay = Math.round(d * 2.2) + 'ms';
+        c.classList.remove('wv');
+        void c.offsetWidth;                // 같은 움직임을 다시 시작하기 위한 준비
+        c.classList.add('wv');
+      });
+    });
+  }
+
   /* ---------- 첫 화면 뷰어 한 줄: 사진 · 예배영상 · 음악 · 주보 · 좋은 글 ----------
      모든 뷰어는 같은 주기(HERO_STEP_MS)로 움직입니다.
      - 줄 전체가 한 칸씩 왼쪽으로 넘어가고(넓은 화면은 세 칸, 중간 화면은 두 칸, 휴대폰은 한 칸 보임)
@@ -1574,6 +1653,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   wireCalendarUI();
   wireCalForm();
   window.addEventListener('hashchange', route);
+  initTitleWave();
   wireHero();
   loadHero();
   heroStart();
