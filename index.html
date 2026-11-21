@@ -167,7 +167,7 @@ h3.sub{font-size:1.2rem;margin:36px 0 14px}
 .about-panel li::before{content:'';flex:0 0 9px;height:9px;margin-top:.55em;border-radius:50%;background:var(--c)}
 .about-panel .k{flex:0 0 auto;min-width:4.2em;font-weight:700;color:var(--c)}
 .about-panel li .tv{flex:1 1 auto;min-width:0}
-.edit-zone{margin-top:auto;min-height:52px;display:flex;align-items:center;justify-content:center;padding:4px 16px 14px}
+.edit-zone{margin-top:auto;min-height:30px;display:flex;align-items:center;justify-content:center;padding:2px 16px 6px}
 .edit-reveal{opacity:0;transform:translateY(4px);transition:opacity .5s ease,transform .5s ease,background .15s ease,color .15s ease;padding:5px 14px;border:1px solid var(--c);background:#fff;color:var(--c);border-radius:999px;font:inherit;font-size:.82rem;cursor:pointer}
 .edit-zone:hover .edit-reveal,.edit-reveal:focus-visible{opacity:.9;transform:none}
 .edit-reveal:hover{background:var(--c);color:#fff}
@@ -409,16 +409,6 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
           <li><span class="staff-ph">✝</span><span class="k">전도사</span><span>김명길전도사</span></li>
           <li><span class="staff-ph">✝</span><span class="k">파송선교사</span><span>이장현선교사</span></li>
         </ul>
-        <div class="staff-up">
-          <div class="staff-up-title">사진 올리기</div>
-          <div class="status" data-role="staff-status"></div>
-          <form id="staff-form">
-            <select name="role"></select>
-            <input name="file" type="file" accept="image/*">
-            <input name="pw" type="password" placeholder="비밀번호 (4자 이상)" minlength="4" maxlength="30" required>
-            <button class="mini primary" type="submit">사진 올리기</button>
-          </form>
-        </div>
         <div class="edit-zone"><button class="edit-reveal" type="button" data-open-group="staff">✎ 내용수정</button></div>
       </div>
 
@@ -1644,40 +1634,6 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     renderStaffList();
   }
 
-  function wireStaff(){
-    const form = document.getElementById('staff-form'), status = document.querySelector('[data-role="staff-status"]');
-    if(!form || !status) return;
-    form.querySelector('select[name="role"]').innerHTML = STAFF.map(s => `<option value="${esc(s.role)}">${esc(s.role)} · ${esc(s.name)}</option>`).join('');
-    if(!configured){
-      status.innerHTML = '<div class="banner">게시판 연결 설정이 필요합니다 (index.html 의 API_URL).</div>';
-      return;
-    }
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      const fd = new FormData(form);
-      const role = (fd.get('role') || '').toString();
-      const f = fd.get('file');
-      const pw = (fd.get('pw') || '').toString();
-      if(!f || !f.size){ status.textContent = '사진을 골라 주세요.'; return; }
-      if(f.size > 10 * 1024 * 1024){ status.textContent = '파일은 10MB 이하만 올릴 수 있습니다.'; return; }
-      if(pw.length < 4){ status.textContent = '비밀번호는 4자 이상 입력해 주세요.'; return; }
-      status.textContent = '올리는 중…';
-      try{
-        const out = await postJSON({
-          action:'create', board:'staff', title: role, password: pw,
-          fileName: f.name, fileType: f.type || 'image/jpeg', fileData: await readFileBase64(f)
-        });
-        if(!out.ok) throw new Error(out.error || 'failed');
-        form.reset();
-        status.textContent = '사진을 올렸습니다.';
-        loadStaff();
-      }catch(err){
-        console.error(err);
-        status.textContent = errText(err.message);
-      }
-    });
-  }
-
   /* 섬기는 분들 사진 위에 마우스를 올리면 5:8 비율로 크게 보여 줍니다.
      화면 밖으로 잘리지 않도록 사진 옆 빈 자리에 놓습니다. */
   function wireStaffZoom(){
@@ -1847,6 +1803,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       <select data-role="pick">${options}</select>
       <label>${g.staff ? '이름' : '내용'}</label>
       ${field}
+      ${g.staff ? '<label>사진 올리기 (위에서 고른 항목의 사진)</label><input type="file" data-role="photo" accept="image/*"><div class="row"><button class="mini primary" type="button" data-adm="photo">사진 올리기</button></div>' : ''}
       <div class="perr" data-role="adm-err"></div>
       <div class="row"><button class="mini primary" type="button" data-adm="save">저장</button><button class="mini" type="button" data-adm="close">닫기</button></div>`;
     admFill();
@@ -1889,6 +1846,32 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     }
   }
 
+  async function admPhoto(){
+    const box = admBox();
+    const g = EDIT_GROUPS[box.dataset.group];
+    const it = g.items[Number(box.querySelector('[data-role="pick"]').value)];
+    const input = box.querySelector('[data-role="photo"]');
+    const f = input.files[0];
+    const err = box.querySelector('[data-role="adm-err"]');
+    if(!f){ err.textContent = '사진을 골라 주세요.'; return; }
+    if(f.size > 10 * 1024 * 1024){ err.textContent = '파일은 10MB 이하만 올릴 수 있습니다.'; return; }
+    if(!configured){ err.textContent = '게시판 연결 설정이 필요합니다.'; return; }
+    err.textContent = '올리는 중…';
+    try{
+      const out = await postJSON({
+        action:'create', board:'staff', title: it.label, password: admPw, adminPassword: admPw,
+        fileName: f.name, fileType: f.type || 'image/jpeg', fileData: await readFileBase64(f)
+      });
+      if(!out.ok) throw new Error(out.error || 'failed');
+      input.value = '';
+      await loadStaff();
+      err.textContent = '사진을 올렸습니다.';
+    }catch(er){
+      console.error(er);
+      err.textContent = errText(er.message);
+    }
+  }
+
   function wireAdmin(){
     document.querySelectorAll('[data-open-group]').forEach(btn => {
       btn.addEventListener('click', () => admAskPassword(btn.dataset.openGroup));
@@ -1902,6 +1885,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       if(b.dataset.adm === 'close') admClose();
       else if(b.dataset.adm === 'ok') admVerify();
       else if(b.dataset.adm === 'save') admSave();
+      else if(b.dataset.adm === 'photo') admPhoto();
     });
     o.addEventListener('change', e => {
       if(e.target.matches('[data-role="pick"]')) admFill();
@@ -1932,7 +1916,6 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   renderCalendar();
   renderWorshipSchedule();
   loadCalendar();
-  wireStaff();
   wireStaffZoom();
   loadStaff();
   loadTextBoard('vision');
