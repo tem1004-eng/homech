@@ -156,6 +156,10 @@ h3.sub{font-size:1.2rem;margin:36px 0 14px}
 .photo-wide{width:100%;border-radius:14px;border:1px solid var(--line);margin-bottom:28px;display:block}
 .about-img{display:block;width:100%;max-width:620px;height:auto;margin:0 auto 36px;border-radius:14px;border:1px solid var(--line);box-shadow:0 10px 26px rgba(60,40,10,.10)}
 .about-intro{max-width:720px;margin:0 auto 36px;padding:22px 26px;background:#fff;border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:14px;box-shadow:0 6px 18px rgba(60,40,10,.06);font-size:1.05rem;line-height:1.9;color:var(--ink);text-align:center}
+.about-top{display:flex;align-items:center;gap:28px;max-width:1000px;margin:0 auto 36px}
+.about-top .about-img{flex:0 0 auto;width:413px;max-width:100%;margin:0;border-radius:14px}
+.about-top .about-intro{flex:1 1 0;min-width:0;max-width:none;margin:0;text-align:left}
+@media (max-width:760px){.about-top{flex-direction:column}.about-top .about-img{width:100%;max-width:413px}}
 .about-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
 .about-panel{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 6px 18px rgba(60,40,10,.06);transition:transform .2s ease,box-shadow .2s ease}
 .about-panel:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(60,40,10,.12)}
@@ -385,8 +389,10 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       <h2>교회 소개</h2>
       <p class="lead">말씀과 기도로 세워지는 교회</p>
     </div>
-    <img class="about-img" src="images/church.png" alt="구미은혜로교회 조감도">
-    <div class="about-intro">구미은혜로교회는 대한예수교장로회 합동교단의 교회입니다. 예배와 전도, 선교와 교육의 4대목표를 복음을 중심으로 실천하는 교회입니다.</div>
+    <div class="about-top">
+      <img class="about-img" src="images/church.png" alt="구미은혜로교회 조감도">
+      <div class="about-intro">구미은혜로교회는 대한예수교장로회 합동교단의 교회입니다. 예배와 전도, 선교와 교육의 4대목표를 복음을 중심으로 실천하는 교회입니다.</div>
+    </div>
 
     <div class="about-grid">
       <div class="about-panel c-brown">
