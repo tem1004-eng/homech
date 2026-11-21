@@ -263,6 +263,11 @@ form.post label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:
 #staff-form{display:grid;gap:8px}
 #staff-form select,#staff-form input[type=file],#staff-form input[type=password]{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:.9rem;background:#fff}
 #staff-form .mini{justify-self:start}
+/* 섬기는 분들 사진 확대: 가로 5 : 세로 8 비율로 옆에 크게 보여 줍니다 */
+#staff-list img.staff-ph{cursor:zoom-in}
+#staff-zoom{position:fixed;z-index:100;width:200px;aspect-ratio:5/8;border-radius:12px;overflow:hidden;border:3px solid #fff;box-shadow:0 18px 40px rgba(0,0,0,.35);background:#f1e9da;opacity:0;transform:scale(.92);transition:opacity .2s ease,transform .2s ease;pointer-events:none}
+#staff-zoom.show{opacity:1;transform:scale(1)}
+#staff-zoom img{width:100%;height:100%;object-fit:cover;display:block}
 
 /* 메뉴 설명창 (마우스를 올리거나 키보드로 포커스하면 나타납니다) */
 nav a.nav-btn{position:relative}
@@ -1660,6 +1665,34 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     });
   }
 
+  /* 섬기는 분들 사진 위에 마우스를 올리면 5:8 비율로 크게 보여 줍니다.
+     화면 밖으로 잘리지 않도록 사진 옆 빈 자리에 놓습니다. */
+  function wireStaffZoom(){
+    const zoom = document.createElement('div');
+    zoom.id = 'staff-zoom';
+    document.body.appendChild(zoom);
+    const ZW = 200, ZH = 320;
+    const pick = t => (t && t.closest) ? t.closest('#staff-list img.staff-ph') : null;
+    document.addEventListener('pointerover', e => {
+      const im = pick(e.target);
+      if(!im) return;
+      zoom.innerHTML = `<img src="${esc(im.src)}" alt="${esc(im.alt)}">`;
+      const r = im.getBoundingClientRect();
+      let left = r.right + 14;
+      if(left + ZW > window.innerWidth - 8) left = r.left - ZW - 14;
+      left = Math.max(8, left);
+      let top = r.top + r.height / 2 - ZH / 2;
+      top = Math.min(Math.max(8, top), window.innerHeight - ZH - 8);
+      zoom.style.left = left + 'px';
+      zoom.style.top = top + 'px';
+      zoom.classList.add('show');
+    });
+    document.addEventListener('pointerout', e => {
+      if(pick(e.target) && !pick(e.relatedTarget)) zoom.classList.remove('show');
+    });
+    window.addEventListener('scroll', () => zoom.classList.remove('show'), {passive:true});
+  }
+
   /* ---------- 시작 ---------- */
   initCalState();
   boardEls.forEach(wireManage);
@@ -1677,6 +1710,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   renderWorshipSchedule();
   loadCalendar();
   wireStaff();
+  wireStaffZoom();
   loadStaff();
 })();
 </script>
