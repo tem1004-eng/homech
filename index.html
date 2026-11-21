@@ -614,6 +614,9 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmt = ts => ts ? new Date(Number(ts)).toLocaleString('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
   const isImage = t => (t||'').startsWith('image/');
+  // 이미지 판별: 파일 종류가 이미지이거나, 파일 이름이 이미지 확장자이면 이미지로 봅니다.
+  const IMG_EXT_RE = /\.(jpe?g|png|gif|webp|bmp|heic|heif)$/i;
+  const isImageRow = r => !!r.fileUrl && (isImage(r.fileType) || IMG_EXT_RE.test(String(r.fileName || '')));
   const driveId = url => { const m = String(url||'').match(/[?&]id=([^&]+)/); return m ? m[1] : ''; };
   const shotUrl = url => { const id = driveId(url); return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w1600` : url; };
   const firstLine = text => String(text || '').split('\n').map(s => s.trim()).find(Boolean) || '';
@@ -756,7 +759,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
           text = lines.slice(1).join('\n').replace(/^\s*\n/, '');
         }
         let img = '';
-        if(r.fileUrl && isImage(r.fileType)){
+        if(isImageRow(r)){
           img = `<div class="art-img-wrap"><a href="${esc(r.fileUrl)}" target="_blank" rel="noopener"><img class="art-img" src="${esc(shotUrl(r.fileUrl))}" alt="${esc(r.title)}" loading="lazy" onerror="this.onerror=null;this.src='${esc(r.fileUrl)}'"></a></div>`;
         } else if(r.fileUrl){
           img = `<div class="b">📎 <a href="${esc(r.fileUrl)}" target="_blank" rel="noopener">${esc(r.fileName || '첨부 파일 내려받기')}</a></div>`;
@@ -1303,6 +1306,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         return `<img src="${esc(shotUrl(item.url))}" alt="${esc(item.title)}" onerror="this.onerror=null;this.src='${esc(item.url)}'"><span class="vbadge">${label}</span>`;
       }
       case 'articles':
+        // 이미지가 있는 글은 이미지를, 없는 글은 텍스트를 보여줍니다.
         if(item.url){
           return `<img src="${esc(shotUrl(item.url))}" alt="${esc(item.title)}" onerror="this.onerror=null;this.src='${esc(item.url)}'"><span class="vbadge">좋은 글</span><div class="vcap">${esc(item.title)}</div>`;
         }
@@ -1362,19 +1366,20 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       }catch(err){ console.error(err); return []; }
     };
     const [ph, sv, mu, bu, ar] = await Promise.all(['photo','service','music','bulletin','articles'].map(get));
-    const isImg = r => r.fileUrl && isImage(r.fileType);
+    const isImg = isImageRow;
 
     const photos = ph.filter(isImg).slice(0, 10).map(r => ({title: r.title, url: r.fileUrl}));
     const video = sv.find(r => youtubeId(r.link));
     const music = mu.filter(r => youtubeId(r.link)).slice(0, 5).map(r => ({title: r.title, yid: youtubeId(r.link)}));
     // 주보: 가장 최근 이미지 2장 중 먼저 올린 것을 앞면, 나중에 올린 것을 뒷면으로 봅니다.
     const bulletin = bu.filter(isImg).slice(0, 2).reverse().map(r => ({title: r.title, url: r.fileUrl}));
-    const articles = ar.slice(0, 5).map(r => {
+    // 좋은 글: 이미지가 있는 글을 먼저 보여주고, 이미지가 없는 글은 텍스트로 뒤에 보여줍니다.
+    const articles = ar.slice(0, 10).map(r => {
       const title = String(r.title || '');
       const lines = String(r.body || '').split('\n').map(s => s.trim()).filter(Boolean);
       const rest = lines[0] === title.trim() ? lines.slice(1) : lines;
       return { title, excerpt: rest.join(' ').slice(0, 120), url: isImg(r) ? r.fileUrl : '' };
-    });
+    }).sort((a, b) => (b.url ? 1 : 0) - (a.url ? 1 : 0)).slice(0, 5);
 
     heroCards = [
       {kind:'photo', route:'#photo', items: photos, empty: HERO_EMPTY.photo},
