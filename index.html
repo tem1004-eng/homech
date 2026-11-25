@@ -2385,7 +2385,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       });
   }
   let bbBookSel, bbChSel, bbText;
-  function bbInit(){
+  // 책·장 고르기와 버튼은 본문과 상관없이 바로 준비합니다.
+  function bbSetup(){
     bbBookSel = document.getElementById('bb-book'); bbChSel = document.getElementById('bb-ch'); bbText = document.getElementById('bb-text');
     if(!bbBookSel || bbBookSel.dataset.ready) return;
     bbBookSel.dataset.ready = '1';
@@ -2399,9 +2400,13 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     document.getElementById('tts-pause').addEventListener('click', ttsPause);
     document.getElementById('tts-stop').addEventListener('click', ttsStop);
     fillChapters(1);
+    ttsVoices();
+  }
+  // 본문(bible.json)을 불러온 뒤에 실행됩니다.
+  function bbInit(){
+    if(!bbBookSel) bbSetup();
     if(pendingPos){ const [bi, c] = pendingPos; pendingPos = null; bbBookSel.value = String(bi); fillChapters(c); bbChSel.value = String(c); }
     renderChapter();
-    ttsVoices();
   }
   function fillChapters(c){
     const bi = Number(bbBookSel.value);
@@ -2410,14 +2415,15 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   }
   function setPos(bi, c){ bbBookSel.value = String(bi); fillChapters(c); bbChSel.value = String(c); renderChapter(); }
   function stepChapter(dir){
-    if(!BIBLE) return;
+    if(!BIBLE) { loadBible(); return; }
     const bi = Number(bbBookSel.value), c = Number(bbChSel.value);
     const pos = BIBLE_CHAPTERS.findIndex(x => x[0] === bi && x[1] === c) + dir;
     if(pos < 0 || pos >= BIBLE_CHAPTERS.length) return;
     setPos(...BIBLE_CHAPTERS[pos]);
   }
   function renderChapter(){
-    if(!BIBLE || !bbText) return;
+    if(!bbText) return;
+    if(!BIBLE){ if(!bibleLoadFailed) bbText.innerHTML = '<div class="empty">성경 본문을 불러오는 중…</div>'; return; }
     const bi = Number(bbBookSel.value), c = Number(bbChSel.value);
     const verses = (BIBLE[bi] && BIBLE[bi].chapters[c - 1]) || [];
     let html = `<h3 class="bb-h">${esc(BOOK_NAMES[bi])} ${c}장</h3>`;
@@ -2627,6 +2633,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   });
   wireLogin();
   wireBible();
+  bbSetup();
   wireLiveLabel();
 })();
 </script>
