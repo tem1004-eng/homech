@@ -243,6 +243,12 @@ form.post label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:
 .banner{padding:12px 16px;background:#fff7e6;border:1px solid #ecd9ad;border-radius:10px;color:#6b5320;font-size:.92rem;margin-bottom:16px}
 .empty{color:var(--muted);font-size:.95rem;padding:10px 0}
 .mbar{display:flex;gap:6px;margin-top:10px}
+.replies{margin-top:10px;padding-left:14px;border-left:3px solid var(--line)}
+.reply{padding:8px 10px;margin-top:6px;background:#fcfbf8;border:1px solid var(--line);border-radius:10px;font-size:.92rem}
+.reply .rm{font-size:.8rem;color:var(--muted)}
+.reply .rb{margin:4px 0;white-space:pre-wrap}
+.reply .rbar{margin-top:4px}
+.reply .rpanel:empty{display:none}
 .mini{padding:4px 12px;border:1px solid var(--line);background:#fff;border-radius:8px;font:inherit;font-size:.82rem;cursor:pointer;color:var(--muted);text-decoration:none;display:inline-block}
 .mini:hover{border-color:var(--accent);color:var(--accent)}
 .mini.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
@@ -776,14 +782,21 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     return `<div class="social"><button class="like-btn${liked ? ' on' : ''}" type="button" data-like="${esc(r.id)}">${liked ? '♥' : '♡'} <span>${Number(r.likes) || 0}</span></button><span class="vcount">👁 <span>${Number(r.views) || 0}</span></span></div>`;
   }
 
+  const REPLY_BOARDS = ['photo','music','articles'];
+  const replyHTML = r => `<div class="reply" data-rid="${esc(r.id)}"><div class="rm">↳ ${esc(r.author || '익명')} · ${fmt(r.createdAt)}</div><div class="rb">${esc(r.body || r.title)}</div><div class="rbar"><button class="mini" type="button" data-act="rdel">삭제</button></div><div class="rpanel"></div></div>`;
+
   function decorate(el, rows){
     const items = el.querySelector('[data-role="items"]');
+    const canReply = REPLY_BOARDS.includes(el.dataset.board);
     items.querySelectorAll('.item').forEach((it, i) => {
       const r = rows[i];
       if(!r) return;
       it.dataset.id = r.id;
+      const reps = canReply ? ((el._replies || {})[r.id] || []) : [];
+      const replyBtn = canReply ? `<button class="mini" type="button" data-act="reply">💬 답글${reps.length ? ' (' + reps.length + ')' : ''}</button>` : '';
+      const repsHTML = canReply ? `<div class="replies">${reps.map(replyHTML).join('')}</div>` : '';
       it.insertAdjacentHTML('beforeend', socialHTML(r) +
-        '<div class="mbar"><button class="mini" type="button" data-act="edit">수정</button><button class="mini" type="button" data-act="delete">삭제</button></div><div class="panel" data-role="panel"></div>');
+        '<div class="mbar">' + replyBtn + '<button class="mini" type="button" data-act="edit">수정</button><button class="mini" type="button" data-act="delete">삭제</button></div>' + repsHTML + '<div class="panel" data-role="panel"></div>');
     });
   }
 
@@ -871,6 +884,78 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       else if(act === 'delete') openDelete(panel);
       else if(act === 'save') (isCal ? saveCalEdit(el, item, panel) : saveEdit(el, item, panel));
       else if(act === 'remove') removePost(el, item, panel);
+    });
+  }
+
+  /* ---------- 답글 (사진·음악·좋은 글) ---------- */
+  function openReply(item, panel){
+    panel.innerHTML = `
+      <div class="pbox">
+        <label>답글 내용</label><textarea name="rbody" maxlength="1000"></textarea>
+        <label>작성자 이름 (선택)</label><input name="rauthor" maxlength="40">
+        <label>비밀번호 (나중에 삭제할 때 필요, 4자 이상)</label><input name="rpw" type="password" maxlength="30">
+        <div class="row"><button class="mini primary" type="button" data-act="rsend">답글 등록</button><button class="mini" type="button" data-act="cancel">취소</button></div>
+        <div class="perr" data-role="err"></div>
+      </div>`;
+  }
+
+  async function sendReply(el, item, panel){
+    const err = panel.querySelector('[data-role="err"]');
+    const g = n => { const x = panel.querySelector(`[name="${n}"]`); return x ? x.value.trim() : ''; };
+    const body = g('rbody'), author = g('rauthor'), pw = g('rpw');
+    if(!body){ err.textContent = '답글 내용을 입력해 주세요.'; return; }
+    if(pw.length < 4){ err.textContent = '비밀번호는 4자 이상 입력해 주세요.'; return; }
+    const bad = censorCheck([body, author]);
+    if(bad){ err.textContent = censorMsg(bad); return; }
+    if(!configured){ err.textContent = '게시판 연결 설정이 필요합니다.'; return; }
+    err.textContent = '등록 중…';
+    try{
+      const out = await postJSON({ action:'create', board: el.dataset.board, parentId: item.dataset.id, title: body.slice(0, 30), author, body, password: pw });
+      if(!out.ok) throw new Error(out.error || 'failed');
+      reload(el);
+    }catch(e){
+      err.textContent = errText(e.message);
+    }
+  }
+
+  function openReplyDelete(rnode){
+    rnode.querySelector('.rpanel').innerHTML = `
+      <div class="pbox">
+        <label>이 답글을 삭제할까요?</label>
+        <input name="rpw" type="password" placeholder="답글 비밀번호 (4자 이상)">
+        <label>관리자 비밀번호 (다른 사람의 답글을 지울 때만)</label>
+        <input name="radminpw" type="password" placeholder="관리자만 입력">
+        <div class="row"><button class="mini danger" type="button" data-act="rdo">삭제 확인</button><button class="mini" type="button" data-act="rcancel">취소</button></div>
+        <div class="perr" data-role="err"></div>
+      </div>`;
+  }
+
+  async function removeReply(el, rnode){
+    const err = rnode.querySelector('[data-role="err"]');
+    const pw = rnode.querySelector('[name="rpw"]').value.trim();
+    const adm = rnode.querySelector('[name="radminpw"]').value.trim();
+    err.textContent = '삭제 중…';
+    try{
+      const out = await postJSON({ action:'delete', board: el.dataset.board, id: rnode.dataset.rid, password: pw, adminPassword: adm });
+      if(!out.ok) throw new Error(out.error || 'failed');
+      reload(el);
+    }catch(e){
+      err.textContent = errText(e.message);
+    }
+  }
+
+  function wireReplies(el){
+    el.addEventListener('click', e => {
+      const btn = e.target.closest('button[data-act]');
+      if(!btn || !el.contains(btn)) return;
+      const act = btn.dataset.act;
+      const item = btn.closest('.item');
+      const rnode = btn.closest('.reply');
+      if(act === 'reply' && item) openReply(item, item.querySelector('[data-role="panel"]'));
+      else if(act === 'rsend' && item) sendReply(el, item, item.querySelector('[data-role="panel"]'));
+      else if(act === 'rdel' && rnode) openReplyDelete(rnode);
+      else if(act === 'rcancel' && rnode) rnode.querySelector('.rpanel').innerHTML = '';
+      else if(act === 'rdo' && rnode) removeReply(el, rnode);
     });
   }
 
@@ -1004,8 +1089,13 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     if(!configured){ items.innerHTML = '<div class="empty">표시할 글이 없습니다.</div>'; return; }
     try{
       const res = await fetch(`${API_URL}?board=${encodeURIComponent(el.dataset.board)}`);
-      const rows = await res.json();
-      if(rows.error) throw new Error(rows.error);
+      const all = await res.json();
+      if(all.error) throw new Error(all.error);
+      // 답글은 같은 게시판에 parentId 와 함께 저장됩니다. 글 목록과 답글 목록을 나눕니다.
+      const rows = all.filter(r => !r.parentId);
+      el._replies = {};
+      all.filter(r => r.parentId).sort((a, b) => Number(a.createdAt) - Number(b.createdAt))
+        .forEach(r => { (el._replies[r.parentId] = el._replies[r.parentId] || []).push(r); });
       render(el, rows);
     }catch(err){
       console.error(err);
@@ -1485,7 +1575,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       try{
         const r = await fetch(`${API_URL}?board=${b}`);
         const j = await r.json();
-        return Array.isArray(j) ? j : [];
+        return Array.isArray(j) ? j.filter(r => !r.parentId) : [];
       }catch(err){ console.error(err); return []; }
     };
     const [ph, sv, mu, bu, ar] = await Promise.all(['photo','service','music','bulletin','articles'].map(get));
@@ -1618,7 +1708,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   document.addEventListener('click', e => {
     const item = e.target.closest('.board .item');
     if(!item || !item.dataset.id) return;
-    if(e.target.closest('button,a,iframe,input,textarea,select,label,form,.mbar,.panel,.social')) return;
+    if(e.target.closest('button,a,iframe,input,textarea,select,label,form,.mbar,.panel,.social,.replies')) return;
     const board = item.closest('.board'); if(!board) return;
     const v = item.querySelector('.vcount span');
     if(v) v.textContent = (Number(v.textContent) || 0) + 1;
@@ -1947,6 +2037,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   /* ---------- 시작 ---------- */
   initCalState();
   boardEls.forEach(wireManage);
+  boardEls.forEach(wireReplies);
   wireManage(calRoot);
   wireCalendarUI();
   wireCalForm();
