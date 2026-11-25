@@ -115,6 +115,7 @@ nav a.nav-btn.current{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--c1),0 6px 16px r
 .live-hover{position:absolute;top:10px;left:10px;z-index:2;padding:10px 18px;border-radius:999px;background:rgba(154,31,31,.92);color:#fff;text-decoration:none;font-size:.95rem;font-weight:700;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .25s ease}
 .hero-live-center:hover .live-hover{opacity:1;pointer-events:auto}
 .live-hover:hover{color:#fff;background:#b02e2e}
+.hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px;position:relative;z-index:2}
 nav{display:flex;align-items:center;gap:12px}
 nav ul{flex:0 1 auto}
 nav a.nav-btn.nav-big{font-size:clamp(.8rem,.6vw + .4rem,1.08rem);font-weight:800;padding:clamp(7px,.6vw,11px) clamp(10px,1vw,16px);box-shadow:0 6px 16px rgba(40,30,10,.22)}
@@ -426,6 +427,10 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         <div class="vcard"><div class="vbox"><div class="vcontent"><div class="vempty">불러오는 중…</div></div></div></div>
       </div>
       <div class="hero-live" id="hero-live"></div>
+    </div>
+    <div class="hero-actions">
+      <button class="btn" type="button" data-go="music">📋 목록보기</button>
+      <button class="btn" type="button" data-go="music-write">✏️ 글쓰기</button>
     </div>
   </div>
   <div class="page alt">
@@ -1716,8 +1721,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   function heroLiveOn(){
     if(heroMode === 'live') return;
     heroShow('live', `
-        <iframe src="https://www.youtube.com/embed/live_stream?channel=${LIVE_CHANNEL}&mute=1" title="구미은혜로교회 실시간 예배" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        <a class="live-badge" href="${LIVE_PAGE}" target="_blank" rel="noopener">● 실시간 예배 · 유튜브에서 보기 ↗</a>`);
+        <iframe src="https://www.youtube.com/embed/live_stream?channel=${LIVE_CHANNEL}&autoplay=1&mute=1" title="구미은혜로교회 실시간 예배" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`);
   }
 
   // 오늘의 예배 게시판에서 가장 최근에 올라온 영상을 가운데에 보여 줍니다.
@@ -2309,6 +2313,20 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   const lastBtn = document.getElementById('yt-last');
   if(lastBtn) lastBtn.addEventListener('click', heroToggleLast);
   document.querySelectorAll('a[href="#music"]').forEach(a => a.addEventListener('click', heroPraiseEntry));
+  // 홈 뷰어 아래 버튼: 찬양 게시판으로 들어가고, 글쓰기는 글쓰기 창까지 엽니다.
+  document.addEventListener('click', e => {
+    const g = e.target.closest('[data-go]');
+    if(!g) return;
+    e.preventDefault();
+    location.hash = '#music';
+    if(g.dataset.go === 'music-write'){
+      setTimeout(() => {
+        const box = document.querySelector('[data-board="music"] [data-role="write-box"]');
+        const btn = document.querySelector('[data-board="music"] [data-role="write-open"]');
+        if(box && box.classList.contains('closed') && btn) btn.click();
+      }, 150);
+    }
+  });
   document.addEventListener('click', e => {
     const b = e.target.closest('[data-role="write-open"]');
     if(!b) return;
