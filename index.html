@@ -369,7 +369,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       </a>
       <a class="cal-top" href="#calendar">📅 목회달력</a>
       <a class="yt-top" href="https://www.youtube.com/@%EA%B5%AC%EB%AF%B8%EC%9D%80%ED%98%9C%EB%A1%9C%EA%B5%90%ED%9A%8C" target="_blank" rel="noopener">▶ <span class="yt-lbl-a">유투브방송전체</span><span class="yt-lbl-b">실시간 예배</span><span class="live-tip">실시간 예배 방송중입니다</span></a>
-      <button class="yt-last" id="yt-last" type="button">🎬 최종예배영상보기</button>
+      <button class="yt-last" id="yt-last" type="button">🎬 최근예배영상보기</button>
     </div>
     <nav>
       <ul>
@@ -1706,8 +1706,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     }
     const yid = youtubeId(row.link);
     heroShow('last', `
-        <iframe src="https://www.youtube.com/embed/${yid}?rel=0" title="${esc(row.title)}" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        <a class="live-badge" href="https://www.youtube.com/watch?v=${yid}" target="_blank" rel="noopener">🎬 최종 예배 영상 · 유튜브에서 보기 ↗</a>`);
+        <iframe src="https://www.youtube.com/embed/${yid}?rel=0&autoplay=1" title="${esc(row.title)}" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <a class="live-badge" href="https://www.youtube.com/watch?v=${yid}" target="_blank" rel="noopener">🎬 최근 예배 영상 · 유튜브에서 보기 ↗</a>`);
   }
 
   // 흘러가는 뷰어로 돌아갑니다.
