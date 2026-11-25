@@ -115,6 +115,28 @@ nav a.nav-btn.current{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--c1),0 6px 16px r
 .live-hover{position:absolute;top:10px;left:10px;z-index:2;padding:10px 18px;border-radius:999px;background:rgba(154,31,31,.92);color:#fff;text-decoration:none;font-size:.95rem;font-weight:700;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .25s ease}
 .hero-live-center:hover .live-hover{opacity:1;pointer-events:auto}
 .live-hover:hover{color:#fff;background:#b02e2e}
+nav{display:flex;align-items:center;gap:12px}
+nav ul{flex:0 1 auto}
+nav a.nav-btn.nav-big{font-size:clamp(.8rem,.6vw + .4rem,1.08rem);font-weight:800;padding:clamp(7px,.6vw,11px) clamp(10px,1vw,16px);box-shadow:0 6px 16px rgba(40,30,10,.22)}
+nav a.nav-btn.nav-big .ic{font-size:clamp(.8rem,.55vw + .3rem,1.05rem)}
+.login-box{display:inline-flex;align-items:center;gap:6px;margin-left:14px;padding:5px 8px 5px 10px;border-radius:999px;background:#fff;border:1px solid var(--line);box-shadow:0 4px 12px rgba(40,30,10,.10);font-size:.8rem;flex:0 0 auto;white-space:nowrap}
+.login-box select,.login-box input{font:inherit;font-size:.8rem;padding:4px 8px;border:1px solid var(--line);border-radius:999px;background:#fff;min-width:0}
+.login-box input{width:96px}
+.login-btn{font:inherit;font-size:.8rem;font-weight:700;padding:4px 10px;border:0;border-radius:999px;background:var(--accent);color:#fff;cursor:pointer}
+.login-state{font-weight:700;color:var(--accent)}
+.login-err{color:#b02e2e;font-size:.75rem}
+.board-top{display:flex;justify-content:flex-end;margin-bottom:14px}
+.write-box{margin-bottom:22px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:0 8px 22px rgba(60,40,10,.06)}
+.write-box.closed{display:none}
+.write-box form.post{grid-template-columns:1fr;margin-bottom:0}
+body.logged-in .pw-row{display:none}
+.board-wrap .items{gap:14px}
+.items.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.items.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.items.grid-music{grid-template-columns:1fr}
+.board-wrap .music-row{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px}
+@media(max-width:1000px){.items.grid-4{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:640px){.items.grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}.items.grid-2{grid-template-columns:1fr}.board-wrap .music-row{grid-template-columns:1fr}.login-box input{width:72px}}
 @media (max-width:640px){.hero-live{grid-template-columns:1fr 1.6fr 1fr;gap:6px;padding:0 4px}.live-badge{font-size:.7rem;padding:4px 8px}.live-hover{font-size:.8rem;padding:8px 12px}}
 .hero-track img,.hero-track iframe{pointer-events:none;-webkit-user-drag:none}
 /* 줄 전체의 이동: 1.2초 동안 천천히 출발해서 천천히 멈춥니다 */
@@ -381,11 +403,12 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         <li><a class="nav-btn" href="#service" style="--c1:#9a4f5e;--c2:#c06f7d"><span class="ic">▶</span>오늘의 예배<span class="nav-tip"><b>오늘의 예배</b>최근 예배의 유튜브 영상을 다시 볼 수 있습니다.</span></a></li>
         <li><a class="nav-btn" href="#bulletin" style="--c1:#4f7a5a;--c2:#7fa887"><span class="ic">📰</span>주보<span class="nav-tip"><b>주보</b>이번 주 주보와 이전 주보를 볼 수 있습니다.</span></a></li>
         <li><a class="nav-btn" href="#photo" style="--c1:#6a4f8c;--c2:#9177b8"><span class="ic">📷</span>사진<span class="nav-tip"><b>사진</b>교회 행사 사진과 말씀 이미지를 모아 봅니다.</span></a></li>
-        <li><a class="nav-btn" href="#music" style="--c1:#2f7f85;--c2:#4fb0b5"><span class="ic">🎵</span>음악<span class="nav-tip"><b>음악</b>유튜브 찬양 중 좋아하는 추천 찬양들을 나눕니다.</span></a></li>
+        <li><a class="nav-btn nav-big" id="praise-nav" href="#music" style="--c1:#2f7f85;--c2:#4fb0b5"><span class="ic">🎵</span>찬양<span class="nav-tip"><b>찬양</b>찬양 버튼을 누르면 찬양 게시판의 곡들이 가운데 창에서 차례대로 이어서 들립니다.</span></a></li>
         <li><a class="nav-btn" href="#articles" style="--c1:#a0672b;--c2:#d18a4a"><span class="ic">📖</span>좋은 글<span class="nav-tip"><b>좋은 글</b>남기고 싶은 글과 이미지 글들을 모았습니다.</span></a></li>
         <li><a class="nav-btn" href="#files" style="--c1:#4a5a78;--c2:#6f80a6"><span class="ic">📁</span>파일공유<span class="nav-tip"><b>파일공유</b>유익한 파일을 내려받을 수 있습니다.</span></a></li>
         <li><a class="nav-btn" href="#visit" style="--c1:#8c4a3a;--c2:#b87262"><span class="ic">📍</span>오시는 길<span class="nav-tip"><b>오시는 길</b>교회 찾아오시는 길을 안내합니다.</span></a></li>
       </ul>
+      <div class="login-box" id="login-box"></div>
     </nav>
   </div>
 </header>
@@ -413,7 +436,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         <a class="tile" href="#service"  style="--c1:#9a4f5e;--c2:#c06f7d"><span class="ic">▶</span><h3>오늘의 예배</h3><p>예배 영상을 다시 볼 수 있습니다.</p></a>
         <a class="tile" href="#bulletin" style="--c1:#4f7a5a;--c2:#7fa887"><span class="ic">📰</span><h3>주보</h3><p>매주 주보를 내려받을 수 있습니다.</p></a>
         <a class="tile" href="#photo"    style="--c1:#6a4f8c;--c2:#9177b8"><span class="ic">📷</span><h3>사진</h3><p>교회의 소중한 순간을 함께 봅니다.</p></a>
-        <a class="tile" href="#music"    style="--c1:#2f7f85;--c2:#4fb0b5"><span class="ic">🎵</span><h3>음악</h3><p>찬양과 음악 링크를 나눕니다.</p></a>
+        <a class="tile" href="#music"    style="--c1:#2f7f85;--c2:#4fb0b5"><span class="ic">🎵</span><h3>찬양</h3><p>찬양 영상을 차례대로 들을 수 있습니다.</p></a>
         <a class="tile" href="#articles" style="--c1:#a0672b;--c2:#d18a4a"><span class="ic">📖</span><h3>좋은 글</h3><p>마음에 남는 글과 묵상을 나눕니다.</p></a>
         <a class="tile" href="#files"    style="--c1:#4a5a78;--c2:#6f80a6"><span class="ic">📁</span><h3>파일 공유</h3><p>문서와 파일을 함께 나눕니다.</p></a>
         <a class="tile" href="#visit"    style="--c1:#8c4a3a;--c2:#b87262"><span class="ic">📍</span><h3>오시는 길</h3><p>주소와 연락처를 안내합니다.</p></a>
@@ -538,8 +561,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 <section class="view page" data-view="music">
   <div class="wrap">
     <div class="page-head">
-      <h2>음악 게시판</h2>
-      <p class="lead">왼쪽에서 올라온 음악을 바로 들을 수 있고, 오른쪽에서 유튜브 링크를 올릴 수 있습니다.</p>
+      <h2>찬양 게시판</h2>
+      <p class="lead">왼쪽에는 영상, 오른쪽에는 곡 설명이 보입니다. 글쓰기 버튼을 누르면 유튜브 링크를 올릴 수 있습니다.</p>
     </div>
     <div class="board" data-board="music"></div>
   </div>
@@ -645,8 +668,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     if(!VIEWS.includes(name)) name = 'home';
     // 최근예배영상이 재생 중이면 다른 페이지로 옮길 때 멈추고 뷰어를 원래대로 돌려 놓습니다.
     if(name !== 'home'){
-      lastToken++;   // 아직 불러오는 중이던 최근 영상도 취소
-      if(heroMode === 'last'){ if(liveNow) heroLiveOn(); else heroLayoutOff(); }
+      lastToken++; praiseToken++;   // 아직 불러오는 중이던 영상도 취소
+      if(heroMode === 'last' || heroMode === 'music'){ if(liveNow) heroLiveOn(); else heroLayoutOff(); }
     }
     document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.dataset.view === name));
     document.querySelectorAll('nav a').forEach(a => a.classList.toggle('current', a.getAttribute('href') === '#' + name));
@@ -765,32 +788,31 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   const censorMsg = cat => `등록할 수 없는 내용이 포함되어 있습니다 (${cat}). 내용을 고쳐 주세요.`;
 
   /* 게시판 화면: 왼쪽 = 올라온 글, 오른쪽 = 새로 올리기 */
+  const LIST_CLASS = {bulletin:'grid-4', photo:'grid-4', music:'grid-music', articles:'grid-2', files:'grid-2'};
   function mountBoard(el){
     const id = el.dataset.board, cfg = BOARDS[id];
     const bodyLabel = id === 'articles' ? '내용 (첫 줄이 제목으로 쓰입니다)' : LABELS.body;
-    const listTitle = {service:'올라온 예배 영상', bulletin:'올라온 주보', photo:'올라온 사진', music:'올라온 음악', articles:'올라온 좋은 글', files:'올라온 파일'}[id] || '올라온 글';
-    const writeTitle = {service:'예배 영상 올리기', bulletin:'주보 올리기', photo:'사진 올리기', music:'음악 올리기', articles:'좋은 글 쓰기', files:'파일 올리기'}[id] || '새 글 쓰기';
+    const listTitle = {service:'올라온 예배 영상', bulletin:'올라온 주보', photo:'올라온 사진', music:'올라온 찬양', articles:'올라온 좋은 글', files:'올라온 파일'}[id] || '올라온 글';
+    const writeTitle = {service:'예배 영상 올리기', bulletin:'주보 올리기', photo:'사진 올리기', music:'찬양 올리기', articles:'좋은 글 쓰기', files:'파일 올리기'}[id] || '새 글 쓰기';
+    el.classList.add('board-wrap');
     el.innerHTML = `
-      <div class="split">
-        <div class="split-left">
-          <div class="split-title">${listTitle}</div>
-          <div class="items" data-role="items"><div class="empty">불러오는 중…</div></div>
-        </div>
-        <div class="split-right">
-          <div class="split-title">${writeTitle}</div>
-          <div class="status" data-role="status"></div>
-          <form class="post" data-role="form">
-            <div class="full"><label>${cfg.titleLabel}</label><input name="title" ${id === 'articles' ? '' : 'required'} maxlength="120"></div>
-            <div class="full"><label>작성자 이름 (선택)</label><input name="author" maxlength="40"></div>
-            ${cfg.fields.includes('link') ? `<div class="full"><label>${LABELS.link}</label><input name="link" type="url" placeholder="https://..."></div>` : ''}
-            ${cfg.fields.includes('body') ? `<div class="full"><label>${bodyLabel}</label><textarea name="body" maxlength="5000"></textarea></div>` : ''}
-            ${cfg.fields.includes('file') ? `<div class="full"><label>${id === 'files' ? '첨부 파일 (최대 50MB)' : (cfg.multiple ? LABELS.fileMulti : LABELS.file)}            </label><input name="file" type="file" ${cfg.multiple ? 'multiple' : ''} ${cfg.accept ? `accept="${cfg.accept}"` : ''}></div>` : ''}
-            <div class="full"><label>비밀번호 (나중에 수정·삭제할 때 필요, 4자 이상)</label><input name="pw" type="password" required minlength="4" maxlength="30"></div>
-            <div class="full"><button class="btn" type="submit">등록하기</button></div>
-            <div class="full note">광고·음란·이단·타종교·폭력·비방 성격의 내용은 등록되지 않습니다.</div>
-          </form>
-        </div>
-      </div>`;
+      <div class="board-top"><button class="btn write-open" type="button" data-role="write-open">✏️ 글쓰기</button></div>
+      <div class="write-box closed" data-role="write-box">
+        <div class="split-title">${writeTitle}</div>
+        <div class="status" data-role="status"></div>
+        <form class="post" data-role="form">
+          <div class="full"><label>${cfg.titleLabel}</label><input name="title" ${id === 'articles' ? '' : 'required'} maxlength="120"></div>
+          <div class="full"><label>작성자 이름 (선택)</label><input name="author" maxlength="40"></div>
+          ${cfg.fields.includes('link') ? `<div class="full"><label>${LABELS.link}</label><input name="link" type="url" placeholder="https://..."></div>` : ''}
+          ${cfg.fields.includes('body') ? `<div class="full"><label>${bodyLabel}</label><textarea name="body" maxlength="5000"></textarea></div>` : ''}
+          ${cfg.fields.includes('file') ? `<div class="full"><label>${id === 'files' ? '첨부 파일 (최대 50MB)' : (cfg.multiple ? LABELS.fileMulti : LABELS.file)}</label><input name="file" type="file" ${cfg.multiple ? 'multiple' : ''} ${cfg.accept ? `accept="${cfg.accept}"` : ''}></div>` : ''}
+          <div class="full pw-row"><label>비밀번호 (나중에 수정·삭제할 때 필요, 4자 이상, 로그인하면 생략)</label><input name="pw" type="password" minlength="4" maxlength="30"></div>
+          <div class="full"><button class="btn" type="submit">등록하기</button></div>
+          <div class="full note">광고·음란·이단·타종교·폭력·비방 성격의 내용은 등록되지 않습니다.</div>
+        </form>
+      </div>
+      <div class="split-title">${listTitle}</div>
+      <div class="items ${LIST_CLASS[id] || ''}" data-role="items"><div class="empty">불러오는 중…</div></div>`;
   }
 
   function youtubeId(url){
@@ -850,7 +872,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
           ? `<div class="yt-frame"><iframe src="https://www.youtube.com/embed/${yid}" title="${esc(r.title)}" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>`
           : '';
         const linkTxt = r.link ? `<div class="b"><a href="${esc(r.link)}" target="_blank" rel="noopener">유튜브에서 열기 ↗</a></div>` : '';
-        return `<div class="item"><div class="music-row"><div class="music-info"><div class="t">${esc(r.title)}</div><div class="m">${esc(r.author)} · ${fmt(r.createdAt)}</div>${r.body ? `<div class="b">${esc(r.body)}</div>` : ''}${linkTxt}</div>${player}</div></div>`;
+        return `<div class="item"><div class="music-row">${player}<div class="music-info"><div class="t">${esc(r.title)}</div><div class="m">${esc(r.author)} · ${fmt(r.createdAt)}</div>${r.body ? `<div class="b">${esc(r.body)}</div>` : ''}${linkTxt}</div></div></div>`;
       }).join('');
       return;
     }
@@ -1142,7 +1164,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     form.addEventListener('submit', async e => {
       e.preventDefault();
       const fd = new FormData(form);
-      const base = { action:'create', board: id, password: (fd.get('pw') || '').toString() };
+      const base = { action:'create', board: id, password: ((fd.get('pw') || '').toString().trim() || loginPw()) };
+      if(base.password.length < 4){ status.textContent = '비밀번호를 입력하거나 로그인해 주세요 (4자 이상).'; return; }
       ['title','author','link','body'].forEach(k => { const v = (fd.get(k) || '').toString().trim(); if(v) base[k] = v; });
       // 좋은 글: 제목을 비우면 내용 첫 줄(없으면 첨부 파일 이름)을 제목으로 씁니다.
       if(id === 'articles' && !base.title){
@@ -1511,7 +1534,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   const HERO_LABEL = {
     photo:'사진',
     video:'오늘의 예배',
-    music:'음악',
+    music:'찬양',
     bulletin:'주보',
     articles:'좋은 글'
   };
@@ -1716,6 +1739,39 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     heroShow('last', `
         <iframe src="https://www.youtube.com/embed/${yid}?rel=0&autoplay=1" title="${esc(row.title)}" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         <a class="live-hover" href="https://www.youtube.com/watch?v=${yid}" target="_blank" rel="noopener">최근예배영상.유투브에서 보기 ↗</a>`);
+  }
+
+  // 찬양: 찬양 게시판의 곡들을 가운데 뷰어에서 차례대로 이어서 들려 줍니다.
+  let praiseToken = 0;
+  async function heroPraiseOn(){
+    const token = ++praiseToken;
+    let rows = [];
+    if(configured){
+      try{
+        const res = await fetch(`${API_URL}?board=music`);
+        const j = await res.json();
+        if(Array.isArray(j)) rows = j.filter(r => !r.parentId);
+      }catch(err){ console.error(err); }
+    }
+    if(token !== praiseToken) return;
+    const ids = [...new Set(rows.map(r => youtubeId(r.link)).filter(Boolean))];
+    if(!ids.length){
+      heroShow('music', '<div class="hero-last-empty">아직 등록된 찬양이 없습니다. 찬양 게시판에서 올려 주세요.</div>');
+      return;
+    }
+    const [first, ...rest] = ids;
+    heroShow('music', `
+        <iframe src="https://www.youtube.com/embed/${first}?rel=0&autoplay=1&loop=1&playlist=${[first, ...rest].join(',')}" title="찬양 듣기" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <a class="live-hover" href="#music">찬양 게시판 보기 ↗</a>`);
+  }
+  // 찬양 메뉴를 누르면 홈 가운데 뷰어에서 찬양이 바로 나옵니다.
+  function heroPraiseEntry(e){
+    if(e) e.preventDefault();
+    const homeOn = !!document.querySelector('[data-view="home"].active');
+    if(!homeOn) location.hash = '#home';
+    heroPraiseOn();
+    const hero = document.querySelector('.hero');
+    if(hero) setTimeout(() => hero.scrollIntoView({behavior:'smooth', block:'start'}), homeOn ? 0 : 50);
   }
 
   // 흘러가는 뷰어로 돌아갑니다.
@@ -2178,6 +2234,50 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     });
   }
 
+  /* ---------- 로그인: 비밀번호를 이 방문(탭) 동안 기억해 글쓰기에 자동으로 씁니다 ---------- */
+  const LOGIN_KEY = 'chLogin';
+  const loginGet = () => { try{ return JSON.parse(sessionStorage.getItem(LOGIN_KEY) || 'null'); }catch(e){ return null; } };
+  const loginSet = v => { try{ if(v) sessionStorage.setItem(LOGIN_KEY, JSON.stringify(v)); else sessionStorage.removeItem(LOGIN_KEY); }catch(e){} };
+  const loginPw = () => (loginGet() || {}).pw || '';
+  function renderLogin(){
+    const box = document.getElementById('login-box');
+    if(!box) return;
+    const cur = loginGet();
+    document.body.classList.toggle('logged-in', !!cur);
+    box.innerHTML = cur
+      ? `<span class="login-state">${cur.kind === 'adm' ? '관리자' : '일반'} 로그인 중</span><button type="button" class="login-btn" data-login="out">로그아웃</button>`
+      : `<select data-role="login-kind" aria-label="로그인 종류"><option value="gen">일반</option><option value="adm">관리자</option></select><input data-role="login-pw" type="password" placeholder="비밀번호" maxlength="30" aria-label="비밀번호"><button type="button" class="login-btn" data-login="in">로그인</button><span class="login-err" data-role="login-err"></span>`;
+  }
+  async function doLogin(){
+    const box = document.getElementById('login-box');
+    const kind = box.querySelector('[data-role="login-kind"]').value;
+    const pw = box.querySelector('[data-role="login-pw"]').value.trim();
+    const err = box.querySelector('[data-role="login-err"]');
+    if(pw.length < 4){ err.textContent = '비밀번호는 4자 이상 입력해 주세요.'; return; }
+    if(kind === 'adm'){
+      if(!configured){ err.textContent = '게시판 연결 설정이 필요합니다.'; return; }
+      err.textContent = '확인 중…';
+      try{
+        const out = await postJSON({ action:'check', adminPassword: pw });
+        if(!(out.ok && out.admin)){ err.textContent = '관리자 비밀번호가 맞지 않습니다.'; return; }
+      }catch(e){ err.textContent = '확인하지 못했습니다. 잠시 후 다시 시도해 주세요.'; return; }
+    }
+    loginSet({ kind, pw });
+    renderLogin();
+  }
+  function wireLogin(){
+    const box = document.getElementById('login-box');
+    if(!box) return;
+    box.addEventListener('click', e => {
+      const b = e.target.closest('[data-login]');
+      if(!b) return;
+      if(b.dataset.login === 'in') doLogin();
+      else { loginSet(null); renderLogin(); }
+    });
+    box.addEventListener('keydown', e => { if(e.key === 'Enter' && e.target.matches('[data-role="login-pw"]')) doLogin(); });
+    renderLogin();
+  }
+
   /* ---------- 시작 ---------- */
   initCalState();
   boardEls.forEach(wireManage);
@@ -2204,6 +2304,15 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   setInterval(updateLiveButton, 30000);
   const lastBtn = document.getElementById('yt-last');
   if(lastBtn) lastBtn.addEventListener('click', heroToggleLast);
+  document.querySelectorAll('a[href="#music"]').forEach(a => a.addEventListener('click', heroPraiseEntry));
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-role="write-open"]');
+    if(!b) return;
+    const box = b.closest('.board-wrap').querySelector('[data-role="write-box"]');
+    box.classList.toggle('closed');
+    b.textContent = box.classList.contains('closed') ? '✏️ 글쓰기' : '✕ 닫기';
+  });
+  wireLogin();
   wireLiveLabel();
 })();
 </script>
