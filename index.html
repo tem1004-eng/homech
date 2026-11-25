@@ -676,7 +676,9 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       lastToken++; praiseToken++;   // 아직 불러오는 중이던 영상도 취소
       // 다른 페이지에서는 가운데 방송·영상을 멈추고, 홈으로 돌아오면 다시 보여 줍니다.
       if(heroMode) heroLayoutOff();
-    } else if(liveNow && heroMode !== 'live'){
+    } else if(pickingHome){
+      pickingHome = false;   // 찬양·최근 영상 버튼이 홈으로 옮긴 것이면 그 영상을 그대로 둡니다.
+    } else if(liveNow && heroMode == null){
       heroLiveOn();   // 홈(구미은혜로교회 버튼)으로 돌아오면 실시간 방송을 가운데 창에 다시 보여 줍니다.
     }
     document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.dataset.view === name));
@@ -1772,10 +1774,11 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         <a class="live-hover" href="#music">찬양 게시판 보기 ↗</a>`);
   }
   // 찬양 메뉴를 누르면 홈 가운데 뷰어에서 찬양이 바로 나옵니다.
+  let pickingHome = false;   // 찬양·최근 영상 버튼이 홈으로 옮길 때, 실시간 방송이 덮어쓰지 않도록 표시
   function heroPraiseEntry(e){
     if(e) e.preventDefault();
     const homeOn = !!document.querySelector('[data-view="home"].active');
-    if(!homeOn) location.hash = '#home';
+    if(!homeOn){ pickingHome = true; location.hash = '#home'; }
     heroPraiseOn();
     const hero = document.querySelector('.hero');
     if(hero) setTimeout(() => hero.scrollIntoView({behavior:'smooth', block:'start'}), homeOn ? 0 : 50);
@@ -1807,7 +1810,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     }
     // 다른 게시판에 있으면 홈화면으로 이동한 뒤 보여 줍니다.
     const homeOn = !!document.querySelector('[data-view="home"].active');
-    if(!homeOn) location.hash = '#home';
+    if(!homeOn){ pickingHome = true; location.hash = '#home'; }
     heroLastOn();
     if(!homeOn){
       const hero = document.querySelector('.hero');
