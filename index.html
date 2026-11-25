@@ -41,6 +41,9 @@ header.site{position:sticky;top:0;z-index:10;background:rgba(251,249,244,.96);ba
 .yt-top{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:999px;background:linear-gradient(135deg,#9a1f1f,#cc3b3b);color:#fff;text-decoration:none;font-weight:600;font-size:.9rem;white-space:nowrap;box-shadow:0 4px 12px rgba(154,31,31,.28);transition:transform .15s ease,box-shadow .15s ease}
 .yt-top:hover{color:#fff;transform:translateY(-2px);box-shadow:0 8px 18px rgba(154,31,31,.36)}
 .yt-top{position:relative}
+.yt-last{display:inline-flex;align-items:center;gap:6px;margin-left:8px;padding:9px 16px;border-radius:999px;border:0;cursor:pointer;background:linear-gradient(135deg,#5a4426,#8a6b3e);color:#fff;font:inherit;font-weight:600;font-size:.9rem;white-space:nowrap;box-shadow:0 4px 12px rgba(40,30,10,.25);transition:transform .15s ease,box-shadow .15s ease}
+.yt-last:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(40,30,10,.35)}
+.hero-last-empty{display:grid;place-items:center;height:100%;color:#fff;text-align:center;padding:12px;font-size:.9rem}
 .yt-top.live{animation:ytBlink 2s ease-in-out infinite}
 @keyframes ytBlink{0%,100%{transform:scale(1);box-shadow:0 4px 12px rgba(154,31,31,.28),0 0 0 0 rgba(255,214,102,0)}50%{transform:scale(1.08);box-shadow:0 4px 12px rgba(154,31,31,.28),0 0 0 4px rgba(255,214,102,.95)}}
 .live-tip{position:absolute;top:calc(100% + 12px);left:50%;transform:translate(-50%,6px);padding:8px 14px;border-radius:10px;background:#9a1f1f;color:#fff;font-size:.8rem;font-weight:600;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .25s ease,transform .25s ease;z-index:31}
@@ -359,6 +362,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       </a>
       <a class="cal-top" href="#calendar">📅 목회달력</a>
       <a class="yt-top" href="https://www.youtube.com/@%EA%B5%AC%EB%AF%B8%EC%9D%80%ED%98%9C%EB%A1%9C%EA%B5%90%ED%9A%8C" target="_blank" rel="noopener">▶ <span class="yt-lbl-a">유투브방송전체</span><span class="yt-lbl-b">실시간 예배</span><span class="live-tip">실시간 예배 방송중입니다</span></a>
+      <button class="yt-last" id="yt-last" type="button">🎬 최종예배영상보기</button>
     </div>
     <nav>
       <ul>
@@ -1649,16 +1653,18 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     heroLiveSlot('right');
   }
 
-  function heroLiveOn(){
+  let heroMode = null;     // null | 'live' (실시간) | 'last' (최종 예배 영상)
+  let liveNow = false;     // 실시간 예배 시간인지 (30초마다 갱신)
+
+  function heroShow(mode, centerHTML){
     const win = document.getElementById('hero-window'), box = document.getElementById('hero-live');
-    if(!win || !box || win.classList.contains('live-mode')) return;
+    if(!win || !box) return;
+    clearInterval(heroLiveTimer); heroLiveTimer = null;
     heroStop();
+    heroMode = mode;
     box.innerHTML = `
       <div class="hero-side"><div class="vbox" data-slot="left"></div></div>
-      <div class="hero-live-center">
-        <iframe src="https://www.youtube.com/embed/live_stream?channel=${LIVE_CHANNEL}&mute=1" title="구미은혜로교회 실시간 예배" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        <a class="live-badge" href="${LIVE_PAGE}" target="_blank" rel="noopener">● 실시간 예배 · 유튜브에서 보기 ↗</a>
-      </div>
+      <div class="hero-live-center">${centerHTML}</div>
       <div class="hero-side"><div class="vbox" data-slot="right"></div></div>`;
     win.classList.add('live-mode');
     heroLiveSlot('left');
@@ -1666,16 +1672,62 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     heroLiveTimer = setInterval(heroLiveTick, HERO_STEP_MS);
   }
 
-  function heroLiveOff(){
+  function heroLiveOn(){
+    if(heroMode === 'live') return;
+    heroShow('live', `
+        <iframe src="https://www.youtube.com/embed/live_stream?channel=${LIVE_CHANNEL}&mute=1" title="구미은혜로교회 실시간 예배" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <a class="live-badge" href="${LIVE_PAGE}" target="_blank" rel="noopener">● 실시간 예배 · 유튜브에서 보기 ↗</a>`);
+  }
+
+  // 오늘의 예배 게시판에서 가장 최근에 올라온 영상을 가운데에 보여 줍니다.
+  let lastToken = 0;
+  async function heroLastOn(){
+    const token = ++lastToken;
+    let rows = [];
+    if(configured){
+      try{
+        const res = await fetch(`${API_URL}?board=service`);
+        const j = await res.json();
+        if(Array.isArray(j)) rows = j;
+      }catch(err){ console.error(err); }
+    }
+    if(token !== lastToken) return;
+    const row = rows.find(r => youtubeId(r.link));
+    if(!row){
+      heroShow('last', '<div class="hero-last-empty">아직 등록된 예배 영상이 없습니다.</div>');
+      return;
+    }
+    const yid = youtubeId(row.link);
+    heroShow('last', `
+        <iframe src="https://www.youtube.com/embed/${yid}?rel=0" title="${esc(row.title)}" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <a class="live-badge" href="https://www.youtube.com/watch?v=${yid}" target="_blank" rel="noopener">🎬 최종 예배 영상 · 유튜브에서 보기 ↗</a>`);
+  }
+
+  // 흘러가는 뷰어로 돌아갑니다.
+  function heroLayoutOff(){
     const win = document.getElementById('hero-window'), box = document.getElementById('hero-live');
-    if(!win || !win.classList.contains('live-mode')) return;
+    if(!win) return;
     clearInterval(heroLiveTimer); heroLiveTimer = null;
+    heroMode = null;
     win.classList.remove('live-mode');
     if(box) box.innerHTML = '';
     heroStart();
   }
 
-  function heroSetLive(on){ on ? heroLiveOn() : heroLiveOff(); }
+  // 실시간 예배 시간이 시작되거나 끝날 때만 화면을 바꿉니다.
+  function heroSetLive(on){
+    if(on && !liveNow){ liveNow = true; heroLiveOn(); }
+    else if(!on && liveNow){ liveNow = false; if(heroMode === 'live') heroLayoutOff(); }
+  }
+
+  // 최종예배영상보기 버튼: 누르면 멈추고 보여 주며, 다시 누르면 흘러가는 뷰어로 돌아갑니다.
+  function heroToggleLast(){
+    if(heroMode === 'last'){
+      if(liveNow) heroLiveOn(); else heroLayoutOff();
+      return;
+    }
+    heroLastOn();
+  }
 
   function heroStart(){
     heroStop();
@@ -2128,6 +2180,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   wireAdmin();
   updateLiveButton();
   setInterval(updateLiveButton, 30000);
+  const lastBtn = document.getElementById('yt-last');
+  if(lastBtn) lastBtn.addEventListener('click', heroToggleLast);
   wireLiveLabel();
 })();
 </script>
