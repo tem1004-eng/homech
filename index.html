@@ -337,6 +337,13 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   .split-right{position:static;order:-1}
 }
 @media(max-width:640px){
+  .brand{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:10px 12px}
+  .brand::-webkit-scrollbar{display:none}
+  .brand > *{flex:0 0 auto}
+  .brand-left,.brand-right{flex-wrap:nowrap}
+  /* 스마트폰: 가운데 창(실시간·최종 예배 영상)만 보여 줍니다 */
+  .hero-side{display:none}
+  .hero-live{grid-template-columns:1fr;padding:0}
   nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   nav::-webkit-scrollbar{display:none}
   nav ul{width:max-content;justify-content:flex-start;padding-bottom:4px}
@@ -1726,7 +1733,14 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       if(liveNow) heroLiveOn(); else heroLayoutOff();
       return;
     }
+    // 다른 게시판에 있으면 홈화면으로 이동한 뒤 보여 줍니다.
+    const homeOn = !!document.querySelector('[data-view="home"].active');
+    if(!homeOn) location.hash = '#home';
     heroLastOn();
+    if(!homeOn){
+      const hero = document.querySelector('.hero');
+      if(hero) setTimeout(() => hero.scrollIntoView({behavior:'smooth', block:'start'}), 50);
+    }
   }
 
   function heroStart(){
