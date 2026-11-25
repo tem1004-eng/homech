@@ -2435,7 +2435,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     });
     bbText.innerHTML = html;
     bbText.scrollTop = 0;
-    ttsState.run++; ttsState.paused = false; if(hasTTS()) speechSynthesis.cancel();
+    ttsState.run++; ttsState.paused = false; ttsState.idx = 0; if(hasTTS()) speechSynthesis.cancel();
     setNote('구절을 누르면 그 구절부터 들립니다.');
   }
 
@@ -2467,8 +2467,9 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         const bi = Number(bbBookSel.value), c = Number(bbChSel.value);
         const pos = BIBLE_CHAPTERS.findIndex(x => x[0] === bi && x[1] === c) + 1;
         if(pos < BIBLE_CHAPTERS.length){
-          setPos(...BIBLE_CHAPTERS[pos]);
-          setTimeout(() => ttsSpeakAt(run, 0), 400);
+          setPos(...BIBLE_CHAPTERS[pos]);   // 장을 바꾸면 재생 번호도 새로 잡히므로, 새 번호로 이어서 읽습니다.
+          const next = ttsState.run;
+          setTimeout(() => ttsSpeakAt(next, 0), 400);
           return;
         }
       }
