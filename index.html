@@ -206,7 +206,11 @@ h3.sub{font-size:1.2rem;margin:36px 0 14px}
 .about-top{display:flex;align-items:center;gap:28px;max-width:1000px;margin:0 auto 36px}
 .about-top .about-img{flex:0 0 auto;width:413px;max-width:100%;margin:0;border-radius:14px}
 .about-top .about-intro{flex:1 1 0;min-width:0;max-width:none;margin:0;text-align:left}
-@media (max-width:760px){.about-top{flex-direction:column}.about-top .about-img{width:100%;max-width:413px}}
+.about-qr{flex:0 0 190px;text-align:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 14px;box-shadow:0 6px 18px rgba(60,40,10,.06)}
+.about-qr img{display:block;width:150px;height:150px;margin:0 auto 10px;image-rendering:pixelated}
+.about-qr p{margin:0;font-weight:700;color:var(--ink);font-size:.95rem;line-height:1.5}
+.about-qr small{font-weight:400;color:var(--muted)}
+@media (max-width:760px){.about-top{flex-direction:column}.about-top .about-img{width:100%;max-width:413px}.about-qr{flex:0 0 auto;width:100%;max-width:300px}}
 .about-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
 .about-panel{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 6px 18px rgba(60,40,10,.06);transition:transform .2s ease,box-shadow .2s ease}
 .about-panel:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(60,40,10,.12)}
@@ -459,6 +463,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     <div class="about-top">
       <img class="about-img" src="images/church.png" alt="구미은혜로교회 조감도">
       <div class="about-intro">구미은혜로교회는 대한예수교장로회 합동교단의 교회입니다. 예배와 전도, 선교와 교육의 4대목표를 복음을 중심으로 실천하는 교회입니다.</div>
+      <div class="about-qr"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAbwAAAG8AQAAAACNyy1yAAADJUlEQVR4Xu2ca27kIBCEYbX/mRvk/sfaG5gT9Kq7oG1vvPFrHAWoUmQ5yowA87ldtJtECZeUf136WgiBX/xCvDi8ONdEckjONZEcknNNJIfkXNNdcqLrFULWX3DEryGsP0DbuaO703FeI7WYBCpXKYlSGozbDzv/5wNDXZzTGomc03rDxSlR1JVEf0wy6XH9gTe0eFJscXDX8Xtz/MpojhL0RB3AhkjO4OT8GAByFBF42P9MyY/p6r7Y1T5uqzmu+ksB0BnTJPkV0oQAq05gNWIC0AcADc1jZdUW+0Vpikmi4lqPRux6bhoaI7vax21VWF3GzGJWEU5zFKP006tYAtAHAA3NYyipqiQy2Xrf1/5ieQCkquxPJasFTQ2NkV3t47aaWQWlQNTh1EHW5BVwrfQSgD4AaGgeFzkrvJ9azIDa1OpUJb/Uwc5moKExsqt93FarPIDCaR4VY4NTjUnUtVrUXZBMAPoAoKF5nF0oHv14xJfnPlxBNbFuaOlX99QQAA11tbKK1ROWV/Wl6tK4cm11Rg0B0FBXV3G1rKSWrK5jLD7AuLqnhgBoqKs1DwDVDBUSAiXGWvFVOXrminkA+tWLun13IDGVrWDVhEoAmezE01mzbrd4Wmxx8NXcwgPUWOopVkd0GVTpAQ6It9UTt1XJWWmlCsJpEpyjGEDLV2qqypJXNexyOh6ZDkK+D7k+6227inrUrBtYYFZVSLcio0UPcEhEbh+5C/J6gFIJgBoAJFr9CHl5AOsBdkRWn2B1rrPCLoAZy2oDjFINqRpec8Q5PcCXIqtPsLrOWS2f9b4ZECmCGm9ZZ3VAZPUJVms9QImWGjzx0h87rTzSopbVKwYZVxlXD9yzm3rDF32bqq+hkFzFagtZVvnjCdg3tHhSbPGJYNXQVd3YxzqHU9Rd5xcyV0gI1Ejb0BjZ1W4h9/zVPEIUX5mbrS+2CEC3ABzT9wOwsY+1mFV7KeB7WkuwrXta6VfpV48h/Vm3v4j/XmU1APFDCwPw0C/Fq3bipQKm2y2eFlscPJKXvf+nxf8VPDo5DB2Dhw4CQACuieSQnGsiOYOT8xdhS9FqSHFLoQAAAABJRU5ErkJggg==" alt="구미은혜로교회 홈페이지 QR코드"><p>홈페이지 QR코드<br><small>카메라로 비추면 바로 열려요</small></p></div>
     </div>
 
     <div class="about-grid">
@@ -2216,7 +2221,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 
 
   /* ---------- 실시간 예배 방송 표시 (한국시간 기준) ---------- */
-  // 주일 10:30~12:30, 수요일 19:00~20:30, 매일 05:15~06:20 (일요일 새벽 제외)
+  // 주일 10:30~12:30, 수요일 19:00~20:30, 매일 05:15~06:10 (일요일 새벽 제외)
   function isLiveWorship(){
     const parts = new Intl.DateTimeFormat('en-US', { timeZone:'Asia/Seoul', weekday:'short', hour:'2-digit', minute:'2-digit', hourCycle:'h23' }).formatToParts(new Date());
     const get = t => parts.find(x => x.type === t).value;
@@ -2225,7 +2230,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     const inRange = (a, b) => t >= a && t < b;
     if(day === 0 && inRange(630, 750)) return true;
     if(day === 3 && inRange(1140, 1230)) return true;
-    if(day !== 0 && inRange(315, 380)) return true;   // 일요일 새벽은 제외
+    if(day !== 0 && inRange(315, 370)) return true;   // 일요일 새벽은 제외
     return false;
   }
   function updateLiveButton(){
