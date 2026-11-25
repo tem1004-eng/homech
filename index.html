@@ -2376,7 +2376,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   let BIBLE = null, bibleLoading = null, bibleLoadFailed = false;
   function loadBible(){
     if(BIBLE || bibleLoading || bibleLoadFailed) return;
-    bibleLoading = fetch('bible.json').then(r => { if(!r.ok) throw new Error(r.status); return r.json(); })
+    bibleLoading = fetch('bible.json').then(r => { if(!r.ok) throw new Error(r.status); return r.json(); }).catch(() => fetch('Bible.json').then(r => { if(!r.ok) throw new Error(r.status); return r.json(); }))
       .then(data => { BIBLE = data; bibleLoading = null; bbInit(); })
       .catch(err => {
         console.error(err); bibleLoading = null; bibleLoadFailed = true;
