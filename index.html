@@ -2620,9 +2620,12 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   function ttsPlayFrom(i){
     if(!hasTTS()){ bbNote('이 브라우저는 소리 듣기를 지원하지 않습니다.'); return; }
     if(!BIBLE){ loadBible(); return; }
+    // 일시정지 상태로 남아 있으면 새 장을 읽어도 소리가 나지 않으므로 먼저 풀고, 잠깐 기다렸다가 시작합니다.
     speechSynthesis.cancel();
+    if(speechSynthesis.paused) speechSynthesis.resume();
     ttsState.run++; ttsState.paused = false;
-    ttsSpeakAt(ttsState.run, i);
+    const run = ttsState.run;
+    setTimeout(() => ttsSpeakAt(run, i), 60);
   }
   function ttsPlay(){
     if(ttsState.paused){ speechSynthesis.resume(); ttsState.paused = false; bbNote('다시 듣는 중'); return; }
@@ -2636,6 +2639,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     if(!hasTTS()) return;
     ttsState.run++; ttsState.paused = false;
     speechSynthesis.cancel();
+    if(speechSynthesis.paused) speechSynthesis.resume();
     clearNow();
     bbNote('정지했습니다.');
   }
