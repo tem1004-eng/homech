@@ -115,6 +115,9 @@ nav a.nav-btn.current{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--c1),0 6px 16px r
 .live-hover{position:absolute;top:10px;left:10px;z-index:2;padding:10px 18px;border-radius:999px;background:rgba(154,31,31,.92);color:#fff;text-decoration:none;font-size:.95rem;font-weight:700;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .25s ease}
 .hero-live-center:hover .live-hover{opacity:1;pointer-events:auto}
 .live-hover:hover{color:#fff;background:#b02e2e}
+.new-badge{position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#d9342b;color:#fff;font-size:.72rem;font-weight:800;line-height:20px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.3);pointer-events:none;z-index:3}
+.new-badge[hidden]{display:none}
+a.nav-btn{position:relative}
 .bible-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
 .bible-tabs .btn:not(.on){background:#8a8f7a}
 .bible-tabs .btn.on{background:var(--accent)}
@@ -745,7 +748,9 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     if(!VIEWS.includes(name)) name = 'home';
     // 최근예배영상이 재생 중이면 다른 페이지로 옮길 때 멈추고 뷰어를 원래대로 돌려 놓습니다.
     if(name !== 'bible' && typeof ttsStop === 'function') ttsStop();
-    if(name === 'bible'){ loadBible(); bbRefresh(); }
+    route_current = name;
+    if(BADGE_BOARDS.includes(name)) markSeen(name);
+    if(name === 'bible'){ loadBible(); bbRefresh(); syncRec(); }
     if(name !== 'home'){
       lastToken++; praiseToken++;   // 아직 불러오는 중이던 영상도 취소
       // 다른 페이지에서는 가운데 방송·영상을 멈추고, 홈으로 돌아오면 다시 보여 줍니다.
@@ -2338,6 +2343,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     if(!box) return;
     const cur = loginGet();
     document.body.classList.toggle('logged-in', !!cur);
+    if(cur && cur.kind === 'gen') syncRec();
     if(cur){
       box.innerHTML = `<span class="login-state">${cur.kind === 'adm' ? '관리자' : esc(cur.name || '일반')} 로그인 중</span><button type="button" class="login-btn" data-login="out">로그아웃</button>`;
       return;
@@ -2432,7 +2438,34 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     const k = REC_KEY(); if(!k) return null;
     try{ const r = JSON.parse(lsGet(k, 'null')); return r && r.read ? r : { read: {}, resume: null }; }catch(e){ return { read: {}, resume: null }; }
   }
-  function recSet(r){ const k = REC_KEY(); if(k) lsSet(k, JSON.stringify(r)); }
+  function recSet(r){ const k = REC_KEY(); if(k){ lsSet(k, JSON.stringify(r)); scheduleRecPush(); } }
+  /* 여러 기기 기록 맞추기: 같은 비밀번호의 기록을 서버에 저장하고 합칩니다 */
+  let pushTimer = null;
+  function scheduleRecPush(){ clearTimeout(pushTimer); pushTimer = setTimeout(pushRec, 1000); }
+  async function pushRec(){
+    const l = loginGet(); const rec = recGet();
+    if(!configured || !l || l.kind !== 'gen' || !rec) return;
+    try{
+      const out = await postJSON({ action:'bibleSave', password: l.pw, data: rec });
+      if(!out || !out.ok) throw new Error('save');
+    }catch(e){ clearTimeout(pushTimer); pushTimer = setTimeout(pushRec, 30000); }
+  }
+  const pickResume = (a, b) => { if(!a) return b || null; if(!b) return a; return (Number(b.t) || 0) > (Number(a.t) || 0) ? b : a; };
+  async function syncRec(){
+    const l = loginGet();
+    if(!configured || !l || l.kind !== 'gen' || !REC_KEY()) return;
+    try{
+      const out = await postJSON({ action:'bibleGet', password: l.pw });
+      if(!out || !out.ok) return;
+      const srv = (out.data && out.data.read) ? out.data : { read:{}, resume:null };
+      const local = recGet() || { read:{}, resume:null };
+      const merged = { read: Object.assign({}, srv.read, local.read), resume: pickResume(local.resume, srv.resume) };
+      if(merged.resume && merged.read[merged.resume.bi + '-' + merged.resume.c]) merged.resume = null;
+      lsSet(REC_KEY(), JSON.stringify(merged));
+      if(JSON.stringify(merged) !== JSON.stringify({ read: srv.read, resume: srv.resume })) scheduleRecPush();
+      bbRefresh();
+    }catch(e){ /* 연결이 안 되면 이 기기의 기록을 그대로 씁니다 */ }
+  }
 
   let BIBLE = null, bibleLoading = null, bibleLoadFailed = false, pendingPos = null;
   function loadBible(){
@@ -2538,7 +2571,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   /* 통독 기록 */
   function markVerseDone(bi, c, i){
     const rec = recGet(); if(!rec) return;
-    rec.resume = { bi, c, v: i }; recSet(rec);
+    rec.resume = { bi, c, v: i, t: Date.now() }; recSet(rec);
   }
   function markChapterRead(bi, c){
     const rec = recGet(); if(!rec) return false;
@@ -2745,6 +2778,48 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     });
   }
 
+  /* ---------- 새글 표시: 메뉴 버튼에 이 기기에서 아직 안 본 새 글 수를 보여 줍니다 ---------- */
+  const BADGE_BOARDS = ['service','bulletin','photo','music','articles','files'];
+  const SEEN_KEY = 'chSeen';
+  const seenGet = () => { try{ return JSON.parse(localStorage.getItem(SEEN_KEY) || '{}'); }catch(e){ return {}; } };
+  function seenSave(o){ try{ localStorage.setItem(SEEN_KEY, JSON.stringify(o)); }catch(e){} }
+  function markSeen(board){
+    const o = seenGet(); o[board] = Date.now(); seenSave(o);
+    setBadge(board, 0);
+  }
+  function setBadge(board, n){
+    document.querySelectorAll(`a.nav-btn[href="#${board}"] .new-badge`).forEach(b => {
+      b.textContent = n > 9 ? '9+' : String(n);
+      b.hidden = n <= 0;
+    });
+  }
+  async function countNew(board){
+    const o = seenGet();
+    if(!o[board]){ o[board] = Date.now(); seenSave(o); return 0; }   // 처음 쓸 때는 지금까지의 글을 본 것으로 봅니다
+    const res = await fetch(`${API_URL}?board=${board}`);
+    const rows = await res.json();
+    if(!Array.isArray(rows)) return 0;
+    return rows.filter(r => !r.parentId && Number(r.createdAt) > o[board]).length;
+  }
+  async function refreshBadges(){
+    if(!configured) return;
+    for(const board of BADGE_BOARDS){
+      try{
+        if(route_current === board) { markSeen(board); continue; }
+        setBadge(board, await countNew(board));
+      }catch(e){ /* 연결이 안 되면 그냥 넘어갑니다 */ }
+    }
+  }
+  let route_current = null;
+  function wireBadges(){
+    document.querySelectorAll('a.nav-btn').forEach(a => {
+      const id = (a.getAttribute('href') || '').slice(1);
+      if(BADGE_BOARDS.includes(id) && !a.querySelector('.new-badge')) a.insertAdjacentHTML('beforeend', '<span class="new-badge" hidden></span>');
+    });
+    refreshBadges();
+    setInterval(refreshBadges, 5 * 60 * 1000);
+  }
+
   /* ---------- 시작 ---------- */
   initCalState();
   boardEls.forEach(wireManage);
@@ -2796,6 +2871,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   wireLogin();
   wireBible();
   bbSetup();
+  wireBadges();
   wireLiveLabel();
 })();
 </script>
