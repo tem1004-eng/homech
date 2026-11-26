@@ -150,6 +150,26 @@ a.nav-btn{position:relative}
 .plan-row .mark{color:var(--accent);font-weight:700}
 .resume-box{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:14px 16px;margin-bottom:12px;background:#fff8e1;border:1px solid #e8d48a;border-radius:12px}
 .resume-btns{display:flex;gap:8px}
+/* 다음 장 버튼: 항상 눈에 띄게, 한 장을 다 읽으면 깜박임 */
+.bb-next{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700;font-size:.92rem;padding:7px 14px}
+.bb-next.bb-ready{animation:bbBlink 1s ease-in-out infinite;box-shadow:0 0 0 3px #ffd54a}
+@keyframes bbBlink{0%,100%{background:var(--accent);transform:scale(1)}50%{background:#e8891d;transform:scale(1.08)}}
+/* 하단 고정 성경 메뉴: 성경 읽기 화면에서 항상 보임 */
+.bb-fixed{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;padding:8px 10px;background:#fffdf7;border-top:2px solid var(--accent);box-shadow:0 -6px 18px rgba(40,30,10,.18)}
+.bb-fixed .bb-sel{display:flex;gap:6px}
+.bb-fixed select{padding:6px 8px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff}
+.bb-fixed .bb-btns{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.bb-fold{display:none}
+.bible-pane[data-pane="read"]{padding-bottom:110px}
+@media (max-width:640px){
+  .bb-fixed{gap:4px;padding:6px 6px}
+  .bb-fixed .bb-sel{display:none}
+  .bb-fixed.bb-open .bb-sel{display:flex;width:100%;justify-content:center}
+  .bb-fixed .bb-btns .mini,.bb-fixed .bb-btns .btn{padding:8px 9px;font-size:.82rem;min-height:38px}
+  .bb-fold{display:inline-block;padding:8px 10px;font-size:.82rem;min-height:38px}
+  .bible-pane[data-pane="read"]{padding-bottom:120px}
+  .bible-tts{display:none}
+}
 .bible-bottom{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin-top:14px;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:12px}
 .read-badge{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;background:var(--accent);color:#fff;font-size:.75rem;vertical-align:middle}
 .hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px;position:relative;z-index:2}
@@ -2494,13 +2514,29 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   const bbTextEl = () => document.getElementById('bb-text');
   const hasTTS = () => 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
   function bbNote(t){ bbAll('note').forEach(n => { n.textContent = t; }); }
-  function barHTML(){
+  function barHTML(compact){
+    if(compact) return `
+      <div class="bb-fixed" data-bb-fixed>
+        <div class="bb-sel">
+          <select data-bb="book" aria-label="책"></select>
+          <select data-bb="ch" aria-label="장"></select>
+        </div>
+        <div class="bb-btns">
+          <button class="mini" type="button" data-bb="prev">‹ 이전</button>
+          <button class="mini bb-next" type="button" data-bb="next">다음 ›</button>
+          <button class="btn" type="button" data-bb="play">🔊 듣기</button>
+          <button class="btn" type="button" data-bb="pause">⏸</button>
+          <button class="btn" type="button" data-bb="stop">⏹</button>
+          <button class="mini" type="button" data-bb="done">✔ 다 읽음</button>
+        </div>
+        <button class="mini bb-fold" type="button" data-bb-fold>📖 메뉴 ▴</button>
+      </div>`;
     return `
       <div class="bible-bar">
         <select data-bb="book" aria-label="책"></select>
         <select data-bb="ch" aria-label="장"></select>
         <button class="mini" type="button" data-bb="prev">‹ 이전 장</button>
-        <button class="mini" type="button" data-bb="next">다음 장 ›</button>
+        <button class="mini bb-next" type="button" data-bb="next">다음 장 ›</button>
       </div>
       <div class="bible-tts">
         <button class="btn" type="button" data-bb="play">🔊 듣기</button>
@@ -2528,7 +2564,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     const slots = document.querySelectorAll('[data-bb-bar]');
     if(!slots.length) return;
     bbReady = true;
-    slots.forEach(s => { s.innerHTML = barHTML(); });
+    slots.forEach(s => { s.innerHTML = barHTML(s.dataset.bbBar === 'bottom'); });
     const opts = BOOK_NAMES.map((n, i) => `<option value="${i}">${esc(n)}</option>`).join('');
     bbAll('book').forEach(s => { s.innerHTML = opts; });
     fillChapters(0, 1);
@@ -2543,6 +2579,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     if(h) h.textContent = REC_KEY() ? '로그인 중이라 통독 기록이 저장됩니다.' : '로그인하면 통독 기록이 저장되고, 읽던 곳을 이어서 읽을 수 있습니다.';
   }
   function renderChapter(){
+    bbAll('next').forEach(b => b.classList.remove('bb-ready'));
     const box = bbTextEl();
     if(!box || !bbReady) return;
     if(!BIBLE){ box.innerHTML = bibleLoadFailed ? '' : '<div class="empty">성경 본문을 불러오는 중…</div>'; return; }
@@ -2630,6 +2667,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     if(hasTTS()) speechSynthesis.cancel();
     clearNow();
     markChapterRead(bi, c);
+    bbAll('next').forEach(b => b.classList.add('bb-ready'));
     bbNote(`${BOOK_NAMES[bi]} ${c}장을 다 읽었습니다. 다음 장 버튼을 누르면 다음 장 1절부터 읽습니다.` + (REC_KEY() ? '' : ' (로그인하면 기록이 저장됩니다)'));
   }
   function ttsSpeakAt(run, i){
@@ -2653,6 +2691,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     speechSynthesis.speak(u);
   }
   function ttsPlayFrom(i){
+    bbAll('next').forEach(b => b.classList.remove('bb-ready'));
     if(!hasTTS()){ bbNote('이 브라우저는 소리 듣기를 지원하지 않습니다.'); return; }
     if(!BIBLE){ loadBible(); return; }
     // 일시정지 상태로 남아 있으면 새 장을 읽어도 소리가 나지 않으므로 먼저 풀고, 잠깐 기다렸다가 시작합니다.
@@ -2681,6 +2720,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   function bbClick(e){
     const v = e.target.closest('#bb-text .vs');
     if(v){ ttsPlayFrom(Number(v.dataset.v)); return; }
+    const f = e.target.closest('[data-bb-fold]');
+    if(f){ const bar = f.closest('[data-bb-fixed]'); if(bar) bar.classList.toggle('bb-open'); return; }
     const r = e.target.closest('[data-bb-resume]');
     if(r){ bbResumeChoice(r.dataset.bbResume === 'go'); return; }
     const b = e.target.closest('[data-bb-bar] [data-bb]');
