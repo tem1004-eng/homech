@@ -140,6 +140,15 @@ nav a.nav-btn.current{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--c1),0 6px 16px r
 .plan-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--line)}
 .plan-row.today{background:#fff3c4}
 .plan-row.done .txt{text-decoration:line-through;color:var(--muted)}
+.plan-row{grid-template-columns:auto 1fr auto}
+.plan-mark{width:18px;color:var(--accent);font-weight:800}
+.bb-login-hint{margin:0 0 12px;color:var(--muted);font-size:.9rem}
+.plan-row{grid-template-columns:20px 1fr auto}
+.plan-row .mark{color:var(--accent);font-weight:700}
+.resume-box{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:14px 16px;margin-bottom:12px;background:#fff8e1;border:1px solid #e8d48a;border-radius:12px}
+.resume-btns{display:flex;gap:8px}
+.bible-bottom{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin-top:14px;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.read-badge{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;background:var(--accent);color:#fff;font-size:.75rem;vertical-align:middle}
 .hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px;position:relative;z-index:2}
 nav{display:flex;align-items:center;gap:12px}
 nav ul{flex:0 1 auto}
@@ -148,6 +157,8 @@ nav a.nav-btn.nav-big .ic{font-size:clamp(.8rem,.55vw + .3rem,1.05rem)}
 .login-box{display:inline-flex;align-items:center;gap:6px;margin-left:14px;padding:5px 8px 5px 10px;border-radius:999px;background:#fff;border:1px solid var(--line);box-shadow:0 4px 12px rgba(40,30,10,.10);font-size:.8rem;flex:0 0 auto;white-space:nowrap}
 .login-box select,.login-box input{font:inherit;font-size:.8rem;padding:4px 8px;border:1px solid var(--line);border-radius:999px;background:#fff;min-width:0}
 .login-box input{width:96px}
+.login-remember{display:inline-flex;align-items:center;gap:4px;font-size:.78rem;color:var(--muted);white-space:nowrap}
+.login-remember[hidden]{display:none}
 .login-btn{font:inherit;font-size:.8rem;font-weight:700;padding:4px 10px;border:0;border-radius:999px;background:var(--accent);color:#fff;cursor:pointer}
 .login-state{font-weight:700;color:var(--accent)}
 .login-err{color:#b02e2e;font-size:.75rem}
@@ -616,22 +627,11 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       <button class="btn" type="button" data-btab="plan">🗓 성경통독표</button>
     </div>
     <div class="bible-pane" data-pane="read">
-      <div class="bible-bar">
-        <select id="bb-book" aria-label="책"></select>
-        <select id="bb-ch" aria-label="장"></select>
-        <button class="mini" type="button" id="bb-prev">‹ 이전 장</button>
-        <button class="mini" type="button" id="bb-next">다음 장 ›</button>
-      </div>
-      <div class="bible-tts">
-        <button class="btn" type="button" id="tts-play">🔊 듣기</button>
-        <button class="btn" type="button" id="tts-pause">⏸ 일시정지</button>
-        <button class="btn" type="button" id="tts-stop">⏹ 정지</button>
-        <label>속도 <select id="tts-rate"><option value="0.8">느리게</option><option value="1" selected>보통</option><option value="1.3">빠르게</option></select></label>
-        <label>목소리 <select id="tts-voice"></select></label>
-        <label class="tts-auto"><input type="checkbox" id="tts-auto" checked> 다음 장 이어서 듣기</label>
-        <span class="tts-note" id="tts-note">구절을 누르면 그 구절부터 들립니다.</span>
-      </div>
+      <p class="bb-login-hint" id="bb-login-hint"></p>
+      <div class="bb-bar-slot" data-bb-bar="top"></div>
+      <div class="resume-box" id="bb-resume" hidden></div>
       <div class="bible-text" id="bb-text"><div class="empty">성경 본문을 불러오는 중…</div></div>
+      <div class="bb-bar-slot" data-bb-bar="bottom"></div>
     </div>
     <div class="bible-pane" data-pane="plan" hidden>
       <div class="plan-head">
@@ -745,7 +745,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     if(!VIEWS.includes(name)) name = 'home';
     // 최근예배영상이 재생 중이면 다른 페이지로 옮길 때 멈추고 뷰어를 원래대로 돌려 놓습니다.
     if(name !== 'bible' && typeof ttsStop === 'function') ttsStop();
-    if(name === 'bible') loadBible();
+    if(name === 'bible'){ loadBible(); bbRefresh(); }
     if(name !== 'home'){
       lastToken++; praiseToken++;   // 아직 불러오는 중이던 영상도 취소
       // 다른 페이지에서는 가운데 방송·영상을 멈추고, 홈으로 돌아오면 다시 보여 줍니다.
@@ -1251,6 +1251,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       const base = { action:'create', board: id, password: ((fd.get('pw') || '').toString().trim() || loginPw()) };
       if(base.password.length < 4){ status.textContent = '비밀번호를 입력하거나 로그인해 주세요 (4자 이상).'; return; }
       ['title','author','link','body'].forEach(k => { const v = (fd.get(k) || '').toString().trim(); if(v) base[k] = v; });
+      if(!base.author && loginGet() && loginGet().name) base.author = loginGet().name;
       // 좋은 글: 제목을 비우면 내용 첫 줄(없으면 첨부 파일 이름)을 제목으로 씁니다.
       if(id === 'articles' && !base.title){
         const firstFile = fd.getAll('file').find(f => f && f.size);
@@ -2320,35 +2321,72 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   }
 
   /* ---------- 로그인: 비밀번호를 이 방문(탭) 동안 기억해 글쓰기에 자동으로 씁니다 ---------- */
-  const LOGIN_KEY = 'chLogin';
-  const loginGet = () => { try{ return JSON.parse(sessionStorage.getItem(LOGIN_KEY) || 'null'); }catch(e){ return null; } };
-  const loginSet = v => { try{ if(v) sessionStorage.setItem(LOGIN_KEY, JSON.stringify(v)); else sessionStorage.removeItem(LOGIN_KEY); }catch(e){} };
+  const LOGIN_KEY = 'chLogin', REMEMBER_KEY = 'chLoginRemember', DEVICE_KEY = 'chDevice';
+  const readLS = (st, k) => { try{ return JSON.parse(st.getItem(k) || 'null'); }catch(e){ return null; } };
+  const loginGet = () => readLS(sessionStorage, LOGIN_KEY) || readLS(localStorage, LOGIN_KEY);
+  // remember=true 이면 이 기기에 계속 저장(자동 로그인), 아니면 이 탭 동안만 저장
+  const loginSet = (v, remember) => {
+    try{
+      sessionStorage.removeItem(LOGIN_KEY); localStorage.removeItem(LOGIN_KEY);
+      if(v){ (remember ? localStorage : sessionStorage).setItem(LOGIN_KEY, JSON.stringify(v)); }
+    }catch(e){}
+  };
   const loginPw = () => (loginGet() || {}).pw || '';
+  let loginPending = null;   // 비밀번호 확인 후 이름을 기다리는 중: {pw, status, remember}
   function renderLogin(){
     const box = document.getElementById('login-box');
     if(!box) return;
     const cur = loginGet();
     document.body.classList.toggle('logged-in', !!cur);
-    box.innerHTML = cur
-      ? `<span class="login-state">${cur.kind === 'adm' ? '관리자' : '일반'} 로그인 중</span><button type="button" class="login-btn" data-login="out">로그아웃</button>`
-      : `<select data-role="login-kind" aria-label="로그인 종류"><option value="gen">일반</option><option value="adm">관리자</option></select><input data-role="login-pw" type="password" placeholder="비밀번호" maxlength="30" aria-label="비밀번호"><button type="button" class="login-btn" data-login="in">로그인</button><span class="login-err" data-role="login-err"></span>`;
+    if(cur){
+      box.innerHTML = `<span class="login-state">${cur.kind === 'adm' ? '관리자' : esc(cur.name || '일반')} 로그인 중</span><button type="button" class="login-btn" data-login="out">로그아웃</button>`;
+      return;
+    }
+    if(loginPending){
+      box.innerHTML = `<span class="login-state">${loginPending.status === 'new' ? '처음 쓰시는 비밀번호입니다. 이름을 넣어 주세요' : '이름을 넣어 주세요 (처음 등록한 이름)'}</span><input data-role="login-name" placeholder="이름" maxlength="40" aria-label="이름"><button type="button" class="login-btn" data-login="name">확인</button><button type="button" class="mini" data-login="cancel">취소</button><span class="login-err" data-role="login-err"></span>`;
+      const inp = box.querySelector('[data-role="login-name"]'); if(inp) inp.focus();
+      return;
+    }
+    box.innerHTML = `<select data-role="login-kind" aria-label="로그인 종류"><option value="gen">일반</option><option value="adm">관리자</option></select><input data-role="login-pw" type="password" placeholder="비밀번호" maxlength="30" aria-label="비밀번호"><label class="login-remember" data-role="remember-wrap"><input type="checkbox" data-role="login-remember"${readLS(localStorage, REMEMBER_KEY) ? ' checked' : ''}> 이 기기에서 자동 로그인</label><button type="button" class="login-btn" data-login="in">로그인</button><span class="login-err" data-role="login-err"></span>`;
   }
   async function doLogin(){
     const box = document.getElementById('login-box');
     const kind = box.querySelector('[data-role="login-kind"]').value;
     const pw = box.querySelector('[data-role="login-pw"]').value.trim();
     const err = box.querySelector('[data-role="login-err"]');
+    const remember = kind === 'gen' && !!box.querySelector('[data-role="login-remember"]').checked;
     if(pw.length < 4){ err.textContent = '비밀번호는 4자 이상 입력해 주세요.'; return; }
-    if(kind === 'adm'){
-      if(!configured){ err.textContent = '게시판 연결 설정이 필요합니다.'; return; }
-      err.textContent = '확인 중…';
-      try{
+    if(!configured){ err.textContent = '게시판 연결 설정이 필요합니다.'; return; }
+    err.textContent = '확인 중…';
+    try{
+      if(kind === 'adm'){
         const out = await postJSON({ action:'check', adminPassword: pw });
         if(!(out.ok && out.admin)){ err.textContent = '관리자 비밀번호가 맞지 않습니다.'; return; }
-      }catch(e){ err.textContent = '확인하지 못했습니다. 잠시 후 다시 시도해 주세요.'; return; }
-    }
-    loginSet({ kind, pw });
-    renderLogin();
+        loginSet({ kind:'adm', pw }, false);
+        try{ localStorage.removeItem(REMEMBER_KEY); }catch(e){}
+        renderLogin(); bbRefresh();
+        return;
+      }
+      const out = await postJSON({ action:'login', password: pw });
+      if(!out.ok){ err.textContent = out.error || '확인하지 못했습니다. 잠시 후 다시 시도해 주세요.'; return; }
+      loginPending = { pw, status: out.status, remember };
+      renderLogin();
+    }catch(e){ err.textContent = '확인하지 못했습니다. 잠시 후 다시 시도해 주세요.'; }
+  }
+  async function doNameStep(){
+    const box = document.getElementById('login-box');
+    const name = box.querySelector('[data-role="login-name"]').value.trim();
+    const err = box.querySelector('[data-role="login-err"]');
+    if(!name){ err.textContent = '이름을 넣어 주세요.'; return; }
+    err.textContent = '확인 중…';
+    try{
+      const out = await postJSON({ action:'login', password: loginPending.pw, name });
+      if(!out.ok){ err.textContent = out.error || '확인하지 못했습니다. 잠시 후 다시 시도해 주세요.'; return; }
+      loginSet({ kind:'gen', pw: loginPending.pw, name: out.name || name }, loginPending.remember);
+      try{ localStorage.setItem(REMEMBER_KEY, loginPending.remember ? '1' : ''); if(!loginPending.remember) localStorage.removeItem(REMEMBER_KEY); }catch(e){}
+      loginPending = null;
+      renderLogin(); bbRefresh();
+    }catch(e){ err.textContent = '확인하지 못했습니다. 잠시 후 다시 시도해 주세요.'; }
   }
   function wireLogin(){
     const box = document.getElementById('login-box');
@@ -2356,14 +2394,27 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     box.addEventListener('click', e => {
       const b = e.target.closest('[data-login]');
       if(!b) return;
-      if(b.dataset.login === 'in') doLogin();
-      else { loginSet(null); renderLogin(); }
+      const a = b.dataset.login;
+      if(a === 'in') doLogin();
+      else if(a === 'name') doNameStep();
+      else if(a === 'cancel'){ loginPending = null; renderLogin(); }
+      else { loginSet(null); loginPending = null; renderLogin(); bbRefresh(); }
     });
-    box.addEventListener('keydown', e => { if(e.key === 'Enter' && e.target.matches('[data-role="login-pw"]')) doLogin(); });
+    box.addEventListener('change', e => {
+      if(e.target.matches('[data-role="login-kind"]')){
+        const w = box.querySelector('[data-role="remember-wrap"]');
+        if(w) w.hidden = e.target.value !== 'gen';
+      }
+    });
+    box.addEventListener('keydown', e => {
+      if(e.key !== 'Enter') return;
+      if(e.target.matches('[data-role="login-pw"]')) doLogin();
+      else if(e.target.matches('[data-role="login-name"]')) doNameStep();
+    });
     renderLogin();
   }
 
-  /* ---------- 성경읽기 · 성경통독표 · 소리 듣기 ---------- */
+  /* ---------- 성경읽기 · 성경통독표 · 소리 듣기 · 통독 기록 ---------- */
   const BOOK_NAMES = ["창세기", "역대상", "출애굽기", "레위기", "민수기", "신명기", "여호수아", "사사기", "룻기", "사무엘상", "사무엘하", "열왕기상", "열왕기하", "역대하", "에스라", "느헤미야", "에스더", "욥기", "시편", "잠언", "전도서", "아가", "이사야", "예레미야", "예레미야애가", "에스겔", "다니엘", "호세아", "요엘", "아모스", "오바댜", "요나", "미가", "나훔", "하박국", "스바냐", "학개", "스가랴", "말라기", "마태복음", "마가복음", "누가복음", "요한복음", "사도행전", "로마서", "고린도전서", "고린도후서", "갈라디아서", "에베소서", "빌립보서", "골로새서", "데살로니가전서", "데살로니가후서", "디모데전서", "디모데후서", "디도서", "빌레몬서", "히브리서", "야고보서", "베드로전서", "베드로후서", "요한일서", "요한이서", "요한삼서", "유다서", "요한계시록"];
   const BOOK_CH = [50, 29, 40, 27, 36, 34, 24, 21, 4, 31, 24, 22, 25, 36, 10, 13, 10, 42, 150, 31, 12, 8, 66, 52, 5, 48, 12, 14, 3, 9, 1, 4, 7, 3, 3, 3, 2, 14, 4, 28, 16, 24, 21, 28, 16, 16, 13, 6, 6, 4, 4, 5, 3, 6, 4, 3, 1, 13, 5, 5, 3, 5, 1, 1, 1, 22];
   const BIBLE_CHAPTERS = (() => { const out = []; BOOK_CH.forEach((n, bi) => { for(let c = 1; c <= n; c++) out.push([bi, c]); }); return out; })();
@@ -2373,58 +2424,94 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   const addDaysYMD = (ymd, n) => new Date(Date.parse(ymd + 'T00:00:00Z') + n * 86400000).toISOString().slice(0, 10);
   const lsGet = (k, d) => { try{ const v = localStorage.getItem(k); return v === null ? d : v; }catch(e){ return d; } };
   const lsSet = (k, v) => { try{ localStorage.setItem(k, v); }catch(e){} };
-  let BIBLE = null, bibleLoading = null, bibleLoadFailed = false;
+  const hashStr = str => { let h = 5381; for(const ch of str) h = ((h << 5) + h + ch.charCodeAt(0)) | 0; return (h >>> 0).toString(36); };
+
+  /* 통독 기록: 로그인 비밀번호별로 저장됩니다 */
+  const REC_KEY = () => { const l = loginGet(); return l ? 'bibleRec:' + hashStr(l.pw) : null; };
+  function recGet(){
+    const k = REC_KEY(); if(!k) return null;
+    try{ const r = JSON.parse(lsGet(k, 'null')); return r && r.read ? r : { read: {}, resume: null }; }catch(e){ return { read: {}, resume: null }; }
+  }
+  function recSet(r){ const k = REC_KEY(); if(k) lsSet(k, JSON.stringify(r)); }
+
+  let BIBLE = null, bibleLoading = null, bibleLoadFailed = false, pendingPos = null;
   function loadBible(){
     if(BIBLE || bibleLoading || bibleLoadFailed) return;
-    bibleLoading = fetch('bible.json').then(r => { if(!r.ok) throw new Error(r.status); return r.json(); }).catch(() => fetch('Bible.json').then(r => { if(!r.ok) throw new Error(r.status); return r.json(); }))
-      .then(data => { BIBLE = data; bibleLoading = null; bbInit(); })
+    const getJSON = name => fetch(name).then(r => { if(!r.ok) throw new Error(r.status); return r.json(); });
+    bibleLoading = getJSON('bible.json').catch(() => getJSON('Bible.json'))
+      .then(data => {
+        BIBLE = data; bibleLoading = null;
+        bbSetup();
+        if(pendingPos){ const [bi, c] = pendingPos; pendingPos = null; bbSetPos(bi, c, false); }
+        else renderChapter();
+        bbRefresh();
+      })
       .catch(err => {
         console.error(err); bibleLoading = null; bibleLoadFailed = true;
         const t = document.getElementById('bb-text');
         if(t) t.innerHTML = '<div class="empty">성경 본문(bible.json)을 불러오지 못했습니다. bible.json 파일을 index.html 과 같은 폴더에 올려 주세요.</div>';
       });
   }
-  let bbBookSel, bbChSel, bbText;
-  // 책·장 고르기와 버튼은 본문과 상관없이 바로 준비합니다.
-  function bbSetup(){
-    bbBookSel = document.getElementById('bb-book'); bbChSel = document.getElementById('bb-ch'); bbText = document.getElementById('bb-text');
-    if(!bbBookSel || bbBookSel.dataset.ready) return;
-    bbBookSel.dataset.ready = '1';
-    bbBookSel.innerHTML = BOOK_NAMES.map((n, i) => `<option value="${i}">${esc(n)}</option>`).join('');
-    bbBookSel.addEventListener('change', () => { fillChapters(1); renderChapter(); });
-    bbChSel.addEventListener('change', renderChapter);
-    document.getElementById('bb-prev').addEventListener('click', () => stepChapter(-1));
-    document.getElementById('bb-next').addEventListener('click', () => stepChapter(1));
-    bbText.addEventListener('click', e => { const v = e.target.closest('.vs'); if(v) ttsPlay(Number(v.dataset.v)); });
-    document.getElementById('tts-play').addEventListener('click', () => ttsPlay(null));
-    document.getElementById('tts-pause').addEventListener('click', ttsPause);
-    document.getElementById('tts-stop').addEventListener('click', ttsStop);
-    fillChapters(1);
-    ttsVoices();
+
+  const bbAll = name => [...document.querySelectorAll(`[data-bb="${name}"]`)];
+  const bbFirst = name => document.querySelector(`[data-bb="${name}"]`);
+  const bbPos = () => [Number(bbFirst('book').value), Number(bbFirst('ch').value)];
+  const bbTextEl = () => document.getElementById('bb-text');
+  const hasTTS = () => 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  function bbNote(t){ bbAll('note').forEach(n => { n.textContent = t; }); }
+  function barHTML(){
+    return `
+      <div class="bible-bar">
+        <select data-bb="book" aria-label="책"></select>
+        <select data-bb="ch" aria-label="장"></select>
+        <button class="mini" type="button" data-bb="prev">‹ 이전 장</button>
+        <button class="mini" type="button" data-bb="next">다음 장 ›</button>
+      </div>
+      <div class="bible-tts">
+        <button class="btn" type="button" data-bb="play">🔊 듣기</button>
+        <button class="btn" type="button" data-bb="pause">⏸ 일시정지</button>
+        <button class="btn" type="button" data-bb="stop">⏹ 정지</button>
+        <button class="mini" type="button" data-bb="done">✔ 이 장 다 읽었어요</button>
+        <label>속도 <select data-bb="rate"><option value="0.8">느리게</option><option value="1" selected>보통</option><option value="1.3">빠르게</option></select></label>
+        <label>목소리 <select data-bb="voice"></select></label>
+        <span class="tts-note" data-bb="note"></span>
+      </div>`;
   }
-  // 본문(bible.json)을 불러온 뒤에 실행됩니다.
-  function bbInit(){
-    if(!bbBookSel) bbSetup();
-    if(pendingPos){ const [bi, c] = pendingPos; pendingPos = null; bbBookSel.value = String(bi); fillChapters(c); bbChSel.value = String(c); }
+  function fillChapters(bi, c){
+    const html = Array.from({length: BOOK_CH[bi]}, (_, i) => `<option value="${i + 1}">${i + 1}장</option>`).join('');
+    bbAll('ch').forEach(s => { s.innerHTML = html; s.value = String(c); });
+  }
+  function bbSetPos(bi, c, play){
+    bbAll('book').forEach(s => { s.value = String(bi); });
+    fillChapters(bi, c);
     renderChapter();
+    if(play) ttsPlayFrom(0);
   }
-  function fillChapters(c){
-    const bi = Number(bbBookSel.value);
-    bbChSel.innerHTML = Array.from({length: BOOK_CH[bi]}, (_, i) => `<option value="${i + 1}">${i + 1}장</option>`).join('');
-    bbChSel.value = String(Math.min(Math.max(1, c), BOOK_CH[bi]));
+  let bbReady = false;
+  function bbSetup(){
+    if(bbReady) return;
+    const slots = document.querySelectorAll('[data-bb-bar]');
+    if(!slots.length) return;
+    bbReady = true;
+    slots.forEach(s => { s.innerHTML = barHTML(); });
+    const opts = BOOK_NAMES.map((n, i) => `<option value="${i}">${esc(n)}</option>`).join('');
+    bbAll('book').forEach(s => { s.innerHTML = opts; });
+    fillChapters(0, 1);
+    ttsVoices();
+    bbNote('구절을 누르면 그 구절부터 들립니다.');
+    renderLoginHint();
+    document.addEventListener('click', bbClick);
+    document.addEventListener('change', bbChange);
   }
-  function setPos(bi, c){ bbBookSel.value = String(bi); fillChapters(c); bbChSel.value = String(c); renderChapter(); }
-  function stepChapter(dir){
-    if(!BIBLE) { loadBible(); return; }
-    const bi = Number(bbBookSel.value), c = Number(bbChSel.value);
-    const pos = BIBLE_CHAPTERS.findIndex(x => x[0] === bi && x[1] === c) + dir;
-    if(pos < 0 || pos >= BIBLE_CHAPTERS.length) return;
-    setPos(...BIBLE_CHAPTERS[pos]);
+  function renderLoginHint(){
+    const h = document.getElementById('bb-login-hint');
+    if(h) h.textContent = REC_KEY() ? '로그인 중이라 통독 기록이 저장됩니다.' : '로그인하면 통독 기록이 저장되고, 읽던 곳을 이어서 읽을 수 있습니다.';
   }
   function renderChapter(){
-    if(!bbText) return;
-    if(!BIBLE){ if(!bibleLoadFailed) bbText.innerHTML = '<div class="empty">성경 본문을 불러오는 중…</div>'; return; }
-    const bi = Number(bbBookSel.value), c = Number(bbChSel.value);
+    const box = bbTextEl();
+    if(!box || !bbReady) return;
+    if(!BIBLE){ box.innerHTML = bibleLoadFailed ? '' : '<div class="empty">성경 본문을 불러오는 중…</div>'; return; }
+    const [bi, c] = bbPos();
     const verses = (BIBLE[bi] && BIBLE[bi].chapters[c - 1]) || [];
     let html = `<h3 class="bb-h">${esc(BOOK_NAMES[bi])} ${c}장</h3>`;
     verses.forEach((v, i) => {
@@ -2433,87 +2520,158 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       if(m){ head = `<span class="sec">${esc(m[1])}</span>`; txt = txt.slice(m[0].length); }
       html += `${head}<span class="vs" data-v="${i}" data-t="${esc(txt)}"><b>${i + 1}</b>${esc(txt)}</span>`;
     });
-    bbText.innerHTML = html;
-    bbText.scrollTop = 0;
-    ttsState.run++; ttsState.paused = false; ttsState.idx = 0; if(hasTTS()) speechSynthesis.cancel();
-    setNote('구절을 누르면 그 구절부터 들립니다.');
+    box.innerHTML = html;
+    box.scrollTop = 0;
+    ttsState.run++; ttsState.paused = false; ttsState.idx = 0;
+    if(hasTTS()) speechSynthesis.cancel();
+    bbNote('구절을 누르면 그 구절부터 들립니다.');
+  }
+  function bbMove(dir){
+    if(!BIBLE){ loadBible(); return; }
+    const [bi, c] = bbPos();
+    const pos = BIBLE_CHAPTERS.findIndex(x => x[0] === bi && x[1] === c) + dir;
+    if(pos < 0 || pos >= BIBLE_CHAPTERS.length) return;
+    const [nb, nc] = BIBLE_CHAPTERS[pos];
+    bbSetPos(nb, nc, dir > 0 && hasTTS());   // 다음 장은 1절부터 바로 읽기 시작
   }
 
-  /* ---------- 소리 듣기 (브라우저 음성 기능) ---------- */
+  /* 통독 기록 */
+  function markVerseDone(bi, c, i){
+    const rec = recGet(); if(!rec) return;
+    rec.resume = { bi, c, v: i }; recSet(rec);
+  }
+  function markChapterRead(bi, c){
+    const rec = recGet(); if(!rec) return false;
+    rec.read[bi + '-' + c] = 1;
+    if(rec.resume && rec.resume.bi === bi && rec.resume.c === c) rec.resume = null;
+    recSet(rec);
+    bbRefresh();
+    return true;
+  }
+  function bbRefresh(){
+    renderLoginHint();
+    const pane = document.querySelector('[data-pane="plan"]');
+    if(pane && !pane.hidden) renderPlan();
+    const box = document.getElementById('bb-resume');
+    if(!box) return;
+    const rec = recGet();
+    if(!BIBLE || !rec || !rec.resume){ box.hidden = true; return; }
+    const { bi, c, v } = rec.resume;
+    const verses = (BIBLE[bi] && BIBLE[bi].chapters[c - 1]) || [];
+    if(v + 1 >= verses.length){ box.hidden = true; return; }
+    box.hidden = false;
+    box.innerHTML = `<div class="bb-resume-txt">지난번에 <b>${esc(BOOK_NAMES[bi])} ${c}장 ${v + 1}절</b>까지 읽으셨습니다. <b>${v + 2}절</b>부터 이어서 읽을까요?</div><div class="bb-resume-btns"><button class="btn" type="button" data-bb-resume="go">이어서 읽기</button><button class="mini" type="button" data-bb-resume="no">그냥 보기</button></div>`;
+  }
+  function bbResumeChoice(go){
+    const box = document.getElementById('bb-resume');
+    if(box) box.hidden = true;
+    const rec = recGet();
+    if(!go || !rec || !rec.resume) return;
+    const { bi, c, v } = rec.resume;
+    bbSetPos(bi, c, false);
+    ttsPlayFrom(v + 1);
+  }
+
+  /* 소리 듣기 */
   const ttsState = { run: 0, paused: false, idx: 0 };
-  const hasTTS = () => 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
-  function setNote(t){ const n = document.getElementById('tts-note'); if(n) n.textContent = t; }
+  function clearNow(){ const box = bbTextEl(); if(box) box.querySelectorAll('.now').forEach(x => x.classList.remove('now')); }
   function ttsVoices(){
-    const sel = document.getElementById('tts-voice');
-    if(!sel || !hasTTS()) return;
+    if(!hasTTS()) return;
     const fill = () => {
       const vs = speechSynthesis.getVoices().filter(v => /^ko/i.test(v.lang));
-      sel.innerHTML = vs.length ? vs.map((v, i) => `<option value="${i}">${esc(v.name)}</option>`).join('') : '<option value="">기본 목소리</option>';
+      const html = vs.length ? vs.map((v, i) => `<option value="${i}">${esc(v.name)}</option>`).join('') : '<option value="">기본 목소리</option>';
+      bbAll('voice').forEach(s => { s.innerHTML = html; });
     };
     fill();
     speechSynthesis.onvoiceschanged = fill;
   }
   function ttsCurrentVoice(){
     const vs = hasTTS() ? speechSynthesis.getVoices().filter(v => /^ko/i.test(v.lang)) : [];
-    const i = Number((document.getElementById('tts-voice') || {}).value);
-    return vs[i] || null;
+    const sel = bbFirst('voice');
+    return sel ? (vs[Number(sel.value)] || null) : null;
+  }
+  function chapterFinished(bi, c){
+    ttsState.run++; ttsState.paused = false;
+    if(hasTTS()) speechSynthesis.cancel();
+    clearNow();
+    markChapterRead(bi, c);
+    bbNote(`${BOOK_NAMES[bi]} ${c}장을 다 읽었습니다. 다음 장 버튼을 누르면 다음 장 1절부터 읽습니다.` + (REC_KEY() ? '' : ' (로그인하면 기록이 저장됩니다)'));
   }
   function ttsSpeakAt(run, i){
-    if(run !== ttsState.run) return;
-    const list = [...bbText.querySelectorAll('.vs')];
-    if(i >= list.length){
-      // 장이 끝나면 다음 장으로 넘어가서 계속 읽습니다.
-      if(document.getElementById('tts-auto').checked){
-        const bi = Number(bbBookSel.value), c = Number(bbChSel.value);
-        const pos = BIBLE_CHAPTERS.findIndex(x => x[0] === bi && x[1] === c) + 1;
-        if(pos < BIBLE_CHAPTERS.length){
-          setPos(...BIBLE_CHAPTERS[pos]);   // 장을 바꾸면 재생 번호도 새로 잡히므로, 새 번호로 이어서 읽습니다.
-          const next = ttsState.run;
-          setTimeout(() => ttsSpeakAt(next, 0), 400);
-          return;
-        }
-      }
-      ttsStop(); setNote('끝까지 들었습니다.');
-      return;
-    }
+    if(run !== ttsState.run || !BIBLE) return;
+    const box = bbTextEl(); if(!box) return;
+    const list = [...box.querySelectorAll('.vs')];
+    const [bi, c] = bbPos();
+    if(i >= list.length){ chapterFinished(bi, c); return; }
     list.forEach(x => x.classList.remove('now'));
     const el = list[i];
     el.classList.add('now');
     ttsState.idx = i;
     el.scrollIntoView({block: 'center', behavior: 'smooth'});
-    setNote(`${BOOK_NAMES[Number(bbBookSel.value)]} ${bbChSel.value}장 ${i + 1}절 듣는 중`);
+    bbNote(`${BOOK_NAMES[bi]} ${c}장 ${i + 1}절 듣는 중`);
     const u = new SpeechSynthesisUtterance(el.dataset.t);
     u.lang = 'ko-KR';
-    u.rate = Number(document.getElementById('tts-rate').value) || 1;
+    u.rate = Number((bbFirst('rate') || {}).value) || 1;
     const voice = ttsCurrentVoice(); if(voice) u.voice = voice;
-    u.onend = () => ttsSpeakAt(run, i + 1);
-    u.onerror = () => { if(run === ttsState.run) setNote('소리를 재생하지 못했습니다. 브라우저 설정을 확인해 주세요.'); };
+    u.onend = () => { if(run !== ttsState.run) return; markVerseDone(bi, c, i); ttsSpeakAt(run, i + 1); };
+    u.onerror = () => { if(run === ttsState.run) bbNote('소리를 재생하지 못했습니다. 브라우저 설정을 확인해 주세요.'); };
     speechSynthesis.speak(u);
   }
-  function ttsPlay(from){
-    if(!hasTTS()){ setNote('이 브라우저는 소리 듣기를 지원하지 않습니다.'); return; }
+  function ttsPlayFrom(i){
+    if(!hasTTS()){ bbNote('이 브라우저는 소리 듣기를 지원하지 않습니다.'); return; }
     if(!BIBLE){ loadBible(); return; }
-    if(from === null && ttsState.paused){ speechSynthesis.resume(); ttsState.paused = false; setNote('다시 듣는 중'); return; }
     speechSynthesis.cancel();
     ttsState.run++; ttsState.paused = false;
-    const start = from === null ? ttsState.idx : from;
-    ttsSpeakAt(ttsState.run, start);
+    ttsSpeakAt(ttsState.run, i);
+  }
+  function ttsPlay(){
+    if(ttsState.paused){ speechSynthesis.resume(); ttsState.paused = false; bbNote('다시 듣는 중'); return; }
+    ttsPlayFrom(ttsState.idx);
   }
   function ttsPause(){
     if(!hasTTS() || ttsState.paused) return;
-    speechSynthesis.pause(); ttsState.paused = true; setNote('일시정지');
+    speechSynthesis.pause(); ttsState.paused = true; bbNote('일시정지');
   }
   function ttsStop(){
     if(!hasTTS()) return;
     ttsState.run++; ttsState.paused = false;
     speechSynthesis.cancel();
-    if(bbText) bbText.querySelectorAll('.now').forEach(x => x.classList.remove('now'));
-    setNote('정지했습니다.');
+    clearNow();
+    bbNote('정지했습니다.');
+  }
+  function bbClick(e){
+    const v = e.target.closest('#bb-text .vs');
+    if(v){ ttsPlayFrom(Number(v.dataset.v)); return; }
+    const r = e.target.closest('[data-bb-resume]');
+    if(r){ bbResumeChoice(r.dataset.bbResume === 'go'); return; }
+    const b = e.target.closest('[data-bb-bar] [data-bb]');
+    if(!b) return;
+    switch(b.dataset.bb){
+      case 'prev': bbMove(-1); break;
+      case 'next': bbMove(1); break;
+      case 'play': ttsPlay(); break;
+      case 'pause': ttsPause(); break;
+      case 'stop': ttsStop(); break;
+      case 'done': {
+        const [bi, c] = bbPos();
+        ttsStop();
+        if(markChapterRead(bi, c)) bbNote(`${BOOK_NAMES[bi]} ${c}장을 읽음으로 표시했습니다.`);
+        else bbNote('로그인하면 통독 기록이 저장됩니다.');
+        break;
+      }
+    }
+  }
+  function bbChange(e){
+    const t = e.target, act = t.dataset && t.dataset.bb;
+    if(!act || !t.closest('[data-bb-bar]')) return;
+    if(act === 'book') bbSetPos(Number(t.value), 1, false);
+    else if(act === 'ch') bbSetPos(bbPos()[0], Number(t.value), false);
+    else if(act === 'rate') bbAll('rate').forEach(s => { s.value = t.value; });
+    else if(act === 'voice') bbAll('voice').forEach(s => { s.value = t.value; });
   }
 
-  /* ---------- 성경통독표 (365일, 시작일부터 날마다 진도) ---------- */
+  /* 성경통독표 (365일) */
   function planStart(){ return lsGet('bibleStart', kstToday()); }
-  function planDone(){ try{ return new Set(JSON.parse(lsGet('bibleDone', '[]'))); }catch(e){ return new Set(); } }
   function refText(a, b){
     const parts = []; let i = a;
     while(i < b){
@@ -2525,37 +2683,44 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     }
     return parts.join(', ');
   }
+  function dayRead(k, read){
+    const [a, b] = planRange(k);
+    if(b <= a) return false;
+    for(let i = a; i < b; i++){ const [bi, c] = BIBLE_CHAPTERS[i]; if(!read[bi + '-' + c]) return false; }
+    return true;
+  }
   function renderPlan(){
     const startEl = document.getElementById('plan-start');
     if(!startEl) return;
     const start = planStart();
     startEl.value = start;
     const today = kstToday(), t = dayDiff(start, today);
-    const done = planDone();
-    document.getElementById('plan-count').textContent = `${done.size} / ${PLAN_DAYS}일 완료`;
-    document.getElementById('plan-fill').style.width = (done.size / PLAN_DAYS * 100).toFixed(1) + '%';
+    const rec = recGet();
+    const read = rec ? rec.read : {};
+    const doneFlags = []; let doneCount = 0;
+    for(let k = 0; k < PLAN_DAYS; k++){ const d = dayRead(k, read); doneFlags.push(d); if(d) doneCount++; }
+    document.getElementById('plan-count').textContent = rec ? `${doneCount} / ${PLAN_DAYS}일 완료` : '로그인하면 통독 기록이 저장됩니다';
+    document.getElementById('plan-fill').style.width = (doneCount / PLAN_DAYS * 100).toFixed(1) + '%';
     const todayEl = document.getElementById('plan-today');
     if(t >= 0 && t < PLAN_DAYS){
       const [a, b] = planRange(t);
       todayEl.innerHTML = `<div class="plan-today-box"><div><b>오늘(${t + 1}일차)</b> 읽을 본문: ${esc(refText(a, b))}</div><button class="btn" type="button" data-readday="${t}">이 본문 읽기</button></div>`;
     } else {
-      todayEl.innerHTML = t < 0 ? `<div class="plan-today-box">시작일(${start}) 이후부터 표시됩니다.</div>` : `<div class="plan-today-box">통독 기간(${PLAN_DAYS}일)이 끝났습니다. 시작일을 바꿔 다시 시작할 수 있습니다.</div>`;
+      todayEl.innerHTML = `<div class="plan-today-box">${t < 0 ? `시작일(${start}) 이후부터 표시됩니다.` : `통독 기간(${PLAN_DAYS}일)이 끝났습니다. 시작일을 바꿔 다시 시작할 수 있습니다.`}</div>`;
     }
     let rows = '';
     for(let k = 0; k < PLAN_DAYS; k++){
       const [a, b] = planRange(k);
-      const isToday = k === t, isDone = done.has(k);
-      rows += `<div class="plan-row${isToday ? ' today' : ''}${isDone ? ' done' : ''}"><input type="checkbox" data-day="${k}" ${isDone ? 'checked' : ''} aria-label="${k + 1}일차 완료"><span class="txt"><b>${k + 1}일차</b> · ${addDaysYMD(start, k).slice(5)} · ${esc(refText(a, b))}</span><button class="mini" type="button" data-readday="${k}">읽기</button></div>`;
+      rows += `<div class="plan-row${k === t ? ' today' : ''}${doneFlags[k] ? ' done' : ''}"><span class="plan-mark">${doneFlags[k] ? '✔' : ''}</span><span class="txt"><b>${k + 1}일차</b> · ${addDaysYMD(start, k).slice(5)} · ${esc(refText(a, b))}</span><button class="mini" type="button" data-readday="${k}">읽기</button></div>`;
     }
     document.getElementById('plan-table').innerHTML = rows;
   }
-  let pendingPos = null;
   function readPlanDay(k){
     const [a] = planRange(k);
     pendingPos = BIBLE_CHAPTERS[a];
     showBibleTab('read');
-    loadBible();
-    if(bbBookSel && BIBLE) { setPos(...pendingPos); pendingPos = null; }
+    if(BIBLE){ const [bi, c] = pendingPos; pendingPos = null; bbSetPos(bi, c, false); }
+    else loadBible();
   }
   function showBibleTab(name){
     document.querySelectorAll('[data-btab]').forEach(b => b.classList.toggle('on', b.dataset.btab === name));
@@ -2572,16 +2737,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       if(rb){ readPlanDay(Number(rb.dataset.readday)); return; }
     });
     view.addEventListener('change', e => {
-      if(e.target.id === 'plan-start'){ if(e.target.value){ lsSet('bibleStart', e.target.value); renderPlan(); } return; }
-      if(e.target.dataset.day !== undefined){
-        const done = planDone();
-        const k = Number(e.target.dataset.day);
-        e.target.checked ? done.add(k) : done.delete(k);
-        lsSet('bibleDone', JSON.stringify([...done]));
-        renderPlan();
-      }
+      if(e.target.id === 'plan-start' && e.target.value){ lsSet('bibleStart', e.target.value); renderPlan(); }
     });
-    if(hasTTS()) ttsVoices();
   }
 
   /* ---------- 시작 ---------- */
