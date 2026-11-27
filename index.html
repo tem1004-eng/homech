@@ -150,6 +150,20 @@ a.nav-btn{position:relative}
 .plan-row .mark{color:var(--accent);font-weight:700}
 .resume-box{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:14px 16px;margin-bottom:12px;background:#fff8e1;border:1px solid #e8d48a;border-radius:12px}
 .resume-btns{display:flex;gap:8px}
+/* 좋은 가게 소개 카드 목록 */
+.shop-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
+.shop-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.shop-card{display:flex;flex-direction:column;text-align:left;border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px;cursor:pointer;font:inherit;min-width:0}
+.shop-card:hover{box-shadow:0 6px 16px rgba(40,30,10,.12)}
+.shop-thumb{aspect-ratio:4/3;background:#f6f3ea;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.shop-thumb img{width:100%;height:100%;object-fit:cover}
+.shop-card-name{font-weight:800;font-size:1.02rem;margin-top:8px}
+.shop-card-owner{color:var(--muted);font-size:.9rem;margin-top:2px}
+.shop-detail-acts{display:flex;gap:8px;justify-content:flex-end;margin-bottom:10px}
+.shop-form-wrap{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+.shop-form-wrap select{padding:8px 10px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff}
+@media(max-width:900px){.shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.shop-grid{grid-template-columns:1fr}}
 /* 좋은 가게 소개: 3단 (목록 · 사진 · 내용), 휴대폰에서는 위아래로 나열 */
 .shop-panes{display:grid;grid-template-columns:minmax(180px,1fr) minmax(0,1.3fr) minmax(0,1.2fr);gap:14px;align-items:start;margin-top:10px}
 .shop-list,.shop-photo,.shop-info{border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px;min-width:0}
@@ -1348,8 +1362,14 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     });
   }
 
-  /* ---------- 좋은 가게 소개 (파일공유 게시판을 대체) ---------- */
-  const SHOP_PAGE = 10;
+  /* ---------- 좋은 가게 소개: 카드 목록 · 상세보기 · 등록/수정 ---------- */
+  const SHOP_PAGE = 9;
+  const SHOP_POS = ['', '성도', '집사', '안수집사', '권사', '장로', '목사', '전도사', '권찰'];
+  const shopTel = p => 'tel:' + String(p || '').replace(/[^0-9+]/g, '');
+  function parseShop(body){
+    try{ const d = JSON.parse(body || '{}'); return (d && typeof d === 'object') ? d : { desc: String(body || '') }; }
+    catch(_){ return { desc: String(body || '') }; }
+  }
   /* 가게 위치: 정확한 주소 또는 대략의 위치(좌표·구글지도 링크)를 구글 지도에 표시합니다 */
   function parseRough(text){
     const t = String(text || '').trim();
@@ -1369,135 +1389,137 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     }
     return { address: address || '', lat, lng };
   }
-  const locQuery = s => s.address ? s.address : ((s.lat !== '' && s.lng !== '') ? `${s.lat},${s.lng}` : '');
+  const locQuery = s => s.address ? s.address : ((s.lat !== '' && s.lat !== undefined && s.lng !== '' && s.lng !== undefined) ? `${s.lat},${s.lng}` : '');
   const locSrc = s => { const q = locQuery(s); return q ? `https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed` : ''; };
   const locLink = s => { const q = locQuery(s); return q ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}` : ''; };
   const locFormHTML = s => `
           <div class="full"><label>가게 주소 (정확한 주소를 알면 입력)</label><input name="address" maxlength="120" value="${esc(s.address || '')}" placeholder="예: 경북 구미시 금오시장로8길 20"></div>
           <div class="full"><label>대략의 위치 (주소를 모를 때만 입력. 위도, 경도 또는 구글지도 링크)${s.lat !== '' && s.lat !== undefined ? ' · 현재: ' + esc(s.lat + ', ' + s.lng) : ''}</label><input name="rough" maxlength="200" placeholder="예: 36.1195, 128.3446"> <a href="https://www.google.com/maps" target="_blank" rel="noopener">구글지도 열기</a> <span class="note">지도에서 원하는 곳을 마우스 오른쪽 클릭하면 좌표가 나옵니다. 그 좌표를 붙여넣으세요.</span></div>`;
-  const shopTel = p => 'tel:' + String(p || '').replace(/[^0-9+]/g, '');
-  function parseShop(body){
-    try{ const d = JSON.parse(body || '{}'); return (d && typeof d === 'object') ? d : { desc: String(body || '') }; }
-    catch(_){ return { desc: String(body || '') }; }
-  }
+  const shopOwnerLine = s => {
+    const pos = s.position || (s.isMember ? '성도' : '');
+    return [s.owner, pos].filter(Boolean).join(' ');
+  };
+  const shopPosOptions = cur => SHOP_POS.map(p => `<option value="${esc(p)}" ${p === (cur || '') ? 'selected' : ''}>${p || '직분 없음'}</option>`).join('');
+  const findShop = el => (el._shops || []).find(s => s.id === el._sel) || null;
+
   function mountShops(el){
     el.classList.add('board-wrap', 'shop-wrap');
-    el.innerHTML = `
-      <div class="board-top"><button class="btn write-open" type="button" data-role="write-open">✏️ 가게 올리기</button></div>
-      <div class="write-box closed" data-role="write-box">
-        <div class="split-title">좋은 가게 올리기</div>
-        <div class="status" data-role="status"></div>
-        <form class="post" data-role="form">
-          <div class="full"><label>가게 이름</label><input name="title" required maxlength="60"></div>
-          <div class="full"><label>업종 (예: 미용실, 음식점, 세탁소)</label><input name="category" maxlength="30"></div>
-          <div class="full"><label>전화번호</label><input name="phone" type="tel" maxlength="20" placeholder="054-000-0000"></div>
-          ${locFormHTML({})}
-          <div class="full"><label><input type="checkbox" name="isMember"> 우리 교회 성도가 운영하는 가게입니다</label></div>
-          <div class="full"><label>성도 이름 (성도가 운영하는 가게일 때 적어 주세요)</label><input name="owner" maxlength="20"></div>
-          <div class="full"><label>가게 소개 (선택)</label><textarea name="desc" maxlength="2000"></textarea></div>
-          <div class="full"><label>가게 사진 (최대 3장, 각 10MB 이하)</label><input name="photos" type="file" accept="image/*" multiple></div>
-          <div class="full"><label><input type="checkbox" name="hasMap"> 지도 사진도 올리기</label></div>
-          <div class="full" data-role="mapbox" hidden><label>지도 사진 (1장, 10MB 이하)</label><input name="map" type="file" accept="image/*"></div>
-          <div class="full pw-row"><label>비밀번호 (나중에 삭제할 때 필요, 4자 이상, 로그인하면 생략)</label><input name="pw" type="password" minlength="4" maxlength="30"></div>
-          <div class="full"><button class="btn" type="submit">등록하기</button></div>
-          <div class="full note">광고·음란·이단·타종교·폭력·비방 성격의 내용은 등록되지 않습니다.</div>
-        </form>
-      </div>
-      <div class="shop-panes">
-        <div class="shop-list" data-role="list"><div class="empty">불러오는 중…</div></div>
-        <div class="shop-photo" data-role="photo"></div>
-        <div class="shop-info" data-role="info"></div>
-      </div>`;
-    el.addEventListener('change', e => {
-      if(e.target.name === 'hasMap') el.querySelector('[data-role="mapbox"]').hidden = !e.target.checked;
-    });
-    el.querySelector('[data-role="form"]').addEventListener('submit', e => { e.preventDefault(); submitShop(el, e.target); });
+    el._mode = 'list'; el._page = 0; el._sel = null; el._editing = null; el._shops = [];
+    el.innerHTML = `<div class="shop-top" data-role="top"></div><div data-role="body"><div class="empty">불러오는 중…</div></div>`;
     el.addEventListener('click', e => shopClick(el, e));
+    el.addEventListener('submit', e => {
+      if(e.target.matches('[data-role="sform"]')){ e.preventDefault(); saveShop(el, e.target); }
+    });
+    renderShops(el);
   }
-  function shopClick(el, e){
-    const t = e.target;
-    const s = t.closest('[data-shop-sel]');
-    if(s){ el._sel = s.dataset.shopSel; el._img = 0; renderShops(el); return; }
-    const p = t.closest('[data-shop-page]');
-    if(p){ el._page = (el._page || 0) + Number(p.dataset.shopPage); renderShops(el); return; }
-    const im = t.closest('[data-shop-img]');
-    if(im){ el._img = Number(im.dataset.shopImg); renderShops(el); return; }
-    if(t.closest('[data-shop-map]')){ const m = el.querySelector('[data-role="map"]'); if(m) m.hidden = !m.hidden; return; }
-    if(t.closest('[data-shop-loc]')){ const m = el.querySelector('[data-role="loc"]'); if(m) m.hidden = !m.hidden; return; }
-    if(t.closest('[data-shop-del]')){ const d = el.querySelector('[data-role="del"]'); if(d) d.hidden = !d.hidden; return; }
-    if(t.closest('[data-shop-del-ok]')) deleteShop(el);
-    if(t.closest('[data-shop-edit]')){ const d = el.querySelector('[data-role="edit"]'); if(d) d.hidden = !d.hidden; return; }
-    if(t.closest('[data-shop-save]')) saveShopEdit(el);
+  function renderShopTop(el){
+    const top = el.querySelector('[data-role="top"]');
+    if(el._mode === 'list') top.innerHTML = '<span></span><button class="btn" type="button" data-shop-new>＋ 가게 등록</button>';
+    else top.innerHTML = '<button class="mini" type="button" data-shop-list>← 목록으로</button><span></span>';
   }
   function renderShops(el){
+    renderShopTop(el);
+    const body = el.querySelector('[data-role="body"]');
+    if(el._mode === 'detail') return renderShopDetail(el, body);
+    if(el._mode === 'form') return renderShopForm(el, body);
+    renderShopGrid(el, body);
+  }
+  function renderShopGrid(el, body){
     const list = el._shops || [];
-    const listEl = el.querySelector('[data-role="list"]');
-    const photoEl = el.querySelector('[data-role="photo"]');
-    const infoEl = el.querySelector('[data-role="info"]');
-    if(!list.length){
-      listEl.innerHTML = '<div class="empty">아직 등록된 가게가 없습니다. 위의 "가게 올리기"로 첫 가게를 올려 보세요.</div>';
-      photoEl.innerHTML = ''; infoEl.innerHTML = ''; return;
-    }
+    if(!list.length){ body.innerHTML = '<div class="empty">아직 등록된 가게가 없습니다. 오른쪽 위 "가게 등록"으로 첫 가게를 올려 보세요.</div>'; return; }
     const pages = Math.max(1, Math.ceil(list.length / SHOP_PAGE));
     el._page = Math.min(Math.max(0, el._page || 0), pages - 1);
-    const sel = list.find(s => s.id === el._sel) || list[0];
-    el._sel = sel.id;
     const start = el._page * SHOP_PAGE;
-    listEl.innerHTML = `
-      <div class="shop-items">${list.slice(start, start + SHOP_PAGE).map(s => `
-        <button type="button" class="shop-item${s.id === sel.id ? ' on' : ''}" data-shop-sel="${esc(s.id)}">
-          <span class="sn">${esc(s.title)}</span>
-          <span class="sc">${esc(s.category || '')}${s.isMember && s.owner ? ' · ' + esc(s.owner) + ' 성도' : ''}</span>
-        </button>`).join('')}</div>
+    body.innerHTML = `
+      <div class="shop-grid">${list.slice(start, start + SHOP_PAGE).map(s => {
+        const first = (s.images || [])[0];
+        const owner = shopOwnerLine(s);
+        return `<button type="button" class="shop-card" data-shop-open="${esc(s.id)}">
+          <div class="shop-thumb">${first ? `<img src="${esc(shotUrl(first))}" alt="${esc(s.title)}" loading="lazy" onerror="this.onerror=null;this.src='${esc(first)}'">` : '<span>사진 없음</span>'}</div>
+          <div class="shop-card-name">${esc(s.title)}</div>
+          <div class="shop-card-owner">${owner ? esc(owner) : '&nbsp;'}</div>
+        </button>`;
+      }).join('')}</div>
       <div class="shop-pager">
         <button class="mini" type="button" data-shop-page="-1" ${el._page === 0 ? 'disabled' : ''}>‹ 이전</button>
         <span>${el._page + 1} / ${pages}</span>
         <button class="mini" type="button" data-shop-page="1" ${el._page >= pages - 1 ? 'disabled' : ''}>다음 ›</button>
       </div>`;
-    const imgs = sel.images || [];
+  }
+  function renderShopDetail(el, body){
+    const s = findShop(el);
+    if(!s){ el._mode = 'list'; return renderShops(el); }
+    const imgs = s.images || [];
     const idx = Math.min(el._img || 0, Math.max(0, imgs.length - 1));
-    photoEl.innerHTML = imgs.length
-      ? `<div class="shop-main"><img src="${esc(shotUrl(imgs[idx]))}" alt="${esc(sel.title)}" onerror="this.onerror=null;this.src='${esc(imgs[idx])}'"></div>
-         ${imgs.length > 1 ? `<div class="shop-thumbs">${imgs.map((u, i) => `<button type="button" class="${i === idx ? 'on' : ''}" data-shop-img="${i}"><img src="${esc(shotUrl(u))}" alt=""></button>`).join('')}</div>` : ''}`
-      : '<div class="shop-main empty-photo">등록된 사진이 없습니다</div>';
-    const phone = sel.phone ? `<a href="${esc(shopTel(sel.phone))}">${esc(sel.phone)}</a>` : '<span class="muted">전화번호 없음</span>';
-    infoEl.innerHTML = `
-      <h3 class="shop-name">${esc(sel.title)}</h3>
-      ${sel.category ? `<div class="shop-cat">업종: ${esc(sel.category)}</div>` : ''}
-      ${sel.isMember && sel.owner ? `<div class="shop-owner">우리 교회 ${esc(sel.owner)} 성도가 운영합니다</div>` : ''}
-      <div class="shop-phone">☎ ${phone}</div>
-      ${sel.desc ? `<div class="shop-desc">${esc(sel.desc)}</div>` : ''}
-      <div class="shop-acts">
-        ${sel.mapUrl ? '<button class="mini" type="button" data-shop-map>🗺 지도 보기</button>' : ''}
-        ${locSrc(sel) ? '<button class="mini" type="button" data-shop-loc>📍 위치 보기</button>' : ''}
-        <button class="mini" type="button" data-shop-edit>✏️ 수정</button>
-        <button class="mini danger" type="button" data-shop-del>삭제</button>
-      </div>
-      ${sel.mapUrl ? `<div class="shop-map" data-role="map" hidden><img src="${esc(shotUrl(sel.mapUrl))}" alt="${esc(sel.title)} 지도"></div>` : ''}
-      ${locSrc(sel) ? `<div class="shop-map" data-role="loc" hidden><iframe src="${esc(locSrc(sel))}" title="${esc(sel.title)} 위치" width="100%" height="300" style="border:0;border-radius:10px" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe><a class="shop-gmap" href="${esc(locLink(sel))}" target="_blank" rel="noopener">구글 지도에서 크게 보기 ↗</a></div>` : ''}
-      <div class="shop-del" data-role="del" hidden>
-        <input type="password" data-role="delpw" placeholder="비밀번호 (4자 이상)">
-        <button class="mini danger" type="button" data-shop-del-ok>삭제 확인</button>
-        <span class="perr" data-role="delerr"></span>
-      </div>
-      <div class="shop-edit" data-role="edit" hidden>
-        <label>가게 이름<input name="title" maxlength="60" value="${esc(sel.title)}"></label>
-        <label>업종<input name="category" maxlength="30" value="${esc(sel.category)}"></label>
-        <label>전화번호<input name="phone" type="tel" maxlength="20" value="${esc(sel.phone)}"></label>
-        ${locFormHTML(sel)}
-        <label class="ck"><input type="checkbox" name="isMember" ${sel.isMember ? 'checked' : ''}> 우리 교회 성도가 운영하는 가게</label>
-        <label>성도 이름<input name="owner" maxlength="20" value="${esc(sel.owner)}"></label>
-        <label>가게 소개<textarea name="desc" maxlength="2000">${esc(sel.desc)}</textarea></label>
-        <label>사진 다시 올리기 (선택, 올리면 기존 사진을 바꿉니다, 최대 3장)<input name="photos" type="file" accept="image/*" multiple></label>
-        <label>지도 다시 올리기 (선택, 올리면 기존 지도를 바꿉니다)<input name="map" type="file" accept="image/*"></label>
-        <label>비밀번호 (4자 이상, 로그인한 경우 생략)<input name="pw" type="password" maxlength="30"></label>
-        <div class="shop-acts"><button class="mini primary" type="button" data-shop-save>저장</button><span class="perr" data-role="editerr"></span></div>
+    const owner = shopOwnerLine(s);
+    const src = locSrc(s);
+    const hasLoc = !!(src || s.mapUrl);
+    body.innerHTML = `
+      <div class="shop-detail">
+        <div class="shop-detail-acts"><button class="mini" type="button" data-shop-edit>✏️ 수정</button><button class="mini danger" type="button" data-shop-del>삭제</button></div>
+        ${imgs.length
+          ? `<div class="shop-main"><img src="${esc(shotUrl(imgs[idx]))}" alt="${esc(s.title)}" onerror="this.onerror=null;this.src='${esc(imgs[idx])}'"></div>
+             ${imgs.length > 1 ? `<div class="shop-thumbs">${imgs.map((u, i) => `<button type="button" class="${i === idx ? 'on' : ''}" data-shop-img="${i}"><img src="${esc(shotUrl(u))}" alt=""></button>`).join('')}</div>` : ''}`
+          : '<div class="shop-main empty-photo">등록된 사진이 없습니다</div>'}
+        <h3 class="shop-name">${esc(s.title)}</h3>
+        ${s.category ? `<div class="shop-cat">업종: ${esc(s.category)}</div>` : ''}
+        ${owner ? `<div class="shop-owner">사장님: ${esc(owner)}</div>` : ''}
+        <div class="shop-phone">☎ ${s.phone ? `<a href="${esc(shopTel(s.phone))}">${esc(s.phone)}</a>` : '전화번호 없음'}</div>
+        ${s.desc ? `<div class="shop-desc">${esc(s.desc)}</div>` : ''}
+        ${hasLoc ? '<div class="shop-acts"><button class="btn" type="button" data-shop-loc>📍 위치 보기</button></div>' : ''}
+        ${hasLoc ? `<div class="shop-map" data-role="loc" hidden>
+            ${src ? `<iframe src="${esc(src)}" title="${esc(s.title)} 위치" width="100%" height="300" style="border:0;border-radius:10px" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe><a class="shop-gmap" href="${esc(locLink(s))}" target="_blank" rel="noopener">구글 지도에서 크게 보기 ↗</a>` : ''}
+            ${s.mapUrl ? `<img src="${esc(shotUrl(s.mapUrl))}" alt="${esc(s.title)} 지도">` : ''}
+          </div>` : ''}
+        <div class="shop-del" data-role="del" hidden>
+          <input type="password" data-role="delpw" placeholder="비밀번호 (4자 이상)">
+          <button class="mini danger" type="button" data-shop-del-ok>삭제 확인</button>
+          <span class="perr" data-role="delerr"></span>
+        </div>
       </div>`;
   }
+  function renderShopForm(el, body){
+    const e = el._editing;
+    const s = e || { title:'', category:'', phone:'', owner:'', position:'', isMember:false, desc:'', address:'', lat:'', lng:'', images:[], mapUrl:'' };
+    const cur = s.position || (s.isMember ? '성도' : '');
+    body.innerHTML = `
+      <div class="shop-form-wrap">
+        <div class="split-title">${e ? '가게 수정' : '가게 등록'}</div>
+        <div class="status" data-role="fstatus"></div>
+        <form class="post" data-role="sform">
+          <div class="full"><label>가게 이름</label><input name="title" required maxlength="60" value="${esc(s.title)}"></div>
+          <div class="full"><label>업종 (예: 미용실, 음식점, 세탁소)</label><input name="category" maxlength="30" value="${esc(s.category)}"></div>
+          <div class="full"><label>전화번호</label><input name="phone" type="tel" maxlength="20" value="${esc(s.phone)}" placeholder="054-000-0000"></div>
+          <div class="full"><label>사장님 이름</label><input name="owner" maxlength="20" value="${esc(s.owner)}"></div>
+          <div class="full"><label>교회 직분</label><select name="position">${shopPosOptions(cur)}</select></div>
+          ${locFormHTML(s)}
+          <div class="full"><label>가게 소개 (선택)</label><textarea name="desc" maxlength="2000">${esc(s.desc)}</textarea></div>
+          <div class="full"><label>가게 사진 (최대 3장, 각 10MB 이하)${e ? ' · 새로 고르면 기존 사진을 바꿉니다' : ''}</label><input name="photos" type="file" accept="image/*" multiple></div>
+          <div class="full"><label>지도 사진 (선택, 10MB 이하)${e ? ' · 새로 고르면 기존 지도를 바꿉니다' : ''}</label><input name="map" type="file" accept="image/*"></div>
+          <div class="full pw-row"><label>비밀번호 (나중에 수정·삭제할 때 필요, 4자 이상, 로그인하면 생략)</label><input name="pw" type="password" minlength="4" maxlength="30"></div>
+          <div class="full"><button class="btn" type="submit">${e ? '저장하기' : '등록하기'}</button> <button class="mini" type="button" data-shop-cancel>취소</button></div>
+          <div class="full note">광고·음란·이단·타종교·폭력·비방 성격의 내용은 등록되지 않습니다.</div>
+        </form>
+      </div>`;
+  }
+  function shopClick(el, e){
+    const t = e.target;
+    let x;
+    if(t.closest('[data-shop-new]')){ el._mode = 'form'; el._editing = null; renderShops(el); return; }
+    if(t.closest('[data-shop-list]')){ el._mode = 'list'; el._editing = null; renderShops(el); return; }
+    if((x = t.closest('[data-shop-open]'))){ el._sel = x.dataset.shopOpen; el._img = 0; el._mode = 'detail'; renderShops(el); return; }
+    if((x = t.closest('[data-shop-page]'))){ el._page = (el._page || 0) + Number(x.dataset.shopPage); renderShops(el); return; }
+    if((x = t.closest('[data-shop-img]'))){ el._img = Number(x.dataset.shopImg); renderShops(el); return; }
+    if(t.closest('[data-shop-loc]')){ const m = el.querySelector('[data-role="loc"]'); if(m) m.hidden = !m.hidden; return; }
+    if(t.closest('[data-shop-edit]')){ el._editing = findShop(el); el._mode = 'form'; renderShops(el); return; }
+    if(t.closest('[data-shop-del]')){ const d = el.querySelector('[data-role="del"]'); if(d) d.hidden = !d.hidden; return; }
+    if(t.closest('[data-shop-del-ok]')){ deleteShop(el); return; }
+    if(t.closest('[data-shop-cancel]')){ el._mode = el._editing ? 'detail' : 'list'; renderShops(el); return; }
+  }
   async function loadShops(el){
-    const listEl = el.querySelector('[data-role="list"]');
-    if(!listEl) return;
-    if(!configured){ listEl.innerHTML = '<div class="empty">표시할 가게가 없습니다.</div>'; return; }
+    const body = el.querySelector('[data-role="body"]');
+    if(!body) return;
+    if(!configured){ body.innerHTML = '<div class="empty">표시할 가게가 없습니다.</div>'; return; }
     try{
       const res = await fetch(`${API_URL}?board=shops`);
       const all = await res.json();
@@ -1506,16 +1528,17 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         const d = parseShop(r.body);
         return {
           id: r.id, title: r.title,
-          owner: String(d.owner || ''), isMember: !!d.isMember,
+          owner: String(d.owner || ''), position: String(d.position || ''), isMember: !!d.isMember,
           category: String(d.category || ''), phone: String(d.phone || ''), desc: String(d.desc || ''),
           images: Array.isArray(d.images) ? d.images : [], mapUrl: String(d.mapUrl || ''),
           address: String(d.address || ''), lat: d.lat ?? '', lng: d.lng ?? ''
         };
       });
+      if(el._mode === 'form') return;   // 입력 중인 등록·수정 화면은 그대로 둡니다
       renderShops(el);
     }catch(err){
       console.error(err);
-      listEl.innerHTML = '<div class="empty">가게 목록을 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</div>';
+      body.innerHTML = '<div class="empty">가게 목록을 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</div>';
     }
   }
   async function uploadShopFile(file, pw){
@@ -1525,88 +1548,56 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     if(!out.ok) throw new Error(out.error || 'failed');
     return out.url;
   }
-  async function submitShop(el, form){
-    const status = el.querySelector('[data-role="status"]');
+  async function saveShop(el, form){
+    const st = el.querySelector('[data-role="fstatus"]');
+    const editing = el._editing || null;
     const fd = new FormData(form);
     const txt = k => (fd.get(k) || '').toString().trim();
-    const pw = txt('pw') || loginPw();
-    if(pw.length < 4){ status.textContent = '비밀번호를 입력하거나 로그인해 주세요 (4자 이상).'; return; }
-    const title = txt('title');
-    if(!title){ status.textContent = '가게 이름을 입력해 주세요.'; return; }
-    const isMember = fd.get('isMember') === 'on';
-    const owner = isMember ? txt('owner') : '';
-    const photos = fd.getAll('photos').filter(f => f && f.size);
-    if(photos.length > 3){ status.textContent = '사진은 3장까지 올릴 수 있습니다.'; return; }
-    const mapFile = fd.get('hasMap') === 'on' && fd.get('map') && fd.get('map').size ? fd.get('map') : null;
-    const bad = censorCheck([title, txt('category'), owner, txt('desc'), ...photos.map(f => f.name), mapFile ? mapFile.name : '']);
-    if(bad){ status.textContent = censorMsg(bad); return; }
-    const loc = locData(txt('address'), txt('rough'), null);
-    if(loc === 'bad'){ status.textContent = '대략의 위치는 위도, 경도 또는 구글지도 링크로 입력해 주세요.'; return; }
-    if(!configured){ status.textContent = '게시판 연결 설정이 필요합니다.'; return; }
-    try{
-      const images = [];
-      for(let i = 0; i < photos.length; i++){
-        status.textContent = `사진 올리는 중… (${i + 1}/${photos.length})`;
-        images.push(await uploadShopFile(photos[i], pw));
-      }
-      let mapUrl = '';
-      if(mapFile){ status.textContent = '지도 사진 올리는 중…'; mapUrl = await uploadShopFile(mapFile, pw); }
-      status.textContent = '등록 중…';
-      const data = { category: txt('category'), phone: txt('phone'), isMember, owner, desc: txt('desc'), images, mapUrl, ...loc };
-      const author = owner || (loginGet() && loginGet().name) || '';
-      const out = await postJSON({ action:'create', board:'shops', title, author, body: JSON.stringify(data), password: pw });
-      if(!out.ok) throw new Error(out.error || 'failed');
-      form.reset();
-      el.querySelector('[data-role="mapbox"]').hidden = true;
-      status.textContent = '가게가 등록되었습니다.';
-      el._sel = out.id; el._img = 0;
-      loadShops(el);
-    }catch(err){
-      console.error(err);
-      status.textContent = errText(err.message);
-    }
-  }
-  async function saveShopEdit(el){
-    const box = el.querySelector('[data-role="edit"]');
-    const err = el.querySelector('[data-role="editerr"]');
-    const sel = (el._shops || []).find(x => x.id === el._sel);
-    if(!sel || !box) return;
-    const g = n => { const x = box.querySelector(`[name="${n}"]`); return x ? (x.type === 'checkbox' ? x.checked : x.value.trim()) : ''; };
     const l = loginGet();
-    const adminPassword = l && l.kind === 'adm' ? l.pw : '';
-    const pw = g('pw') || loginPw();
-    if(!adminPassword && pw.length < 4){ err.textContent = '비밀번호를 입력하거나 로그인해 주세요 (4자 이상).'; return; }
-    const title = g('title');
-    if(!title){ err.textContent = '가게 이름을 입력해 주세요.'; return; }
-    const isMember = g('isMember');
-    const owner = isMember ? g('owner') : '';
-    const photos = [...(box.querySelector('[name="photos"]').files || [])].filter(f => f.size);
-    if(photos.length > 3){ err.textContent = '사진은 3장까지 올릴 수 있습니다.'; return; }
-    const mapInput = box.querySelector('[name="map"]');
-    const mapFile = mapInput.files && mapInput.files[0] && mapInput.files[0].size ? mapInput.files[0] : null;
-    const bad = censorCheck([title, g('category'), owner, g('desc'), ...photos.map(f => f.name), mapFile ? mapFile.name : '']);
-    if(bad){ err.textContent = censorMsg(bad); return; }
-    const loc = locData(g('address'), g('rough'), sel);
-    if(loc === 'bad'){ err.textContent = '대략의 위치는 위도, 경도 또는 구글지도 링크로 입력해 주세요.'; return; }
-    if(!configured){ err.textContent = '게시판 연결 설정이 필요합니다.'; return; }
-    err.textContent = '저장 중…';
+    const adminPassword = editing && l && l.kind === 'adm' ? l.pw : '';
+    const pw = txt('pw') || loginPw();
+    if(!adminPassword && pw.length < 4){ st.textContent = '비밀번호를 입력하거나 로그인해 주세요 (4자 이상).'; return; }
+    const title = txt('title');
+    if(!title){ st.textContent = '가게 이름을 입력해 주세요.'; return; }
+    const photos = fd.getAll('photos').filter(f => f && f.size);
+    if(photos.length > 3){ st.textContent = '사진은 3장까지 올릴 수 있습니다.'; return; }
+    const mapFile = fd.get('map') && fd.get('map').size ? fd.get('map') : null;
+    const position = txt('position');
+    const owner = txt('owner');
+    const bad = censorCheck([title, txt('category'), owner, txt('desc'), ...photos.map(f => f.name), mapFile ? mapFile.name : '']);
+    if(bad){ st.textContent = censorMsg(bad); return; }
+    const loc = locData(txt('address'), txt('rough'), editing);
+    if(loc === 'bad'){ st.textContent = '대략의 위치는 위도, 경도 또는 구글지도 링크로 입력해 주세요.'; return; }
+    if(!configured){ st.textContent = '게시판 연결 설정이 필요합니다.'; return; }
     try{
-      let images = sel.images;
+      let images = editing ? editing.images : [];
       if(photos.length){
         images = [];
         for(let i = 0; i < photos.length; i++){
-          err.textContent = `사진 올리는 중… (${i + 1}/${photos.length})`;
+          st.textContent = `사진 올리는 중… (${i + 1}/${photos.length})`;
           images.push(await uploadShopFile(photos[i], pw));
         }
       }
-      let mapUrl = sel.mapUrl;
-      if(mapFile){ err.textContent = '지도 사진 올리는 중…'; mapUrl = await uploadShopFile(mapFile, pw); }
-      err.textContent = '저장 중…';
-      const data = { category: g('category'), phone: g('phone'), isMember, owner, desc: g('desc'), images, mapUrl, ...loc };
-      const out = await postJSON({ action:'update', board:'shops', id: sel.id, title, link:'', body: JSON.stringify(data), password: pw, adminPassword });
+      let mapUrl = editing ? editing.mapUrl : '';
+      if(mapFile){ st.textContent = '지도 사진 올리는 중…'; mapUrl = await uploadShopFile(mapFile, pw); }
+      st.textContent = '저장 중…';
+      const data = { category: txt('category'), phone: txt('phone'), owner, position, isMember: !!position, desc: txt('desc'), images, mapUrl, ...loc };
+      const body = JSON.stringify(data);
+      let out;
+      if(editing){
+        out = await postJSON({ action:'update', board:'shops', id: editing.id, title, link:'', body, password: pw, adminPassword });
+      }else{
+        const author = owner || (l && l.name) || '';
+        out = await postJSON({ action:'create', board:'shops', title, author, body, password: pw });
+      }
       if(!out.ok) throw new Error(out.error || 'failed');
-      loadShops(el);
-    }catch(e){ err.textContent = errText(e.message); }
+      el._sel = editing ? editing.id : out.id;
+      el._img = 0; el._editing = null; el._mode = 'detail';
+      await loadShops(el);
+    }catch(err){
+      console.error(err);
+      st.textContent = errText(err.message);
+    }
   }
   async function deleteShop(el){
     const box = el.querySelector('[data-role="del"]');
@@ -1619,8 +1610,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     try{
       const out = await postJSON({ action:'delete', board:'shops', id: el._sel, password: pw, adminPassword });
       if(!out.ok) throw new Error(out.error || 'failed');
-      el._sel = null;
-      loadShops(el);
+      el._sel = null; el._mode = 'list';
+      await loadShops(el);
     }catch(e){ err.textContent = errText(e.message); }
   }
 
