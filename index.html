@@ -157,6 +157,16 @@ a.nav-btn{position:relative}
 .ch-cell i{position:absolute;top:-7px;right:-4px;font-style:normal;font-size:.7rem;background:#fff;color:var(--accent);border-radius:999px;padding:0 3px;line-height:1.3}
 .resume-box{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:14px 16px;margin-bottom:12px;background:#fff8e1;border:1px solid #e8d48a;border-radius:12px}
 .resume-btns{display:flex;gap:8px}
+/* 찬양: 왼쪽 목록(15곡씩), 오른쪽 선택한 곡 */
+.mu-split{display:grid;grid-template-columns:minmax(240px,1fr) minmax(0,2fr);gap:14px;align-items:start}
+.mu-list{border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px}
+.mu-item{display:flex;flex-direction:column;align-items:flex-start;width:100%;text-align:left;padding:8px 10px;margin-bottom:5px;border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer;font:inherit;min-width:0}
+.mu-item.on{border-color:var(--accent);background:#fff8e1}
+.mu-item .mt{font-weight:700}
+.mu-item .mm{font-size:.8rem;color:var(--muted)}
+.mu-view{min-width:0}
+.mu-view .music-row{grid-template-columns:1fr}
+@media (max-width:760px){.mu-split{grid-template-columns:1fr}}
 /* 좋은 가게 소개 카드 목록 */
 .shop-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
 .shop-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
@@ -982,7 +992,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   function render(el, rows){
     el._rows = rows;
     renderList(el, rows);
-    decorate(el, rows);
+    if(el.dataset.board !== 'music') decorate(el, rows);
   }
 
   /* 좋아요와 조회수 줄 */
@@ -1025,14 +1035,28 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       return;
     }
     if(id === 'music'){
-      items.innerHTML = rows.map(r => {
-        const yid = youtubeId(r.link);
-        const player = yid
-          ? `<div class="yt-frame"><iframe src="https://www.youtube.com/embed/${yid}" title="${esc(r.title)}" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>`
-          : '';
-        const linkTxt = r.link ? `<div class="b"><a href="${esc(r.link)}" target="_blank" rel="noopener">유튜브에서 열기 ↗</a></div>` : '';
-        return `<div class="item"><div class="music-row">${player}<div class="music-info"><div class="t">${esc(r.title)}</div><div class="m">${esc(r.author)} · ${fmt(r.createdAt)}</div>${r.body ? `<div class="b">${esc(r.body)}</div>` : ''}${linkTxt}</div></div></div>`;
-      }).join('');
+      // 왼쪽: 곡 목록 (한 페이지 15곡), 오른쪽: 선택한 곡
+      const PER = 15;
+      const pages = Math.max(1, Math.ceil(rows.length / PER));
+      el._muPage = Math.min(Math.max(0, el._muPage || 0), pages - 1);
+      const sel = rows.find(r => r.id === el._muSel) || rows[0];
+      el._muSel = sel.id;
+      const start = el._muPage * PER;
+      const yid = youtubeId(sel.link);
+      const player = yid ? `<div class="yt-frame"><iframe src="https://www.youtube.com/embed/${yid}" title="${esc(sel.title)}" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>` : '';
+      const linkTxt = sel.link ? `<div class="b"><a href="${esc(sel.link)}" target="_blank" rel="noopener">유튜브에서 열기 ↗</a></div>` : '';
+      items.innerHTML = `<div class="mu-split">
+        <div class="mu-list">
+          ${rows.slice(start, start + PER).map(r => `<button type="button" class="mu-item${r.id === sel.id ? ' on' : ''}" data-mu-sel="${esc(r.id)}"><span class="mt">${esc(r.title)}</span><span class="mm">${esc(r.author)} · ${fmt(r.createdAt)}</span></button>`).join('')}
+          <div class="shop-pager">
+            <button class="mini" type="button" data-mu-page="-1" ${el._muPage === 0 ? 'disabled' : ''}>‹ 이전</button>
+            <span>${el._muPage + 1} / ${pages}</span>
+            <button class="mini" type="button" data-mu-page="1" ${el._muPage >= pages - 1 ? 'disabled' : ''}>다음 ›</button>
+          </div>
+        </div>
+        <div class="mu-view"><div class="item" data-id="${esc(sel.id)}"><div class="music-row">${player}<div class="music-info"><div class="t">${esc(sel.title)}</div><div class="m">${esc(sel.author)} · ${fmt(sel.createdAt)}</div>${sel.body ? `<div class="b">${esc(sel.body)}</div>` : ''}${linkTxt}</div></div></div></div>
+      </div>`;
+      decorate(el, [sel]);
       return;
     }
     if(id === 'articles'){
@@ -1074,6 +1098,15 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       if(r.body) extra += `<div class="b">${esc(r.body)}</div>`;
       return `<div class="item"><div class="t">${esc(r.title)}</div><div class="m">${esc(r.author)} · ${fmt(r.createdAt)}</div>${extra}</div>`;
     }).join('');
+  }
+
+  function wireMusicList(el){
+    el.addEventListener('click', e => {
+      const sel = e.target.closest('[data-mu-sel]');
+      if(sel){ el._muSel = sel.dataset.muSel; renderList(el, el._rows || []); return; }
+      const pg = e.target.closest('[data-mu-page]');
+      if(pg){ el._muPage = (el._muPage || 0) + Number(pg.dataset.muPage); renderList(el, el._rows || []); }
+    });
   }
 
   function postJSON(payload){
@@ -3230,6 +3263,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   /* ---------- 시작 ---------- */
   initCalState();
   boardEls.forEach(wireManage);
+  boardEls.forEach(el => { if(el.dataset.board === 'music') wireMusicList(el); });
   boardEls.forEach(wireReplies);
   wireManage(calRoot);
   wireCalendarUI();
