@@ -253,9 +253,12 @@ nav a.nav-btn.nav-big .ic{font-size:clamp(.8rem,.55vw + .3rem,1.05rem)}
 .login-btn{font:inherit;font-size:.8rem;font-weight:700;padding:4px 10px;border:0;border-radius:999px;background:var(--accent);color:#fff;cursor:pointer}
 .login-state{font-weight:700;color:var(--accent)}
 .login-err{color:#b02e2e;font-size:.75rem}
-.login-stack{display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-left:14px;flex:0 0 auto}
-.login-stack .login-box{margin-left:0}
-.guide-btn{font:inherit;font-size:.8rem;font-weight:700;padding:5px 12px;border:0;border-radius:999px;background:linear-gradient(135deg,#7a5c2e,#b08a4f);color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(40,30,10,.18);white-space:nowrap}
+.guide-btn{font:inherit;font-size:.9rem;font-weight:700;padding:9px 18px;border:1px solid rgba(231,201,138,.85);border-radius:999px;background:rgba(255,255,255,.16);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25);white-space:nowrap;transition:background .15s ease,transform .15s ease}
+.guide-btn:hover{background:rgba(231,201,138,.35);transform:translateY(-1px)}
+.hero-title-row{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:6px 16px;margin:0 0 42px}
+.hero-title-row .hero-title{margin:0}
+.guide-hero{margin-top:.25em}
+@media(max-width:640px){.guide-hero{font-size:.8rem;padding:7px 14px}}
 #guide-overlay{position:fixed;inset:0;background:rgba(20,16,10,.45);display:none;align-items:center;justify-content:center;z-index:210;padding:16px}
 #guide-overlay.show{display:flex}
 #guide-box{position:relative;width:100%;max-width:640px;max-height:88vh;overflow:auto;background:#fffdf5;border-radius:16px;border-top:6px solid var(--accent);padding:20px 24px 22px;box-shadow:0 24px 60px rgba(0,0,0,.3);color:var(--ink);font-size:.92rem;line-height:1.75}
@@ -564,7 +567,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         <li><a class="nav-btn" href="#shops" style="--c1:#4a5a78;--c2:#6f80a6"><span class="ic">🏪</span>좋은가게 소개<span class="nav-tip"><b>좋은가게 소개</b>성도님들의 가게와 좋은 가게를 소개합니다.</span></a></li>
         <li><a class="nav-btn" href="#visit" style="--c1:#8c4a3a;--c2:#b87262"><span class="ic">📍</span>오시는 길<span class="nav-tip"><b>오시는 길</b>교회 찾아오시는 길을 안내합니다.</span></a></li>
       </ul>
-      <div class="login-stack"><button type="button" class="guide-btn" id="guide-open" aria-haspopup="dialog">📘 홈페이지 사용안내</button><div class="login-box" id="login-box"></div></div>
+      <div class="login-box" id="login-box"></div>
     </nav>
   </div>
 </header>
@@ -575,7 +578,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   <div class="hero">
     <div class="wrap">
       <p class="hero-kicker">Welcome</p>
-      <h1 class="hero-title">구미은혜로교회에 오신 것을 환영합니다</h1>
+      <div class="hero-title-row"><h1 class="hero-title">구미은혜로교회에 오신 것을 환영합니다</h1><button type="button" class="guide-btn guide-hero" id="guide-open" aria-haspopup="dialog">📘 홈페이지 사용안내</button></div>
     </div>
     <div class="hero-window" id="hero-window">
       <div class="hero-track" id="hero-track">
