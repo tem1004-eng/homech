@@ -167,6 +167,13 @@ a.nav-btn{position:relative}
 .mu-view{min-width:0}
 .mu-view .music-row{grid-template-columns:1fr}
 @media (max-width:760px){.mu-split{grid-template-columns:1fr}}
+.shop-detail-split{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px;align-items:start}
+.shop-gal-nav{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px}
+.shop-info-d{min-width:0}
+.shop-loc-sec{margin-top:18px;padding-top:12px;border-top:1px solid var(--line)}
+.shop-loc-sec h4{margin:0 0 8px}
+.shop-mapimg img{width:100%;border-radius:10px;margin-top:10px}
+@media (max-width:760px){.shop-detail-split{grid-template-columns:1fr}}
 /* 좋은 가게 소개 카드 목록 */
 .shop-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
 .shop-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
@@ -1490,24 +1497,31 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     const idx = Math.min(el._img || 0, Math.max(0, imgs.length - 1));
     const owner = shopOwnerLine(s);
     const src = locSrc(s);
-    const hasLoc = !!(src || s.mapUrl);
     body.innerHTML = `
       <div class="shop-detail">
         <div class="shop-detail-acts"><button class="mini" type="button" data-shop-edit>✏️ 수정</button><button class="mini danger" type="button" data-shop-del>삭제</button></div>
-        ${imgs.length
-          ? `<div class="shop-main"><img src="${esc(shotUrl(imgs[idx]))}" alt="${esc(s.title)}" onerror="this.onerror=null;this.src='${esc(imgs[idx])}'"></div>
-             ${imgs.length > 1 ? `<div class="shop-thumbs">${imgs.map((u, i) => `<button type="button" class="${i === idx ? 'on' : ''}" data-shop-img="${i}"><img src="${esc(shotUrl(u))}" alt=""></button>`).join('')}</div>` : ''}`
-          : '<div class="shop-main empty-photo">등록된 사진이 없습니다</div>'}
-        <h3 class="shop-name">${esc(s.title)}</h3>
-        ${s.category ? `<div class="shop-cat">업종: ${esc(s.category)}</div>` : ''}
-        ${owner ? `<div class="shop-owner">사장님: ${esc(owner)}</div>` : ''}
-        <div class="shop-phone">☎ ${s.phone ? `<a href="${esc(shopTel(s.phone))}">${esc(s.phone)}</a>` : '전화번호 없음'}</div>
-        ${s.desc ? `<div class="shop-desc">${esc(s.desc)}</div>` : ''}
-        ${hasLoc ? '<div class="shop-acts"><button class="btn" type="button" data-shop-loc>📍 위치 보기</button></div>' : ''}
-        ${hasLoc ? `<div class="shop-map" data-role="loc" hidden>
-            ${src ? `<iframe src="${esc(src)}" title="${esc(s.title)} 위치" width="100%" height="300" style="border:0;border-radius:10px" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe><a class="shop-gmap" href="${esc(locLink(s))}" target="_blank" rel="noopener">구글 지도에서 크게 보기 ↗</a>` : ''}
-            ${s.mapUrl ? `<img src="${esc(shotUrl(s.mapUrl))}" alt="${esc(s.title)} 지도">` : ''}
-          </div>` : ''}
+        <div class="shop-detail-split">
+          <div class="shop-gal">
+            ${imgs.length
+              ? `<div class="shop-main"><img src="${esc(shotUrl(imgs[idx]))}" alt="${esc(s.title)}" onerror="this.onerror=null;this.src='${esc(imgs[idx])}'"></div>`
+              : '<div class="shop-main empty-photo">등록된 사진이 없습니다</div>'}
+            ${imgs.length > 1 ? `<div class="shop-gal-nav"><button class="mini" type="button" data-shop-step="-1" ${idx === 0 ? 'disabled' : ''}>‹ 이전</button><span>${idx + 1} / ${imgs.length}</span><button class="mini bb-next" type="button" data-shop-step="1" ${idx >= imgs.length - 1 ? 'disabled' : ''}>다음 ›</button></div>` : ''}
+          </div>
+          <div class="shop-info-d">
+            <h3 class="shop-name">${esc(s.title)}</h3>
+            ${s.category ? `<div class="shop-cat">업종: ${esc(s.category)}</div>` : ''}
+            ${owner ? `<div class="shop-owner">사장님: ${esc(owner)}</div>` : ''}
+            <div class="shop-phone">☎ ${s.phone ? `<a href="${esc(shopTel(s.phone))}">${esc(s.phone)}</a>` : '전화번호 없음'}</div>
+            ${s.desc ? `<div class="shop-desc">${esc(s.desc)}</div>` : ''}
+          </div>
+        </div>
+        <div class="shop-loc-sec">
+          <h4>📍 가게 위치</h4>
+          ${src
+            ? `<iframe src="${esc(src)}" title="${esc(s.title)} 위치" width="100%" height="320" style="border:0;border-radius:10px" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe><a class="shop-gmap" href="${esc(locLink(s))}" target="_blank" rel="noopener">구글 지도에서 크게 보기 ↗</a>`
+            : '<div class="muted">등록된 위치가 없습니다</div>'}
+          ${s.mapUrl ? `<div class="shop-mapimg"><img src="${esc(shotUrl(s.mapUrl))}" alt="${esc(s.title)} 지도"></div>` : ''}
+        </div>
         <div class="shop-del" data-role="del" hidden>
           <input type="password" data-role="delpw" placeholder="비밀번호 (4자 이상)">
           <button class="mini danger" type="button" data-shop-del-ok>삭제 확인</button>
@@ -1547,6 +1561,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     if((x = t.closest('[data-shop-open]'))){ el._sel = x.dataset.shopOpen; el._img = 0; el._mode = 'detail'; renderShops(el); return; }
     if((x = t.closest('[data-shop-page]'))){ el._page = (el._page || 0) + Number(x.dataset.shopPage); renderShops(el); return; }
     if((x = t.closest('[data-shop-img]'))){ el._img = Number(x.dataset.shopImg); renderShops(el); return; }
+    if((x = t.closest('[data-shop-step]'))){ el._img = (el._img || 0) + Number(x.dataset.shopStep); renderShops(el); return; }
     if(t.closest('[data-shop-loc]')){ const m = el.querySelector('[data-role="loc"]'); if(m) m.hidden = !m.hidden; return; }
     if(t.closest('[data-shop-edit]')){ el._editing = findShop(el); el._mode = 'form'; renderShops(el); return; }
     if(t.closest('[data-shop-del]')){ const d = el.querySelector('[data-role="del"]'); if(d) d.hidden = !d.hidden; return; }
