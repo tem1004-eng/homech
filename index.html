@@ -148,6 +148,13 @@ a.nav-btn{position:relative}
 .bb-login-hint{margin:0 0 12px;color:var(--muted);font-size:.9rem}
 .plan-row{grid-template-columns:20px 1fr auto}
 .plan-row .mark{color:var(--accent);font-weight:700}
+.ch-book{margin-bottom:16px}
+.ch-book-head{display:flex;justify-content:space-between;align-items:center;padding:6px 4px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.ch-book.all .ch-book-head b::after{content:' ✔';color:var(--accent)}
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:6px}
+.ch-cell{position:relative;padding:9px 0;border:1px solid var(--line);border-radius:8px;background:#fff;font:inherit;cursor:pointer}
+.ch-cell.done{background:var(--accent);color:#fff;border-color:var(--accent)}
+.ch-cell i{position:absolute;top:-7px;right:-4px;font-style:normal;font-size:.7rem;background:#fff;color:var(--accent);border-radius:999px;padding:0 3px;line-height:1.3}
 .resume-box{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:14px 16px;margin-bottom:12px;background:#fff8e1;border:1px solid #e8d48a;border-radius:12px}
 .resume-btns{display:flex;gap:8px}
 /* 좋은 가게 소개 카드 목록 */
@@ -514,7 +521,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         <li><a class="nav-btn" href="#bulletin" style="--c1:#4f7a5a;--c2:#7fa887"><span class="ic">📰</span>주보<span class="nav-tip"><b>주보</b>이번 주 주보와 이전 주보를 볼 수 있습니다.</span></a></li>
         <li><a class="nav-btn" href="#photo" style="--c1:#6a4f8c;--c2:#9177b8"><span class="ic">📷</span>사진<span class="nav-tip"><b>사진</b>교회 행사 사진과 말씀 이미지를 모아 봅니다.</span></a></li>
         <li><a class="nav-btn nav-big" id="praise-nav" href="#music" style="--c1:#2f7f85;--c2:#4fb0b5"><span class="ic">🎵</span>찬양<span class="nav-tip"><b>찬양</b>찬양 버튼을 누르면 찬양 게시판의 곡들이 가운데 창에서 차례대로 이어서 들립니다.</span></a></li>
-        <li><a class="nav-btn" href="#bible" style="--c1:#5a6b3a;--c2:#8a9e5c"><span class="ic">📜</span>성경읽기<span class="nav-tip"><b>성경읽기</b>성경을 읽고 소리로 들으며, 성경통독표로 날마다 진도를 확인합니다.</span></a></li>
+        <li><a class="nav-btn" href="#bible" style="--c1:#5a6b3a;--c2:#8a9e5c"><span class="ic">📜</span>성경읽기<span class="nav-tip"><b>성경읽기</b>성경을 읽고 소리로 들으며, 각장 통독표로 읽은 장을 확인합니다.</span></a></li>
         <li><a class="nav-btn" href="#articles" style="--c1:#a0672b;--c2:#d18a4a"><span class="ic">📖</span>좋은 글<span class="nav-tip"><b>좋은 글</b>남기고 싶은 글과 이미지 글들을 모았습니다.</span></a></li>
         <li><a class="nav-btn" href="#shops" style="--c1:#4a5a78;--c2:#6f80a6"><span class="ic">🏪</span>좋은가게 소개<span class="nav-tip"><b>좋은가게 소개</b>성도님들의 가게와 좋은 가게를 소개합니다.</span></a></li>
         <li><a class="nav-btn" href="#visit" style="--c1:#8c4a3a;--c2:#b87262"><span class="ic">📍</span>오시는 길<span class="nav-tip"><b>오시는 길</b>교회 찾아오시는 길을 안내합니다.</span></a></li>
@@ -689,11 +696,12 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   <div class="wrap">
     <div class="page-head">
       <h2>성경읽기</h2>
-      <p class="lead">성경을 읽고, 소리 듣기 버튼으로 들을 수 있습니다. 성경통독표에서 날마다 읽을 본문을 확인하고 체크해 보세요.</p>
+      <p class="lead">성경을 읽고 소리 듣기 버튼으로 들을 수 있습니다. 장을 끝까지 읽으면 각장 통독표에 자동으로 체크됩니다.</p>
     </div>
     <div class="bible-tabs">
       <button class="btn on" type="button" data-btab="read">📖 성경 읽기</button>
-      <button class="btn" type="button" data-btab="plan">🗓 성경통독표</button>
+      <button class="btn" type="button" data-cont>⏩ 성경 이어읽기</button>
+      <button class="btn" type="button" data-btab="plan">✅ 각장 통독표</button>
     </div>
     <div class="bible-pane" data-pane="read">
       <p class="bb-login-hint" id="bb-login-hint"></p>
@@ -703,12 +711,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       <div class="bb-bar-slot" data-bb-bar="bottom"></div>
     </div>
     <div class="bible-pane" data-pane="plan" hidden>
-      <div class="plan-head">
-        <label>통독 시작일 <input type="date" id="plan-start"></label>
-        <span class="plan-count" id="plan-count"></span>
-      </div>
+      <div class="plan-head"><span class="plan-count" id="plan-count"></span></div>
       <div class="plan-bar"><i id="plan-fill" style="width:0%"></i></div>
-      <div class="plan-today" id="plan-today"></div>
       <div class="plan-table" id="plan-table"></div>
     </div>
   </div>
@@ -2787,7 +2791,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     }catch(e){ /* 연결이 안 되면 이 기기의 기록을 그대로 씁니다 */ }
   }
 
-  let BIBLE = null, bibleLoading = null, bibleLoadFailed = false, pendingPos = null;
+  let BIBLE = null, bibleLoading = null, bibleLoadFailed = false, pendingPos = null, pendingContinue = false, endMarkedKey = '';
   function loadBible(){
     if(BIBLE || bibleLoading || bibleLoadFailed) return;
     const getJSON = name => fetch(name).then(r => { if(!r.ok) throw new Error(r.status); return r.json(); });
@@ -2797,6 +2801,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         bbSetup();
         if(pendingPos){ const [bi, c] = pendingPos; pendingPos = null; bbSetPos(bi, c, false); }
         else renderChapter();
+        if(pendingContinue){ pendingContinue = false; continueReading(); }
         bbRefresh();
       })
       .catch(err => {
@@ -2894,9 +2899,49 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     });
     box.innerHTML = html;
     box.scrollTop = 0;
+    endMarkedKey = '';
+    box.onscroll = checkChapterEnd;
+    checkChapterEnd();
     ttsState.run++; ttsState.paused = false; ttsState.idx = 0;
     if(hasTTS()) speechSynthesis.cancel();
     bbNote('구절을 누르면 그 구절부터 들립니다.');
+  }
+  /* 장을 끝까지 읽으면(또는 한 화면에 다 보이면) 읽은 장으로 기록합니다 */
+  function checkChapterEnd(){
+    const box = bbTextEl();
+    if(!box || !BIBLE || !box.clientHeight) return;
+    const [bi, c] = bbPos();
+    const key = bi + '-' + c;
+    if(endMarkedKey === key) return;
+    if(box.scrollHeight - box.clientHeight <= 4 || box.scrollTop + box.clientHeight >= box.scrollHeight - 24){
+      endMarkedKey = key;
+      if(REC_KEY()) markChapterRead(bi, c);
+    }
+  }
+  /* 성경 이어읽기: 멈춘 절 다음부터 읽고, 기록이 없으면 다음에 읽을 장을 펼칩니다 */
+  function continueReading(){
+    if(!REC_KEY()){
+      showBibleTab('read');
+      bbNote('이어 읽기는 로그인한 뒤에 쓸 수 있습니다. 같은 비밀번호로 로그인하면 읽은 기록이 이어집니다.');
+      return;
+    }
+    if(!BIBLE){ pendingContinue = true; showBibleTab('read'); loadBible(); return; }
+    showBibleTab('read');
+    const rec = recGet() || { read: {}, resume: null };
+    if(rec.resume){
+      const { bi, c, v } = rec.resume;
+      const verses = (BIBLE[bi] && BIBLE[bi].chapters[c - 1]) || [];
+      if(v + 1 < verses.length){
+        bbSetPos(bi, c, false);
+        ttsPlayFrom(v + 1);
+        return;
+      }
+    }
+    let last = -1;
+    BIBLE_CHAPTERS.forEach(([b, cc], idx) => { if(rec.read[b + '-' + cc]) last = idx; });
+    const [nb, nc] = BIBLE_CHAPTERS[Math.min(last + 1, BIBLE_CHAPTERS.length - 1)];
+    bbSetPos(nb, nc, false);
+    bbNote(`${BOOK_NAMES[nb]} ${nc}장을 펼쳤습니다. 듣기를 누르면 읽어 드립니다.`);
   }
   function bbMove(dir){
     if(!BIBLE){ loadBible(); return; }
@@ -3094,57 +3139,34 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     else if(act === 'voice') bbAll('voice').forEach(s => { s.value = t.value; });
   }
 
-  /* 성경통독표 (365일) */
-  function planStart(){ return lsGet('bibleStart', kstToday()); }
-  function refText(a, b){
-    const parts = []; let i = a;
-    while(i < b){
-      const [bi, c] = BIBLE_CHAPTERS[i];
-      let j = i; while(j + 1 < b && BIBLE_CHAPTERS[j + 1][0] === bi) j++;
-      const c2 = BIBLE_CHAPTERS[j][1];
-      parts.push(`${BOOK_NAMES[bi]} ${c === c2 ? c : c + '–' + c2}장`);
-      i = j + 1;
-    }
-    return parts.join(', ');
-  }
-  function dayRead(k, read){
-    const [a, b] = planRange(k);
-    if(b <= a) return false;
-    for(let i = a; i < b; i++){ const [bi, c] = BIBLE_CHAPTERS[i]; if(!read[bi + '-' + c]) return false; }
-    return true;
-  }
+  /* 각장 통독표: 성경 장마다 읽은 장에 체크합니다 */
   function renderPlan(){
-    const startEl = document.getElementById('plan-start');
-    if(!startEl) return;
-    const start = planStart();
-    startEl.value = start;
-    const today = kstToday(), t = dayDiff(start, today);
+    const el = document.getElementById('plan-table');
+    if(!el) return;
     const rec = recGet();
     const read = rec ? rec.read : {};
-    const doneFlags = []; let doneCount = 0;
-    for(let k = 0; k < PLAN_DAYS; k++){ const d = dayRead(k, read); doneFlags.push(d); if(d) doneCount++; }
-    document.getElementById('plan-count').textContent = rec ? `${doneCount} / ${PLAN_DAYS}일 완료` : '로그인하면 통독 기록이 저장됩니다';
-    document.getElementById('plan-fill').style.width = (doneCount / PLAN_DAYS * 100).toFixed(1) + '%';
-    const todayEl = document.getElementById('plan-today');
-    if(t >= 0 && t < PLAN_DAYS){
-      const [a, b] = planRange(t);
-      todayEl.innerHTML = `<div class="plan-today-box"><div><b>오늘(${t + 1}일차)</b> 읽을 본문: ${esc(refText(a, b))}</div><button class="btn" type="button" data-readday="${t}">이 본문 읽기</button></div>`;
-    } else {
-      todayEl.innerHTML = `<div class="plan-today-box">${t < 0 ? `시작일(${start}) 이후부터 표시됩니다.` : `통독 기간(${PLAN_DAYS}일)이 끝났습니다. 시작일을 바꿔 다시 시작할 수 있습니다.`}</div>`;
+    const total = BIBLE_CHAPTERS.length;
+    let done = 0;
+    BIBLE_CHAPTERS.forEach(([bi, c]) => { if(read[bi + '-' + c]) done++; });
+    document.getElementById('plan-count').textContent = rec ? `${done} / ${total}장 완료` : '로그인하면 읽은 장이 저장되고 체크됩니다';
+    document.getElementById('plan-fill').style.width = (total ? done / total * 100 : 0).toFixed(1) + '%';
+    let html = '';
+    for(let bi = 0; bi < BOOK_NAMES.length; bi++){
+      const n = BOOK_CH[bi];
+      let bd = 0; const cells = [];
+      for(let c = 1; c <= n; c++){
+        const ok = !!read[bi + '-' + c];
+        if(ok) bd++;
+        cells.push(`<button type="button" class="ch-cell${ok ? ' done' : ''}" data-readch="${bi}-${c}" title="${esc(BOOK_NAMES[bi])} ${c}장">${c}${ok ? '<i>✔</i>' : ''}</button>`);
+      }
+      html += `<div class="ch-book${bd === n ? ' all' : ''}"><div class="ch-book-head"><b>${esc(BOOK_NAMES[bi])}</b><span>${bd} / ${n}장</span></div><div class="ch-grid">${cells.join('')}</div></div>`;
     }
-    let rows = '';
-    for(let k = 0; k < PLAN_DAYS; k++){
-      const [a, b] = planRange(k);
-      rows += `<div class="plan-row${k === t ? ' today' : ''}${doneFlags[k] ? ' done' : ''}"><span class="plan-mark">${doneFlags[k] ? '✔' : ''}</span><span class="txt"><b>${k + 1}일차</b> · ${addDaysYMD(start, k).slice(5)} · ${esc(refText(a, b))}</span><button class="mini" type="button" data-readday="${k}">읽기</button></div>`;
-    }
-    document.getElementById('plan-table').innerHTML = rows;
+    el.innerHTML = html;
   }
-  function readPlanDay(k){
-    const [a] = planRange(k);
-    pendingPos = BIBLE_CHAPTERS[a];
+  function readChapterFromPlan(bi, c){
     showBibleTab('read');
-    if(BIBLE){ const [bi, c] = pendingPos; pendingPos = null; bbSetPos(bi, c, false); }
-    else loadBible();
+    if(BIBLE) bbSetPos(bi, c, false);
+    else { pendingPos = [bi, c]; loadBible(); }
   }
   function showBibleTab(name){
     document.querySelectorAll('[data-btab]').forEach(b => b.classList.toggle('on', b.dataset.btab === name));
@@ -3155,13 +3177,11 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     const view = document.querySelector('[data-view="bible"]');
     if(!view) return;
     view.addEventListener('click', e => {
+      if(e.target.closest('[data-cont]')){ continueReading(); return; }
       const tab = e.target.closest('[data-btab]');
       if(tab){ showBibleTab(tab.dataset.btab); return; }
-      const rb = e.target.closest('[data-readday]');
-      if(rb){ readPlanDay(Number(rb.dataset.readday)); return; }
-    });
-    view.addEventListener('change', e => {
-      if(e.target.id === 'plan-start' && e.target.value){ lsSet('bibleStart', e.target.value); renderPlan(); }
+      const rc = e.target.closest('[data-readch]');
+      if(rc){ const [bi, c] = rc.dataset.readch.split('-').map(Number); readChapterFromPlan(bi, c); return; }
     });
   }
 
