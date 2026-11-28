@@ -2236,12 +2236,18 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   let heroMode = null;     // null | 'live' (실시간) | 'last' (최종 예배 영상)
   let liveNow = false;     // 실시간 예배 시간인지 (30초마다 갱신)
 
+  function heroSyncActions(){
+    const last = heroMode === 'last';
+    document.querySelectorAll('[data-go="music"]').forEach(b => { b.textContent = last ? '📋 오늘의 예배 목록' : '📋 목록보기'; });
+    document.querySelectorAll('[data-go="music-write"]').forEach(b => { b.textContent = last ? '✏️ 오늘의 예배 올리기' : '✏️ 글쓰기'; });
+  }
   function heroShow(mode, centerHTML){
     const win = document.getElementById('hero-window'), box = document.getElementById('hero-live');
     if(!win || !box) return;
     clearInterval(heroLiveTimer); heroLiveTimer = null;
     heroStop();
     heroMode = mode;
+    heroSyncActions();
     box.innerHTML = `
       <div class="hero-side"><div class="vbox" data-slot="left"></div></div>
       <div class="hero-live-center">${centerHTML}</div>
@@ -2271,7 +2277,9 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       }catch(err){ console.error(err); }
     }
     if(token !== lastToken) return;
-    const row = rows.find(r => youtubeId(r.link));
+    // 오늘의 예배에 가장 마지막으로 올라온 영상(등록 시각이 가장 늦은 것)을 보여 줍니다.
+    const row = rows.filter(r => !r.parentId && youtubeId(r.link))
+      .sort((a, b) => Number(b.createdAt) - Number(a.createdAt))[0];
     if(!row){
       heroShow('last', '<div class="hero-last-empty">아직 등록된 예배 영상이 없습니다.</div>');
       return;
@@ -2322,6 +2330,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     if(!win) return;
     clearInterval(heroLiveTimer); heroLiveTimer = null;
     heroMode = null;
+    heroSyncActions();
     win.classList.remove('live-mode');
     if(box) box.innerHTML = '';
     heroStart();
@@ -3421,11 +3430,13 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     const g = e.target.closest('[data-go]');
     if(!g) return;
     e.preventDefault();
-    location.hash = '#music';
+    // 최근예배 영상을 보고 있으면 오늘의 예배, 그 밖(찬양 등)에서는 찬양 게시판으로 들어갑니다.
+    const target = heroMode === 'last' ? 'service' : 'music';
+    location.hash = '#' + target;
     if(g.dataset.go === 'music-write'){
       setTimeout(() => {
-        const box = document.querySelector('[data-board="music"] [data-role="write-box"]');
-        const btn = document.querySelector('[data-board="music"] [data-role="write-open"]');
+        const box = document.querySelector(`[data-board="${target}"] [data-role="write-box"]`);
+        const btn = document.querySelector(`[data-board="${target}"] [data-role="write-open"]`);
         if(box && box.classList.contains('closed') && btn) btn.click();
       }, 150);
     }
