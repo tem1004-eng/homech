@@ -2897,6 +2897,14 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       }
       const out = await postJSON({ action:'login', password: pw });
       if(!out.ok){ err.textContent = out.error || '확인하지 못했습니다. 잠시 후 다시 시도해 주세요.'; return; }
+      // 이 기기에서 처음 등록한 비밀번호라면 이름을 다시 묻지 않고 바로 로그인합니다.
+      const dev = readLS(localStorage, DEVICE_KEY);
+      if(out.status === 'exists' && dev && dev.k === hashStr(pw) && dev.name){
+        loginSet({ kind:'gen', pw, name: dev.name }, remember);
+        try{ localStorage.setItem(REMEMBER_KEY, remember ? '1' : ''); if(!remember) localStorage.removeItem(REMEMBER_KEY); }catch(e){}
+        renderLogin(); bbRefresh();
+        return;
+      }
       loginPending = { pw, status: out.status, remember };
       renderLogin();
     }catch(e){ err.textContent = '확인하지 못했습니다. 잠시 후 다시 시도해 주세요.'; }
@@ -2912,6 +2920,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       if(!out.ok){ err.textContent = out.error || '확인하지 못했습니다. 잠시 후 다시 시도해 주세요.'; return; }
       loginSet({ kind:'gen', pw: loginPending.pw, name: out.name || name }, loginPending.remember);
       try{ localStorage.setItem(REMEMBER_KEY, loginPending.remember ? '1' : ''); if(!loginPending.remember) localStorage.removeItem(REMEMBER_KEY); }catch(e){}
+      try{ localStorage.setItem(DEVICE_KEY, JSON.stringify({ k: hashStr(loginPending.pw), name: out.name || name })); }catch(e){}
       loginPending = null;
       renderLogin(); bbRefresh();
     }catch(e){ err.textContent = '확인하지 못했습니다. 잠시 후 다시 시도해 주세요.'; }
