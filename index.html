@@ -256,6 +256,8 @@ nav a.nav-btn.nav-big .ic{font-size:clamp(.8rem,.55vw + .3rem,1.05rem)}
 .login-btn{font:inherit;font-size:.8rem;font-weight:700;padding:4px 10px;border:0;border-radius:999px;background:var(--accent);color:#fff;cursor:pointer}
 .login-state{font-weight:700;color:var(--accent)}
 .login-err{color:#b02e2e;font-size:.75rem}
+.pick-help{padding:10px 12px;border-radius:10px;background:var(--accent-soft);color:var(--ink);font-size:.86rem;line-height:1.6}
+.pick-note{margin-top:6px;color:var(--accent);font-size:.84rem;font-weight:600}
 .guide-btn{font:inherit;font-size:.9rem;font-weight:700;padding:9px 18px;border:1px solid rgba(231,201,138,.85);border-radius:999px;background:rgba(255,255,255,.16);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25);white-space:nowrap;transition:background .15s ease,transform .15s ease}
 .guide-btn:hover{background:rgba(231,201,138,.35);transform:translateY(-1px)}
 .hero-title-row{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:6px 16px;margin:0 0 42px}
@@ -1041,7 +1043,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     const writeTitle = {service:'예배 영상 올리기', bulletin:'주보 올리기', photo:'사진 올리기', music:'찬양 올리기', articles:'좋은 글 쓰기', files:'파일 올리기'}[id] || '새 글 쓰기';
     el.classList.add('board-wrap');
     el.innerHTML = `
-      <div class="board-top"><button class="btn write-open" type="button" data-role="write-open">✏️ 글쓰기</button></div>
+      <div class="board-top"><button class="btn write-open" type="button" data-role="write-open" data-label="${id === 'photo' ? '📷 사진 여러 장 올리기' : '✏️ 글쓰기'}">${id === 'photo' ? '📷 사진 여러 장 올리기' : '✏️ 글쓰기'}</button></div>
       <div class="write-box closed" data-role="write-box">
         <div class="split-title">${writeTitle}</div>
         <div class="status" data-role="status"></div>
@@ -1050,7 +1052,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
           <div class="full"><label>작성자 이름 (선택)</label><input name="author" maxlength="40"></div>
           ${cfg.fields.includes('link') ? `<div class="full"><label>${LABELS.link}</label><input name="link" type="url" placeholder="https://..."></div>` : ''}
           ${cfg.fields.includes('body') ? `<div class="full"><label>${bodyLabel}</label><textarea name="body" maxlength="5000"></textarea></div>` : ''}
-          ${cfg.fields.includes('file') ? `<div class="full"><label>${id === 'files' ? '첨부 파일 (최대 50MB)' : (cfg.multiple ? LABELS.fileMulti : LABELS.file)}</label><input name="file" type="file" ${cfg.multiple ? 'multiple' : ''} ${cfg.accept ? `accept="${cfg.accept}"` : ''}></div>` : ''}
+          ${id === 'photo' ? `<div class="full pick-help">📂 폴더에서 사진을 한꺼번에 고르려면, 파일 창에서 <b>Ctrl</b>(맥은 <b>⌘</b>)을 누른 채 여러 장을 클릭하거나, <b>Shift</b>로 처음과 끝 사진을 눌러 고르세요. 휴대폰은 사진 앱에서 여러 장을 체크하면 됩니다.</div>` : ''}
+          ${cfg.fields.includes('file') ? `<div class="full"><label>${id === 'files' ? '첨부 파일 (최대 50MB)' : (cfg.multiple ? LABELS.fileMulti : LABELS.file)}</label><input name="file" type="file" ${cfg.multiple ? 'multiple' : ''} ${cfg.accept ? `accept="${cfg.accept}"` : ''}><div class="pick-note" data-role="pick-note"></div></div>` : ''}
           <div class="full pw-row"><label>비밀번호 (나중에 수정·삭제할 때 필요, 4자 이상, 로그인하면 생략)</label><input name="pw" type="password" minlength="4" maxlength="30"></div>
           <div class="full"><button class="btn" type="submit">등록하기</button></div>
           <div class="full note">광고·음란·이단·타종교·폭력·비방 성격의 내용은 등록되지 않습니다.</div>
@@ -1429,6 +1432,14 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     if(!configured){
       status.innerHTML = '<div class="banner">게시판 연결 설정이 필요합니다 (index.html 의 API_URL).</div>';
       return;
+    }
+    const pickInput = form.querySelector('input[type=file][multiple]');
+    const pickNote = form.querySelector('[data-role="pick-note"]');
+    if(pickInput && pickNote){
+      pickInput.addEventListener('change', () => {
+        const n = pickInput.files ? pickInput.files.length : 0;
+        pickNote.textContent = n ? `선택한 파일 ${n}개 — 각각 한 장씩 올라갑니다.` : '';
+      });
     }
     form.addEventListener('submit', async e => {
       e.preventDefault();
@@ -3424,7 +3435,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     if(!b) return;
     const box = b.closest('.board-wrap').querySelector('[data-role="write-box"]');
     box.classList.toggle('closed');
-    b.textContent = box.classList.contains('closed') ? '✏️ 글쓰기' : '✕ 닫기';
+    b.textContent = box.classList.contains('closed') ? (b.dataset.label || '✏️ 글쓰기') : '✕ 닫기';
   });
   /* ----- 홈페이지 사용안내 창 ----- */
   const guideOverlay = document.getElementById('guide-overlay');
