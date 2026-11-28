@@ -253,6 +253,27 @@ nav a.nav-btn.nav-big .ic{font-size:clamp(.8rem,.55vw + .3rem,1.05rem)}
 .login-btn{font:inherit;font-size:.8rem;font-weight:700;padding:4px 10px;border:0;border-radius:999px;background:var(--accent);color:#fff;cursor:pointer}
 .login-state{font-weight:700;color:var(--accent)}
 .login-err{color:#b02e2e;font-size:.75rem}
+.login-stack{display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-left:14px;flex:0 0 auto}
+.login-stack .login-box{margin-left:0}
+.guide-btn{font:inherit;font-size:.8rem;font-weight:700;padding:5px 12px;border:0;border-radius:999px;background:linear-gradient(135deg,#7a5c2e,#b08a4f);color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(40,30,10,.18);white-space:nowrap}
+#guide-overlay{position:fixed;inset:0;background:rgba(20,16,10,.45);display:none;align-items:center;justify-content:center;z-index:210;padding:16px}
+#guide-overlay.show{display:flex}
+#guide-box{position:relative;width:100%;max-width:640px;max-height:88vh;overflow:auto;background:#fffdf5;border-radius:16px;border-top:6px solid var(--accent);padding:20px 24px 22px;box-shadow:0 24px 60px rgba(0,0,0,.3);color:var(--ink);font-size:.92rem;line-height:1.75}
+#guide-box .guide-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#guide-box h3{margin:0;font-size:1.2rem;color:var(--accent)}
+#guide-box .guide-x{font:inherit;font-size:1rem;width:34px;height:34px;border:0;border-radius:50%;background:var(--accent-soft);color:var(--accent);cursor:pointer;flex:0 0 auto}
+#guide-box .guide-lead{margin:6px 0 0;color:var(--muted);font-size:.88rem}
+#guide-box .guide-sec{margin-top:14px}
+#guide-box .guide-sec h4{margin:0 0 6px;padding-bottom:4px;border-bottom:1px dashed var(--line);color:var(--accent);font-size:1rem}
+#guide-box .guide-sec ol,#guide-box .guide-sec ul{margin:0;padding-left:1.2em}
+#guide-box .guide-sec li{margin:3px 0}
+#guide-box .guide-sec p{margin:8px 0 0}
+#guide-box table{width:100%;border-collapse:collapse;font-size:.86rem}
+#guide-box th,#guide-box td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+#guide-box th{background:var(--accent-soft);color:var(--accent);font-weight:700}
+#guide-box td:first-child{white-space:nowrap;font-weight:700}
+#guide-box .guide-foot{margin:16px 0 0;padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-size:.86rem;text-align:center}
+@media(max-width:640px){#guide-box{padding:16px 16px 18px}#guide-box td:first-child{white-space:normal}}
 .board-top{display:flex;justify-content:flex-end;margin-bottom:14px}
 .write-box{margin-bottom:22px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:0 8px 22px rgba(60,40,10,.06)}
 .write-box.closed{display:none}
@@ -543,7 +564,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         <li><a class="nav-btn" href="#shops" style="--c1:#4a5a78;--c2:#6f80a6"><span class="ic">🏪</span>좋은가게 소개<span class="nav-tip"><b>좋은가게 소개</b>성도님들의 가게와 좋은 가게를 소개합니다.</span></a></li>
         <li><a class="nav-btn" href="#visit" style="--c1:#8c4a3a;--c2:#b87262"><span class="ic">📍</span>오시는 길<span class="nav-tip"><b>오시는 길</b>교회 찾아오시는 길을 안내합니다.</span></a></li>
       </ul>
-      <div class="login-box" id="login-box"></div>
+      <div class="login-stack"><button type="button" class="guide-btn" id="guide-open" aria-haspopup="dialog">📘 홈페이지 사용안내</button><div class="login-box" id="login-box"></div></div>
     </nav>
   </div>
 </header>
@@ -821,6 +842,48 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 </footer>
 
 <div id="adm-overlay" aria-hidden="true"><div id="adm-box" role="dialog" aria-modal="true"></div></div>
+<div id="guide-overlay" aria-hidden="true"><div id="guide-box" role="dialog" aria-modal="true" aria-labelledby="guide-title">
+  <div class="guide-head"><h3 id="guide-title">📘 홈페이지 사용안내</h3><button type="button" class="guide-x" id="guide-close" data-guide="close" aria-label="닫기">✕</button></div>
+  <p class="guide-lead">처음 오신 분도 쉽게 쓰실 수 있도록 한눈에 정리했습니다.</p>
+
+  <div class="guide-sec"><h4>1. 로그인 방법과 이유</h4>
+    <ol>
+      <li>상단 오른쪽 <b>로그인</b> 칸에서 <b>일반</b>(성도) 또는 <b>관리자</b>를 고르세요.</li>
+      <li>비밀번호를 넣고 <b>로그인</b>을 누르세요. 처음 쓰는 비밀번호라면 <b>이름</b>을 한 번 넣으면 됩니다.</li>
+      <li>자주 쓰는 기기라면 <b>이 기기에서 자동 로그인</b>에 체크하세요.</li>
+    </ol>
+    <p><b>이유</b> : 글 쓰기와 수정, 좋은가게 등록, 성경 읽기 기록 저장에 필요합니다.</p>
+  </div>
+
+  <div class="guide-sec"><h4>2. 게시판 사용법</h4>
+    <table>
+      <tr><th>메뉴</th><th>이렇게 쓰세요</th></tr>
+      <tr><td>🕊 예배안내</td><td>예배 시간과 분기별 교회 일정을 봅니다.</td></tr>
+      <tr><td>▶ 오늘의 예배</td><td>최근 예배 영상을 골라 다시 볼 수 있습니다.</td></tr>
+      <tr><td>📰 주보</td><td>이번 주 주보와 지난 주보를 봅니다.</td></tr>
+      <tr><td>📷 사진</td><td>행사 사진과 말씀 이미지를 모아 봅니다.</td></tr>
+      <tr><td>🎵 찬양</td><td>곡을 고르거나 찬양 버튼을 누르면 곡들이 차례대로 이어서 들립니다.</td></tr>
+      <tr><td>📜 성경읽기</td><td>본문을 읽고 소리로 들을 수 있습니다. 장을 다 읽으면 <b>다음</b> 버튼이 깜박이고, 마이크를 켜 두고 "다음"이라고 말하면 다음 장으로 넘어갑니다. <b>각장 통독표</b>에서 읽은 장을 확인하고, <b>성경 이어읽기</b>로 마지막 자리에서 다시 시작합니다.</td></tr>
+      <tr><td>📖 좋은 글</td><td>남기고 싶은 글과 이미지 글을 올리고 읽습니다.</td></tr>
+      <tr><td>🏪 좋은가게 소개</td><td>성도님들의 가게를 카드로 보고, 누르면 사진과 위치를 자세히 볼 수 있습니다.</td></tr>
+      <tr><td>📅 목회달력</td><td>상단 <b>목회달력</b>에서 교회 일정을 확인합니다.</td></tr>
+      <tr><td>📍 오시는 길</td><td>교회 찾아오시는 길을 안내합니다.</td></tr>
+    </table>
+  </div>
+
+  <div class="guide-sec"><h4>3. 이 홈페이지의 특징과 장점</h4>
+    <ul>
+      <li><b>휴대폰에서도 편하게</b> : 작은 화면에서는 한 줄로 보여서 손가락으로 넘겨 읽기 쉽습니다.</li>
+      <li><b>실시간 예배 연결</b> : 상단 유튜브 링크로 실시간 예배와 지난 영상을 바로 볼 수 있습니다.</li>
+      <li><b>소리로 듣는 성경</b> : 성경을 소리로 들으며 읽을 수 있습니다. (음성 기능은 기기와 브라우저에 따라 다를 수 있습니다.)</li>
+      <li><b>기기 간 기록 동기화</b> : 로그인하면 성경 읽기 기록이 다른 기기에서도 이어집니다.</li>
+      <li><b>성도 가게 소개</b> : 성도님들의 가게를 한곳에서 알리고 찾을 수 있습니다.</li>
+    </ul>
+  </div>
+
+  <p class="guide-foot">궁금한 점은 교회 사무실이나 담당자에게 문의해 주세요.</p>
+</div></div>
+
 <script>
 (function(){
   /* ★ 설정: 구글 Apps Script 웹 앱 URL */
@@ -3324,6 +3387,24 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     box.classList.toggle('closed');
     b.textContent = box.classList.contains('closed') ? '✏️ 글쓰기' : '✕ 닫기';
   });
+  /* ----- 홈페이지 사용안내 창 ----- */
+  const guideOverlay = document.getElementById('guide-overlay');
+  function guideOpen(){
+    guideOverlay.classList.add('show');
+    guideOverlay.setAttribute('aria-hidden', 'false');
+    document.getElementById('guide-close').focus();
+  }
+  function guideClose(){
+    guideOverlay.classList.remove('show');
+    guideOverlay.setAttribute('aria-hidden', 'true');
+    document.getElementById('guide-open').focus();
+  }
+  document.getElementById('guide-open').addEventListener('click', guideOpen);
+  guideOverlay.addEventListener('click', e => {
+    if(e.target === guideOverlay || e.target.closest('[data-guide="close"]')) guideClose();
+  });
+  guideOverlay.addEventListener('keydown', e => { if(e.key === 'Escape') guideClose(); });
+
   wireLogin();
   wireBible();
   bbSetup();
