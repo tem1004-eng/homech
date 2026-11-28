@@ -2238,6 +2238,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 
   function heroSyncActions(){
     const last = heroMode === 'last';
+    // 목록보기·글쓰기는 최근예배 영상이나 찬양 뷰어를 열었을 때만 보입니다.
+    document.querySelectorAll('.hero-actions').forEach(a => { a.style.display = (heroMode === 'last' || heroMode === 'music') ? '' : 'none'; });
     document.querySelectorAll('[data-go="music"]').forEach(b => { b.textContent = last ? '📋 오늘의 예배 목록' : '📋 목록보기'; });
     document.querySelectorAll('[data-go="music-write"]').forEach(b => { b.textContent = last ? '✏️ 오늘의 예배 올리기' : '✏️ 글쓰기'; });
   }
@@ -3466,6 +3468,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   });
   guideOverlay.addEventListener('keydown', e => { if(e.key === 'Escape') guideClose(); });
 
+  heroSyncActions();
   wireLogin();
   wireBible();
   bbSetup();
