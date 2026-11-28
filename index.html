@@ -255,6 +255,24 @@ nav a.nav-btn.nav-big .ic{font-size:clamp(.8rem,.55vw + .3rem,1.05rem)}
 .login-remember[hidden]{display:none}
 .login-btn{font:inherit;font-size:.8rem;font-weight:700;padding:4px 10px;border:0;border-radius:999px;background:var(--accent);color:#fff;cursor:pointer}
 .login-state{font-weight:700;color:var(--accent)}
+#info-overlay{position:fixed;inset:0;background:rgba(20,16,10,.45);display:none;align-items:center;justify-content:center;z-index:215;padding:16px}
+#info-overlay.show{display:flex}
+#info-box{width:100%;max-width:620px;max-height:88vh;overflow:auto;background:#fff;border-radius:16px;border-top:6px solid var(--accent);padding:20px 24px 22px;box-shadow:0 24px 60px rgba(0,0,0,.3);color:var(--ink);font-size:.92rem;line-height:1.6}
+#info-box .guide-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#info-box h3{margin:0;font-size:1.15rem;color:var(--accent)}
+#info-box .guide-x{font:inherit;width:34px;height:34px;border:0;border-radius:50%;background:var(--accent-soft);color:var(--accent);cursor:pointer}
+#info-box h4{margin:16px 0 6px;color:var(--accent);font-size:1rem}
+#info-box h4 small{color:var(--muted);font-weight:400}
+#info-box .info-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+#info-box .info-card{padding:12px 14px;border-radius:12px;background:var(--accent-soft);display:flex;flex-direction:column;gap:2px}
+#info-box .info-card b{font-size:1.5rem;color:var(--accent)}
+#info-box .info-card span{font-size:.82rem;color:var(--muted)}
+#info-box table{width:100%;border-collapse:collapse;font-size:.88rem}
+#info-box th,#info-box td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left}
+#info-box th{background:var(--accent-soft);color:var(--accent)}
+#info-box td:nth-child(2),#info-box td:nth-child(3),#info-box th:nth-child(2),#info-box th:nth-child(3){text-align:right;width:18%}
+#info-box .info-foot{margin:14px 0 0;color:var(--muted);font-size:.84rem;text-align:center}
+.login-count{font-size:.78rem;font-weight:700;color:#fff;background:var(--accent);padding:3px 9px;border-radius:999px;white-space:nowrap}
 .login-err{color:#b02e2e;font-size:.75rem}
 .pick-help{padding:10px 12px;border-radius:10px;background:var(--accent-soft);color:var(--ink);font-size:.86rem;line-height:1.6}
 .pick-note{margin-top:6px;color:var(--accent);font-size:.84rem;font-weight:600}
@@ -850,6 +868,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
 </footer>
 
 <div id="adm-overlay" aria-hidden="true"><div id="adm-box" role="dialog" aria-modal="true"></div></div>
+<div id="info-overlay" aria-hidden="true"><div id="info-box" role="dialog" aria-modal="true" aria-labelledby="info-title"><div class="guide-head"><h3 id="info-title">📊 정보보기 (관리자)</h3><button type="button" class="guide-x" id="info-close" data-info="close" aria-label="닫기">✕</button></div><div id="info-body"></div></div></div>
 <div id="guide-overlay" aria-hidden="true"><div id="guide-box" role="dialog" aria-modal="true" aria-labelledby="guide-title">
   <div class="guide-head"><h3 id="guide-title">📘 홈페이지 사용안내</h3><button type="button" class="guide-x" id="guide-close" data-guide="close" aria-label="닫기">✕</button></div>
   <p class="guide-lead">처음 오신 분도 쉽게 쓰실 수 있도록 한눈에 정리했습니다.</p>
@@ -2808,7 +2827,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     document.body.classList.toggle('logged-in', !!cur);
     if(cur && cur.kind === 'gen') syncRec();
     if(cur){
-      box.innerHTML = `<span class="login-state">${cur.kind === 'adm' ? '관리자' : esc(cur.name || '일반')} 로그인 중</span><button type="button" class="login-btn" data-login="out">로그아웃</button>`;
+      box.innerHTML = `<span class="login-state">${cur.kind === 'adm' ? '관리자' : esc(cur.name || '일반')} 로그인 중</span>${cur.kind === 'adm' ? '<button type="button" class="login-btn" data-login="info">📊 정보보기</button>' : ''}<button type="button" class="login-btn" data-login="out">로그아웃</button>`;
       return;
     }
     if(loginPending){
@@ -2818,6 +2837,46 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     }
     box.innerHTML = `<select data-role="login-kind" aria-label="로그인 종류"><option value="gen">일반</option><option value="adm">관리자</option></select><input data-role="login-pw" type="password" placeholder="비밀번호" maxlength="30" aria-label="비밀번호"><label class="login-remember" data-role="remember-wrap"><input type="checkbox" data-role="login-remember"${readLS(localStorage, REMEMBER_KEY) ? ' checked' : ''}> 이 기기에서 자동 로그인</label><button type="button" class="login-btn" data-login="in">로그인</button><span class="login-err" data-role="login-err"></span>`;
   }
+  /* ----- 관리자 정보보기: 회원 수, 게시판별 글 수, 성경통독 현황 ----- */
+  const BOARD_NAMES = {service:'오늘의 예배', bulletin:'주보', photo:'사진', music:'찬양', articles:'좋은 글', shops:'좋은가게 소개', files:'파일공유(이전)', calendar:'목회달력', staff:'섬기는 분들', vision:'우리의 비전', mission:'섬기는 사역'};
+  const infoOverlay = document.getElementById('info-overlay');
+  function infoClose(){
+    infoOverlay.classList.remove('show');
+    infoOverlay.setAttribute('aria-hidden', 'true');
+  }
+  function infoRender(d){
+    const kst = new Date(d.generatedAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', hour12: false });
+    const rows = (d.boards || []).filter(b => b.posts || b.replies || BOARD_NAMES[b.board])
+      .map(b => `<tr><td>${esc(BOARD_NAMES[b.board] || b.board)}</td><td>${b.posts}</td><td>${b.replies}</td></tr>`).join('');
+    const total = (d.boards || []).reduce((a, b) => a + b.posts, 0);
+    return `
+      <div class="info-cards">
+        <div class="info-card"><b>${d.members}</b><span>회원 (비밀번호 등록)</span></div>
+        <div class="info-card"><b>${d.bible.readers}</b><span>성경통독 기록이 있는 분</span></div>
+        <div class="info-card"><b>${d.bible.activeWeek}</b><span>최근 7일 통독한 분</span></div>
+        <div class="info-card"><b>${d.bible.chapters}</b><span>읽은 장 합계</span></div>
+      </div>
+      <h4>게시판별 현황 <small>(글 ${total}개)</small></h4>
+      <table><tr><th>게시판</th><th>글</th><th>답글</th></tr>${rows}</table>
+      <p class="info-foot">확인 시각: ${esc(kst)} (한국 시간)</p>`;
+  }
+  function openAdminInfo(){
+    const cur = loginGet();
+    if(!cur || cur.kind !== 'adm') return;
+    const body = document.getElementById('info-body');
+    body.innerHTML = '<p class="info-foot">불러오는 중…</p>';
+    infoOverlay.classList.add('show');
+    infoOverlay.setAttribute('aria-hidden', 'false');
+    document.getElementById('info-close').focus();
+    postJSON({ action:'adminStats', adminPassword: cur.pw }).then(out => {
+      body.innerHTML = out.ok ? infoRender(out) : `<p class="info-foot">${esc(out.error || '정보를 불러오지 못했습니다.')}</p>`;
+    }).catch(() => { body.innerHTML = '<p class="info-foot">정보를 불러오지 못했습니다.</p>'; });
+  }
+  infoOverlay.addEventListener('click', e => {
+    if(e.target === infoOverlay || e.target.closest('[data-info="close"]')) infoClose();
+  });
+  infoOverlay.addEventListener('keydown', e => { if(e.key === 'Escape') infoClose(); });
+
   async function doLogin(){
     const box = document.getElementById('login-box');
     const kind = box.querySelector('[data-role="login-kind"]').value;
@@ -2867,6 +2926,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       if(a === 'in') doLogin();
       else if(a === 'name') doNameStep();
       else if(a === 'cancel'){ loginPending = null; renderLogin(); }
+      else if(a === 'info'){ openAdminInfo(); }
       else { loginSet(null); loginPending = null; renderLogin(); bbRefresh(); }
     });
     box.addEventListener('change', e => {
