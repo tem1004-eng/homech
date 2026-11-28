@@ -3426,6 +3426,13 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   setInterval(updateLiveButton, 30000);
   const lastBtn = document.getElementById('yt-last');
   if(lastBtn) lastBtn.addEventListener('click', heroToggleLast);
+  // 이미 홈(#home)에 있을 때 홈 버튼을 누르면 뷰어를 닫고 처음 카드 화면으로 돌아갑니다.
+  document.querySelectorAll('a[href="#home"]').forEach(a => a.addEventListener('click', e => {
+    if(location.hash !== '#home') return;
+    e.preventDefault();
+    if(heroMode) heroLayoutOff();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }));
   document.querySelectorAll('a[href="#music"]').forEach(a => a.addEventListener('click', heroPraiseEntry));
   // 홈 뷰어 아래 버튼: 찬양 게시판으로 들어가고, 글쓰기는 글쓰기 창까지 엽니다.
   document.addEventListener('click', e => {
