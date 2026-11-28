@@ -125,8 +125,11 @@ a.nav-btn{position:relative}
 .bible-bar select,.bible-tts select,.plan-head input{padding:8px 10px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff}
 .bible-tts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;font-size:.9rem}
 .bible-tts label{display:inline-flex;align-items:center;gap:4px}
+.fz-group{display:inline-flex;align-items:center;gap:6px}
+.fz-group .mini:disabled{opacity:.4;cursor:default}
+.bb-fixed .bb-sel .fz-group .mini{padding:6px 8px;font-size:.78rem;min-height:34px}
 .tts-note{color:var(--muted);font-size:.85rem}
-.bible-text{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 24px;line-height:2;font-size:1.05rem;max-height:70vh;overflow:auto}
+.bible-text{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 24px;line-height:2;font-size:var(--bb-fz,1.05rem);max-height:70vh;overflow:auto}
 .bible-text .bb-h{margin:0 0 10px;font-size:1.2rem}
 .bible-text .sec{display:block;font-weight:700;color:var(--accent);margin:14px 0 4px}
 .bible-text .vs{display:block;padding:2px 6px;border-radius:6px;cursor:pointer}
@@ -2937,6 +2940,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         <div class="bb-sel">
           <select data-bb="book" aria-label="책"></select>
           <select data-bb="ch" aria-label="장"></select>
+          <span class="fz-group"><button class="mini" type="button" data-bb="fzdown" aria-label="글자 더작게">가−</button><button class="mini" type="button" data-bb="fzup" aria-label="글자 더크게">가+</button></span>
         </div>
         <div class="bb-btns">
           <button class="mini" type="button" data-bb="prev">‹ 이전</button>
@@ -2955,6 +2959,8 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
         <select data-bb="ch" aria-label="장"></select>
         <button class="mini" type="button" data-bb="prev">‹ 이전 장</button>
         <button class="mini bb-next" type="button" data-bb="next">다음 장 ›</button>
+        <span class="fz-group"><button class="mini" type="button" data-bb="fzdown" aria-label="글자 더작게">가 더작게</button><button class="mini" type="button" data-bb="fzup" aria-label="글자 더크게">가 더크게</button></span>
+        <button class="mini" type="button" data-bb="copybook">📋 본문 복사</button>
       </div>
       <div class="bible-tts">
         <button class="btn" type="button" data-bb="play">🔊 듣기</button>
@@ -2977,8 +2983,35 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
     renderChapter();
     if(play) ttsPlayFrom(0);
   }
+  const FZ_STEPS = [0.9, 1, 1.05, 1.2, 1.35, 1.5, 1.7];   // 성경 본문 글자 크기(rem)
+  let fzIdx = 2;                                           // 기본값 1.05rem
+  function fzLoad(){
+    try{ const raw = localStorage.getItem('bibleFz'); const v = raw === null ? NaN : Number(raw); if(Number.isInteger(v) && v >= 0 && v < FZ_STEPS.length) fzIdx = v; }catch(e){}
+  }
+  function fzApply(){
+    document.documentElement.style.setProperty('--bb-fz', FZ_STEPS[fzIdx] + 'rem');
+    document.querySelectorAll('[data-bb="fzdown"]').forEach(b => { b.disabled = fzIdx === 0; });
+    document.querySelectorAll('[data-bb="fzup"]').forEach(b => { b.disabled = fzIdx === FZ_STEPS.length - 1; });
+  }
+  function bbCopyChapter(){
+    if(!BIBLE) return;
+    const [bi, c] = bbPos();
+    const verses = (BIBLE[bi] && BIBLE[bi].chapters[c - 1]) || [];
+    const lines = verses.map((v, i) => `${i + 1} ${String(v).replace(/^<[^>]+>\s*/, '')}`);
+    const text = `${BOOK_NAMES[bi]} ${c}장\n` + lines.join('\n');
+    copyText(text)
+      .then(() => bbNote('이 장의 본문을 복사했습니다. 원하는 곳에 붙여넣으세요.'))
+      .catch(() => bbNote('복사하지 못했습니다. 본문을 길게 눌러 직접 복사해 주세요.'));
+  }
+  function bbFontStep(d){
+    fzIdx = Math.min(FZ_STEPS.length - 1, Math.max(0, fzIdx + d));
+    try{ localStorage.setItem('bibleFz', String(fzIdx)); }catch(e){}
+    fzApply();
+  }
   let bbReady = false;
   function bbSetup(){
+    fzLoad();
+    fzApply();
     if(bbReady) return;
     const slots = document.querySelectorAll('[data-bb-bar]');
     if(!slots.length) return;
@@ -3221,7 +3254,7 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
   }
   function bbClick(e){
     const v = e.target.closest('#bb-text .vs');
-    if(v){ ttsPlayFrom(Number(v.dataset.v)); return; }
+    if(v){ if(String(window.getSelection && window.getSelection()).length) return; ttsPlayFrom(Number(v.dataset.v)); return; }
     const f = e.target.closest('[data-bb-fold]');
     if(f){ const bar = f.closest('[data-bb-fixed]'); if(bar) bar.classList.toggle('bb-open'); return; }
     const r = e.target.closest('[data-bb-resume]');
@@ -3235,6 +3268,9 @@ footer{padding:36px 0;color:var(--muted);font-size:.9rem;border-top:1px solid va
       case 'pause': ttsPause(); break;
       case 'stop': ttsStop(); break;
       case 'mic': if(micOn) micStop(); else micStart(); break;
+      case 'fzdown': bbFontStep(-1); break;
+      case 'fzup': bbFontStep(1); break;
+      case 'copybook': bbCopyChapter(); break;
       case 'done': {
         const [bi, c] = bbPos();
         ttsStop();
